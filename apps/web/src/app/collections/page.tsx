@@ -88,7 +88,7 @@ export default function CollectionsPage() {
       <ProductListing />
 
       {/* 3. Bottom Trust Banner (Dark Mode Glow) */}
-      <section className="container mx-auto px-4 mb-24 relative z-10 -mt-10">
+      <section className="container mx-auto px-4 mb-24 relative z-10 mt-10">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}

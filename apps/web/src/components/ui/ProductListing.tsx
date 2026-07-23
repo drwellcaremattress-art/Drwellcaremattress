@@ -78,7 +78,7 @@ export function ProductListing() {
   }, [products, selectedTypes, selectedFirmnesses, selectedSizes, sortBy]);
 
   return (
-    <div className="container mx-auto px-4 pb-24 relative z-20 bg-white pt-10">
+    <div className="container mx-auto px-4 pb-8 relative z-20 bg-white pt-10">
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Mobile Filter Toggle */}
