@@ -4,11 +4,64 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle2, ShieldCheck, Truck } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ShieldCheck, Truck, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { signIn } from 'next-auth/react';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        const res = await signIn('credentials', {
+          redirect: false,
+          email,
+          password
+        });
+        
+        if (res?.error) {
+          setError('Invalid email or password');
+        } else {
+          window.location.href = '/';
+        }
+      } else {
+        // Register
+        const res = await fetch('/api/users/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          setError(data.message || 'Failed to create account');
+        } else {
+          // Auto login after register
+          await signIn('credentials', {
+            redirect: false,
+            email,
+            password
+          });
+          window.location.href = '/';
+        }
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex bg-white font-body relative overflow-hidden">
@@ -98,7 +151,13 @@ export default function LoginPage() {
             {/* Subtle top border glow */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0B1A2A] to-[#7cb93e]"></div>
 
-            <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-5" onSubmit={handleAuth}>
+              {error && (
+                <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm font-medium border border-red-100">
+                  {error}
+                </div>
+              )}
+
               <AnimatePresence mode="wait">
                 {!isLogin && (
                   <motion.div
@@ -113,6 +172,9 @@ export default function LoginPage() {
                     <input 
                       type="text" 
                       placeholder="Dr Well Customer" 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required={!isLogin}
                       className="w-full border-2 border-gray-100 rounded-xl p-3.5 focus:border-[#7cb93e] focus:ring-0 outline-none transition-colors bg-gray-50 focus:bg-white text-sm"
                     />
                   </motion.div>
@@ -124,6 +186,9 @@ export default function LoginPage() {
                 <input 
                   type="email" 
                   placeholder="you@example.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   className="w-full border-2 border-gray-100 rounded-xl p-3.5 focus:border-[#7cb93e] focus:ring-0 outline-none transition-colors bg-gray-50 focus:bg-white text-sm"
                 />
               </div>
@@ -133,6 +198,9 @@ export default function LoginPage() {
                 <input 
                   type="password" 
                   placeholder="••••••••" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   className="w-full border-2 border-gray-100 rounded-xl p-3.5 focus:border-[#7cb93e] focus:ring-0 outline-none transition-colors bg-gray-50 focus:bg-white text-sm"
                 />
               </div>
@@ -145,7 +213,8 @@ export default function LoginPage() {
                 </div>
               )}
 
-              <Button className="w-full bg-[#0B1A2A] hover:bg-[#16273B] text-white h-12 rounded-xl font-bold text-base shadow-lg transition-transform hover:-translate-y-0.5 mt-2">
+              <Button disabled={isLoading} type="submit" className="w-full bg-[#0B1A2A] hover:bg-[#16273B] text-white h-12 rounded-xl font-bold text-base shadow-lg transition-transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
+                {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isLogin ? 'Sign In' : 'Create Account'}
               </Button>
             </form>
