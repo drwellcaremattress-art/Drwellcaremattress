@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { Providers } from "@/components/Providers";
 
 // Load fonts matching blueprint
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -24,12 +25,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${poppins.variable} ${dmSans.variable} ${workSans.variable} font-body bg-surface text-ink min-h-screen flex flex-col`}>
-        <Navbar />
-        <CartDrawer />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
+        <Providers>
+          <Navbar />
+          <CartDrawer />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
