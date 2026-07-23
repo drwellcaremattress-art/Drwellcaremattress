@@ -16,9 +16,10 @@ const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) return null;
-        
         try {
-          const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+          // Fix for Vercel: use NEXTAUTH_URL, fallback to VERCEL_URL, then localhost
+          const baseUrl = process.env.NEXTAUTH_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+          
           const res = await fetch(`${baseUrl}/api/users/login`, {
             method: 'POST',
             body: JSON.stringify({

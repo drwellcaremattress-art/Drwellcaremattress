@@ -9,7 +9,8 @@ import {
   ChevronUp,
   RotateCcw,
   CircleDot,
-  ShieldCheck
+  ShieldCheck,
+  Filter
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -32,6 +33,7 @@ export function ProductListing() {
   const [selectedFirmnesses, setSelectedFirmnesses] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('Best Selling');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const typesList = ['Orthopaedic', 'Memory Foam', 'Latex', 'Hybrid'];
   const firmnessList = ['Soft', 'Medium Soft', 'Medium', 'Medium Firm', 'Firm'];
@@ -79,8 +81,17 @@ export function ProductListing() {
     <div className="container mx-auto px-4 pb-24 relative z-20 bg-white pt-10">
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
+        {/* Mobile Filter Toggle */}
+        <div className="lg:hidden w-full flex justify-between items-center bg-gray-50 p-4 rounded-xl -mb-4 border border-gray-100">
+          <Button onClick={() => setShowMobileFilters(!showMobileFilters)} variant="outline" className="flex items-center gap-2 font-bold text-[#0B1A2A] bg-white">
+            <Filter className="w-4 h-4" />
+            {showMobileFilters ? "Hide Filters" : "Show Filters"}
+          </Button>
+          <span className="text-sm font-bold text-gray-500">{processedProducts.length} Products</span>
+        </div>
+
         {/* Sidebar */}
-        <aside className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] overflow-y-auto hide-scrollbar self-start">
+        <aside className={`w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] overflow-y-auto hide-scrollbar self-start ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
           <div className="bg-white rounded-2xl p-6 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] mb-4">
             <h2 className="font-heading font-bold text-lg mb-6 text-[#0B1A2A]">Filter By</h2>
             

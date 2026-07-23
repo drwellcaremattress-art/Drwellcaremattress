@@ -30,9 +30,9 @@ export function Footer() {
         <div>
           <h3 className="font-heading font-semibold text-lg mb-4 text-brand-green-light">Shop</h3>
           <ul className="space-y-2 text-primary-blue-light text-sm font-body">
-            <li><Link href="/collections/orthopaedic" className="hover:text-white transition-colors">Orthopaedic Range</Link></li>
-            <li><Link href="/collections/memory-foam" className="hover:text-white transition-colors">Memory Foam</Link></li>
-            <li><Link href="/collections/hybrid" className="hover:text-white transition-colors">Hybrid Series</Link></li>
+            <li><Link href="/collections" className="hover:text-white transition-colors">Orthopaedic Range</Link></li>
+            <li><Link href="/collections" className="hover:text-white transition-colors">Memory Foam</Link></li>
+            <li><Link href="/collections" className="hover:text-white transition-colors">Hybrid Series</Link></li>
             <li><Link href="/quiz" className="hover:text-brand-green transition-colors">Firmness Quiz</Link></li>
           </ul>
         </div>
