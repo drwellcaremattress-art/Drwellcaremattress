@@ -18,7 +18,8 @@ const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
         
         try {
-          const res = await fetch("http://localhost:3001/api/users/login", {
+          const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+          const res = await fetch(`${baseUrl}/api/users/login`, {
             method: 'POST',
             body: JSON.stringify({
               email: credentials.email,
