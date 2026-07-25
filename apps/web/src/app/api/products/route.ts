@@ -7,6 +7,7 @@ const querySchema = z.object({
   category: z.string().optional(),
   firmness: z.string().optional(),
   sort: z.string().optional(),
+  admin: z.string().optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -26,6 +27,12 @@ export async function GET(req: NextRequest) {
     }
 
     let filter: any = { status: 'active' };
+    
+    // If admin flag is passed, remove the status filter to show all products
+    if (query.admin === 'true') {
+      delete filter.status;
+    }
+
     if (query.category) filter.category = query.category;
     if (query.firmness) filter.firmness = query.firmness;
 

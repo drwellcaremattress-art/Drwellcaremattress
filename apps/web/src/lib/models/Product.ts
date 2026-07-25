@@ -37,7 +37,6 @@ const ProductSchema: Schema = new Schema(
     brand: { type: String, default: 'Dr Well Care' },
     category: {
       type: String,
-      enum: ['orthopaedic', 'memory-foam', 'hybrid', 'pocket-spring'],
       required: true,
     },
     description: { type: String, required: true },
@@ -51,7 +50,7 @@ const ProductSchema: Schema = new Schema(
     ],
     variants: [
       {
-        size: { type: String, enum: ['Single', 'Double', 'Queen', 'King'], required: true },
+        size: { type: String, required: true },
         dimensions: { type: String },
         thickness_cm: { type: Number },
         price: { type: Number, required: true },
@@ -62,7 +61,7 @@ const ProductSchema: Schema = new Schema(
     ],
     firmness: {
       type: String,
-      enum: ['Soft', 'Medium', 'Firm', 'Orthopaedic Firm'],
+      enum: ['Soft', 'Medium Soft', 'Medium', 'Medium Firm', 'Firm', 'Orthopaedic Firm'],
       required: true,
     },
     warranty_years: { type: Number, default: 10 },
@@ -84,5 +83,7 @@ const ProductSchema: Schema = new Schema(
     timestamps: true,
   }
 );
-
-export const Product = mongoose.model<IProduct>('Product', ProductSchema);
+if (process.env.NODE_ENV === 'development' && mongoose.models.Product) {
+  delete mongoose.models.Product;
+}
+export const Product = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);

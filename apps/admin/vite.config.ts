@@ -6,5 +6,17 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     dedupe: ['react', 'react-dom']
+  },
+  server: {
+    proxy: {
+      '/images': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      },
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
   }
 })

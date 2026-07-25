@@ -140,6 +140,7 @@ function DashboardOverview() {
 
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
+import ProductsList from './pages/ProductsList';
 
 export default function App() {
   return (
@@ -156,7 +157,9 @@ export default function App() {
                 <main className="flex-1 overflow-x-hidden">
                   <Routes>
                     <Route path="/" element={<DashboardOverview />} />
-                    <Route path="/products/*" element={<ProductEditor />} />
+                    <Route path="/products" element={<ProductsList />} />
+                    <Route path="/products/new" element={<ProductEditor />} />
+                    <Route path="/products/:id" element={<ProductEditor />} />
                     <Route path="/orders/*" element={<OrdersTable />} />
                     <Route path="*" element={<div className="p-8 text-center mt-20">Coming Soon</div>} />
                   </Routes>

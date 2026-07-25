@@ -4,16 +4,20 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, User, Menu, ShieldCheck, Truck, Search, Moon, Phone, Mail, X } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
 import { useCartStore } from '@/store/cartStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function Navbar() {
+  const pathname = usePathname();
   const { toggleCart, items } = useCartStore();
   const itemCount = items.reduce((total, item) => total + item.qty, 0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  if (pathname === '/login') return null;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,11 +78,11 @@ export function Navbar() {
               onClick={() => setIsMobileMenuOpen(true)}
             />
             <Link href="/" className="flex items-center justify-center">
-              <Image src="/images/logo.png" alt="Dr Well Care Logo" width={150} height={50} className="h-12 w-auto object-contain hover:scale-105 transition-transform" priority />
+              <Image src="/images/logo.png" alt="Dr Well Care Logo" width={200} height={65} className="h-14 sm:h-[58px] w-auto object-contain hover:scale-105 transition-transform" priority />
             </Link>
           </div>
 
-          <nav className="hidden lg:flex items-center justify-center gap-8 xl:gap-12 font-body font-bold text-[15px] text-[#0B1A2A]">
+          <nav className="hidden lg:flex items-center justify-center gap-6 xl:gap-9 font-body font-bold text-[14px] xl:text-[15px] text-[#0B1A2A]">
             <Link href="/" className="hover:text-[#0682E4] transition-colors relative group">
               Home
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#0682E4] group-hover:w-full transition-all duration-300"></span>
@@ -90,6 +94,14 @@ export function Navbar() {
             <Link href="/collections" className="hover:text-[#0682E4] transition-colors relative group">
               Products
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#0682E4] group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link href="/collections?type=Bonded+Series" className="hover:text-[#0682E4] transition-colors relative group text-[#0682E4] font-bold flex items-center gap-1 bg-[#0682E4]/10 px-3 py-1.5 rounded-full border border-[#0682E4]/30">
+              Bonded Series
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#0682E4] group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link href="/collections?type=Luxury+HR+Series" className="hover:text-[#6CB50E] transition-colors relative group text-[#6CB50E] font-bold flex items-center gap-1 bg-[#6CB50E]/10 px-3 py-1.5 rounded-full border border-[#6CB50E]/30">
+              Luxury HR Series
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#6CB50E] group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link href="/faq" className="hover:text-[#6CB50E] transition-colors relative group">
               FAQ
@@ -181,6 +193,14 @@ export function Navbar() {
                 <Link href="/" className="px-6 py-4 hover:bg-gray-50 hover:text-[#0682E4] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
                 <Link href="/about" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>About</Link>
                 <Link href="/collections" className="px-6 py-4 hover:bg-gray-50 hover:text-[#0682E4] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Products</Link>
+                <Link href="/collections?type=Bonded+Series" className="px-6 py-3 bg-[#0682E4]/10 text-[#0682E4] font-bold mx-6 my-1 rounded-xl hover:bg-[#0682E4]/20 transition-colors flex items-center justify-between border border-[#0682E4]/30" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span>Bonded Series</span>
+                  <span className="text-[10px] bg-[#0682E4] text-white font-bold px-2 py-0.5 rounded">80kg+ Support</span>
+                </Link>
+                <Link href="/collections?type=Luxury+HR+Series" className="px-6 py-3 bg-[#6CB50E]/10 text-[#6CB50E] font-bold mx-6 my-1 rounded-xl hover:bg-[#6CB50E]/20 transition-colors flex items-center justify-between border border-[#6CB50E]/30" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span>Luxury HR Series</span>
+                  <span className="text-[10px] bg-[#6CB50E] text-white font-bold px-2 py-0.5 rounded">Flagship</span>
+                </Link>
                 <Link href="/faq" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>FAQ</Link>
                 <Link href="/contact" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link>
               </nav>

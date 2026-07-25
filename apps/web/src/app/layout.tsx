@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { FloatingContactButtons } from "@/components/ui/FloatingContactButtons";
 import { Providers } from "@/components/Providers";
 
 // Load fonts matching blueprint
@@ -28,6 +29,7 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           <CartDrawer />
+          <FloatingContactButtons />
           <main className="flex-grow">
             {children}
           </main>

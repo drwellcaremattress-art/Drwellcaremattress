@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { 
   Heart, 
@@ -14,28 +16,92 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export function ProductListing() {
-  const products = [
-    { id: 1, title: 'Ecolatex', slug: 'ecolatex-6', type: 'Latex', firmness: 'Medium Firm', subtitle: 'Premium Mattress', description: 'Advanced spine support and pressure relief.', badge: 'NEW', badgeColor: 'bg-[#7cb93e] text-white', thickness: '6 Inch', price: '₹12,999', priceValue: 12999, image: "/images/products/ecolatex 6'.png" },
-    { id: 2, title: 'Ecolatex', slug: 'ecolatex-8', type: 'Latex', firmness: 'Medium Firm', subtitle: 'Premium Mattress', description: 'Advanced spine support and pressure relief.', badge: 'BEST SELLER', badgeColor: 'bg-[#3b82f6] text-white', thickness: '8 Inch', price: '₹14,999', priceValue: 14999, image: "/images/products/ecolatex 8'.png" },
-    { id: 3, title: 'Lax-o-Bond', slug: 'lax-o-bond', type: 'Orthopaedic', firmness: 'Firm', subtitle: 'Premium Orthopaedic', description: 'Advanced spine support and pressure relief.', badge: 'POPULAR', badgeColor: 'bg-[#8b5cf6] text-white', thickness: 'Standard', price: '₹11,999', priceValue: 11999, image: "/images/products/lax-o-bond.png" },
-    { id: 4, title: 'Luxoria', slug: 'luxoria', type: 'Hybrid', firmness: 'Medium Soft', subtitle: 'Luxury Mattress', description: 'Cloud-like comfort that contours to your body.', badge: 'LUXURY', badgeColor: 'bg-[#0B1A2A] text-white', thickness: 'Standard', price: '₹18,999', priceValue: 18999, image: "/images/products/luxoria.png" },
-    { id: 5, title: 'Memory Bond', slug: 'memory-bond', type: 'Memory Foam', firmness: 'Medium', subtitle: 'Memory Foam Mattress', description: 'Cloud-like comfort that contours to your body.', badge: 'PREMIUM', badgeColor: 'bg-[#10b981] text-white', thickness: 'Standard', price: '₹15,999', priceValue: 15999, image: "/images/products/memory bond.png" },
-    { id: 6, title: 'Memory Dump', slug: 'memory-dump-6', type: 'Memory Foam', firmness: 'Soft', subtitle: 'Memory Foam Mattress', description: 'Cloud-like comfort that contours to your body.', badge: 'NEW', badgeColor: 'bg-[#7cb93e] text-white', thickness: '6 Inch', price: '₹13,999', priceValue: 13999, image: "/images/products/Memory Dump 6'.png" },
-    { id: 7, title: 'Memory Dump', slug: 'memory-dump-8', type: 'Memory Foam', firmness: 'Medium Soft', subtitle: 'Memory Foam Mattress', description: 'Cloud-like comfort that contours to your body.', badge: 'LIMITED', badgeColor: 'bg-[#f59e0b] text-white', thickness: '8 Inch', price: '₹16,999', priceValue: 16999, image: "/images/products/Memory Dump 8'.png" },
-    { id: 8, title: 'Mono Softy', slug: 'mono-softy', type: 'Hybrid', firmness: 'Medium Soft', subtitle: 'Comfort Mattress', description: 'Cloud-like comfort that contours to your body.', badge: 'POPULAR', badgeColor: 'bg-[#8b5cf6] text-white', thickness: 'Standard', price: '₹10,999', priceValue: 10999, image: "/images/products/mono softy.png" },
-    { id: 9, title: 'Softy Bond', slug: 'softy-bond-6', type: 'Orthopaedic', firmness: 'Medium Soft', subtitle: 'Comfort Mattress', description: 'Cloud-like comfort that contours to your body.', badge: 'NEW', badgeColor: 'bg-[#7cb93e] text-white', thickness: '6 Inch', price: '₹12,499', priceValue: 12499, image: "/images/products/softy bond 6'.png" },
-    { id: 10, title: 'Softybond Plus', slug: 'softybond-plus-8', type: 'Orthopaedic', firmness: 'Medium', subtitle: 'Comfort Mattress', description: 'Cloud-like comfort that contours to your body.', badge: 'EXCLUSIVE', badgeColor: 'bg-[#ef4444] text-white', thickness: '8 Inch', price: '₹15,499', priceValue: 15499, image: "/images/products/softybond plus 8'.png" }
+function ProductListingContent() {
+  const searchParams = useSearchParams();
+  const typeParam = searchParams ? searchParams.get('type') : null;
+
+  const defaultProducts = [
+    { id: 1, title: 'Ecolatex', slug: 'ecolatex-6', type: 'Latex', firmness: 'Medium Firm', subtitle: '100% Organic Latex Core', description: 'Advanced spine support, pressure relief, and eco-friendly natural materials.', badge: 'NEW', badgeColor: 'bg-[#7cb93e] text-white', thickness: '6 Inch', price: '₹12,999', priceValue: 12999, image: "/images/products/ecolatex 6'.png" },
+    { id: 2, title: 'Luxoria Latex', slug: 'luxoria-latex', type: 'Latex', firmness: 'Medium Soft', subtitle: 'Luxury HR & Natural Latex Hybrid', description: 'Experience luxury with 100% natural latex and pocket springs for ultimate comfort.', badge: 'LUXURY', badgeColor: 'bg-[#0B1A2A] text-white', thickness: '8 Inch', price: '₹17,999', priceValue: 17999, image: "/images/products/luxoria.png" },
+    { id: 3, title: 'Natural Latex', slug: 'natural-latex', type: 'Latex', firmness: 'Medium Firm', subtitle: '100% Pure Organic Latex', description: 'Pure natural latex core providing zero chemical emissions and responsive support.', badge: 'BEST SELLER', badgeColor: 'bg-[#3b82f6] text-white', thickness: '8 Inch', price: '₹16,999', priceValue: 16999, image: "/images/products/ecolatex 8'.png" },
+    { id: 4, title: 'Lax-o-Bond 6"', slug: 'lax-o-bond-6', type: 'Bonded Series', firmness: 'Firm', subtitle: 'High-Density Bonded Foam - 6 Inch', description: 'Specially designed for individuals weighing above 80 kg with strong & durable support.', badge: 'POPULAR', badgeColor: 'bg-[#8b5cf6] text-white', thickness: '6 Inch', price: '₹11,999', priceValue: 11999, image: "/images/products/lax-o-bond.png" },
+    { id: 5, title: 'Lax-o-Bond 8"', slug: 'lax-o-bond-8', type: 'Bonded Series', firmness: 'Firm', subtitle: 'High-Density Bonded Foam - 8 Inch', description: 'Extra deep orthopaedic back support and excellent weight distribution for heavy weight sleepers.', badge: 'HEAVY DUTY', badgeColor: 'bg-[#059669] text-white', thickness: '8 Inch', price: '₹14,999', priceValue: 14999, image: "/images/products/lax-o-bond.png" },
+    { id: 6, title: 'Memory Dump', slug: 'memory-dump-6', type: 'Memory Foam', firmness: 'Soft', subtitle: 'Cooling Gel Memory Foam', description: 'Cloud-like comfort that contours to your body shape and relieves pressure points.', badge: 'NEW', badgeColor: 'bg-[#7cb93e] text-white', thickness: '6 Inch', price: '₹13,999', priceValue: 13999, image: "/images/products/Memory Dump 6'.png" },
+    { id: 7, title: 'Memory Bond', slug: 'memory-bond', type: 'Bonded Series', firmness: 'Medium', subtitle: 'Bonded Core & Plush Memory Top', description: 'Specially designed for heavy weight sleepers above 80 kg with cloud-like memory contour.', badge: 'PREMIUM', badgeColor: 'bg-[#10b981] text-white', thickness: '6 Inch', price: '₹15,999', priceValue: 15999, image: "/images/products/memory bond.png" },
+    { id: 8, title: 'Memory Bond Plus', slug: 'memory-bond-plus', type: 'Bonded Series', firmness: 'Medium', subtitle: 'Enhanced Memory Contour & Bonded Core', description: 'Long-lasting comfort combined with high-density bonded support for deep sleep.', badge: 'EXCLUSIVE', badgeColor: 'bg-[#ef4444] text-white', thickness: '8 Inch', price: '₹17,999', priceValue: 17999, image: "/images/products/Memory Dump 8'.png" },
+    { id: 9, title: 'Softy Bond', slug: 'softy-bond', type: 'Bonded Series', firmness: 'Medium Soft', subtitle: 'Orthopaedic Bonded Mattress', description: 'Engineered with High-Density Bonded Foam for strong spine alignment and soft top feel.', badge: 'NEW', badgeColor: 'bg-[#3b82f6] text-white', thickness: '6 Inch', price: '₹12,499', priceValue: 12499, image: "/images/products/softy bond 6'.png" },
+    { id: 10, title: 'Softy Bond Plus', slug: 'softy-bond-plus', type: 'Bonded Series', firmness: 'Medium', subtitle: 'Premium Bonded Ortho Support', description: 'Superior weight distribution and orthopaedic support for long-lasting durability.', badge: 'EXCLUSIVE', badgeColor: 'bg-[#ef4444] text-white', thickness: '8 Inch', price: '₹15,499', priceValue: 15499, image: "/images/products/softybond plus 8'.png" },
+    { id: 11, title: 'Luxoria', slug: 'luxoria', type: 'Pocket Spring', firmness: 'Medium Soft', subtitle: 'Luxury HR Pocket Spring', description: 'Crafted with premium pocket springs and HR foam to deliver exceptional hotel comfort.', badge: 'LUXURY', badgeColor: 'bg-[#0B1A2A] text-white', thickness: '8 Inch', price: '₹18,999', priceValue: 18999, image: "/images/products/luxoria.png" },
+    { id: 12, title: 'Mona Lite', slug: 'mona-lite', type: 'Budget Mattress', firmness: 'Medium Firm', subtitle: 'Comfort Budget Mattress', description: 'Quality sleep at an unbeatable price point with durable orthopaedic foam support.', badge: 'VALUE', badgeColor: 'bg-[#f59e0b] text-white', thickness: '5 Inch', price: '₹7,999', priceValue: 7999, image: "/images/products/mono softy.png" },
+    { id: 13, title: 'Mona Softy', slug: 'mona-softy', type: 'Budget Mattress', firmness: 'Medium Soft', subtitle: 'Plush Comfort Budget Mattress', description: 'Soft, breathable comfort layer designed for daily rest and relaxation at a budget price.', badge: 'POPULAR', badgeColor: 'bg-[#8b5cf6] text-white', thickness: '6 Inch', price: '₹8,999', priceValue: 8999, image: "/images/products/mono softy.png" }
   ];
+
+  const [products, setProducts] = useState<any[]>(defaultProducts);
+
+  useEffect(() => {
+    axios.get('/api/products').then((res) => {
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+        const typeMap: any = {
+          'orthopaedic': 'Orthopaedic',
+          'memory-foam': 'Memory Foam',
+          'latex': 'Latex',
+          'hybrid': 'Hybrid',
+          'pocket-spring': 'Pocket Spring',
+          'bonded': 'Bonded Series',
+          'luxury-hr': 'Luxury HR Series',
+          'budget': 'Budget Mattress'
+        };
+        
+        const mapped = res.data.map((p: any, idx: number) => {
+          const firstVariant = p.variants && p.variants[0] ? p.variants[0] : null;
+          const priceVal = firstVariant ? firstVariant.price : 12999;
+          const thicknessVal = firstVariant && firstVariant.thickness_cm ? `${Math.round(firstVariant.thickness_cm / 2.54)} Inch` : '6 Inch';
+          
+          return {
+            id: p._id || idx + 1,
+            title: p.name || 'Mattress',
+            slug: p.slug,
+            type: typeMap[p.category] || p.category || 'Orthopaedic',
+            firmness: p.firmness || 'Medium Firm',
+            subtitle: p.description ? p.description.split('.')[0] : 'Premium Mattress',
+            description: p.description || 'Advanced spine support and pressure relief.',
+            badge: idx === 0 ? 'BEST SELLER' : (idx === 1 ? 'NEW' : 'POPULAR'),
+            badgeColor: idx % 2 === 0 ? 'bg-[#7cb93e] text-white' : 'bg-[#3b82f6] text-white',
+            thickness: thicknessVal,
+            price: `₹${priceVal.toLocaleString('en-IN')}`,
+            priceValue: priceVal,
+            image: p.images && p.images[0] ? p.images[0].url : "/images/products/ecolatex 6'.png"
+          };
+        });
+        setProducts(mapped);
+      }
+    }).catch(err => {
+      console.error("Failed to load dynamic products:", err);
+    });
+  }, []);
 
   // States for filters
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedFirmnesses, setSelectedFirmnesses] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (typeParam) {
+      setSelectedTypes([typeParam]);
+      setTimeout(() => {
+        const el = document.getElementById('product-listing-section') || document.querySelector('aside');
+        if (el) {
+          const yOffset = -100;
+          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 150);
+    }
+  }, [typeParam]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('Best Selling');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const typesList = ['Orthopaedic', 'Memory Foam', 'Latex', 'Hybrid'];
+  const typesList = ['Latex', 'Memory Foam', 'Pocket Spring', 'Bonded Series', 'Luxury HR Series', 'Budget Mattress', 'Orthopaedic', 'Hybrid'];
   const firmnessList = ['Soft', 'Medium Soft', 'Medium', 'Medium Firm', 'Firm'];
   const sizesList = ['Single (72 x 36 in)', 'Queen (60 x 72 in)', 'King (72 x 72 in)', 'Custom Size'];
 
@@ -57,9 +123,19 @@ export function ProductListing() {
   // Filter and Sort Logic
   const processedProducts = useMemo(() => {
     let filtered = products.filter(p => {
-      let typeMatch = selectedTypes.length === 0 || selectedTypes.includes(p.type);
+      let typeMatch = selectedTypes.length === 0 || selectedTypes.some(t => {
+        const titleLower = (p.title || '').toLowerCase();
+        const slugLower = (p.slug || '').toLowerCase();
+        const typeLower = (p.type || '').toLowerCase();
+        if (t === 'Latex') return typeLower === 'latex' || titleLower.includes('latex') || slugLower.includes('lax-o-bond') || slugLower.includes('ecolatex');
+        if (t === 'Memory Foam') return typeLower === 'memory foam' || titleLower.includes('memory') || slugLower.includes('memory');
+        if (t === 'Pocket Spring') return typeLower === 'pocket spring' || titleLower.includes('pocket') || slugLower.includes('luxoria');
+        if (t === 'Bonded Series') return typeLower === 'bonded series' || titleLower.includes('bond') || slugLower.includes('bond') || titleLower.includes('lax-o-bond');
+        if (t === 'Luxury HR Series') return typeLower === 'luxury hr series' || titleLower.includes('hr') || slugLower.includes('luxoria') || titleLower.includes('natural latex') || p.badge === 'LUXURY' || typeLower === 'pocket spring' || titleLower.includes('memory dump') || titleLower.includes('memory bond');
+        if (t === 'Budget Mattress') return typeLower === 'budget mattress' || titleLower.includes('mona') || slugLower.includes('mona') || titleLower.includes('budget');
+        return p.type === t;
+      });
       let firmnessMatch = selectedFirmnesses.length === 0 || selectedFirmnesses.includes(p.firmness);
-      // We don't have actual sizes array on products right now, so we assume all products are available in all sizes
       let sizeMatch = true; 
       
       return typeMatch && firmnessMatch && sizeMatch;
@@ -171,11 +247,17 @@ export function ProductListing() {
 
         {/* Main Content */}
         <main className="flex-grow">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4 border-b border-gray-100 pb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4 border-b border-gray-100 pb-6">
             <div>
-              <h2 className="font-heading text-4xl font-bold text-[#0B1A2A] mb-2 tracking-tight">Our Collections</h2>
+              <h2 className="font-heading text-4xl font-bold text-[#0B1A2A] mb-2 tracking-tight">
+                {selectedTypes.includes('Bonded Series') ? 'Bonded Series Collection' : selectedTypes.includes('Luxury HR Series') ? 'Luxury HR Series Collection' : 'Our Collections'}
+              </h2>
               <p className="text-[#64748b] text-sm md:text-base font-medium max-w-xl">
-                Explore our meticulously crafted range of mattresses, designed for the ultimate restorative sleep experience.
+                {selectedTypes.includes('Bonded Series') 
+                  ? 'Specially designed for heavy weight sleepers above 80 kg, engineered with High-Density Bonded Foam.'
+                  : selectedTypes.includes('Luxury HR Series')
+                  ? 'Experience luxury and choose your comfort with our flagship high resilience & organic variants.'
+                  : 'Explore our meticulously crafted range of mattresses, designed for the ultimate restorative sleep experience.'}
               </p>
             </div>
             <div className="flex items-center gap-2 mt-4 sm:mt-0 shrink-0">
@@ -195,6 +277,38 @@ export function ProductListing() {
               </div>
             </div>
           </div>
+
+          {/* Dynamic Series Showcase Banner */}
+          {selectedTypes.includes('Bonded Series') && (
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8 p-6 md:p-8 bg-gradient-to-r from-[#0B1A2A] via-[#0f253d] to-[#0B1A2A] rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-[#0682E4]/40">
+              <div className="space-y-2 text-center md:text-left">
+                <div className="inline-block px-3 py-1 rounded-full bg-[#0682E4]/30 text-[#0682E4] font-extrabold text-xs uppercase tracking-wider border border-[#0682E4]/40">Heavy Weight Ortho Support</div>
+                <h3 className="text-2xl md:text-3xl font-extrabold text-white">BONDED SERIES</h3>
+                <p className="text-white/80 text-sm md:text-base max-w-xl">Best Mattress for People Above 80 kg with strong, durable, long-lasting spinal support and zero sagging.</p>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-center shrink-0">
+                <span className="px-3 py-1.5 bg-[#0682E4]/20 text-white rounded-xl text-xs font-bold border border-[#0682E4]/30">✔️ Strong Support</span>
+                <span className="px-3 py-1.5 bg-[#0682E4]/20 text-white rounded-xl text-xs font-bold border border-[#0682E4]/30">✔️ 80kg+ Support</span>
+                <span className="px-3 py-1.5 bg-[#0682E4]/20 text-white rounded-xl text-xs font-bold border border-[#0682E4]/30">✔️ Ortho Alignment</span>
+              </div>
+            </motion.div>
+          )}
+
+          {selectedTypes.includes('Luxury HR Series') && (
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8 p-6 md:p-8 bg-gradient-to-r from-[#0f172a] via-[#1a2f1c] to-[#0f172a] rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-[#6CB50E]/40">
+              <div className="space-y-2 text-center md:text-left">
+                <div className="inline-block px-3 py-1 rounded-full bg-[#6CB50E]/30 text-[#6CB50E] font-extrabold text-xs uppercase tracking-wider border border-[#6CB50E]/40">Showroom Flagship Collection</div>
+                <h3 className="text-2xl md:text-3xl font-extrabold text-white">LUXURY HR SERIES</h3>
+                <p className="text-white/80 text-sm md:text-base max-w-xl">Experience Luxury. Choose Your Comfort. Crafted with premium high resilience foam, natural latex, and independent pocket springs.</p>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-center shrink-0">
+                <span className="px-3 py-1.5 bg-[#6CB50E]/20 text-white rounded-xl text-xs font-bold border border-[#6CB50E]/30">✨ HR Foam</span>
+                <span className="px-3 py-1.5 bg-[#6CB50E]/20 text-white rounded-xl text-xs font-bold border border-[#6CB50E]/30">✨ Memory Foam</span>
+                <span className="px-3 py-1.5 bg-[#6CB50E]/20 text-white rounded-xl text-xs font-bold border border-[#6CB50E]/30">✨ Natural Latex</span>
+                <span className="px-3 py-1.5 bg-[#6CB50E]/20 text-white rounded-xl text-xs font-bold border border-[#6CB50E]/30">✨ Pocket Spring</span>
+              </div>
+            </motion.div>
+          )}
 
           {processedProducts.length === 0 ? (
             <div className="py-20 text-center text-gray-500 font-medium">No products match your selected filters.</div>
@@ -266,3 +380,12 @@ export function ProductListing() {
     </div>
   );
 }
+
+export function ProductListing() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center text-gray-500 font-bold text-lg">Loading collection...</div>}>
+      <ProductListingContent />
+    </Suspense>
+  );
+}
+

@@ -263,6 +263,44 @@ export default function ContactPage() {
           </form>
         </motion.div>
       </div>
+
+      {/* Interactive Google Map & Street View Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 relative z-10"
+      >
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 md:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#0682E4] bg-[#0682E4]/10 px-3 py-1 rounded-full">
+                Visit Our Showroom
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-2">
+                Live Location & Street View
+              </h2>
+            </div>
+            <p className="text-sm text-slate-500 font-medium">
+              No. 551, Sivapragasam Nagar, Surapet, Chennai-600066
+            </p>
+          </div>
+
+          <div className="relative w-full h-[450px] rounded-2xl overflow-hidden shadow-inner border border-slate-200 dark:border-slate-800">
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3885.3106831213377!2d80.1844535750794!3d13.14279238718852!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a52649df083458f%3A0x570c69f166e4dc62!2sDr.Well%20Care%20Mattress!5e0!3m2!1sen!2sin!4v1784973063647!5m2!1sen!2sin" 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="strict-origin-when-cross-origin"
+              title="Dr.Well Care Mattress Business Location Map"
+            />
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

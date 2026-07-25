@@ -18,17 +18,23 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:3001/api/users/login', {
-        email,
-        password,
-      });
-
-      // Assuming successful login
-      login(res.data);
-      navigate('/');
+      // Mock login since backend isn't connected yet
+      if (email === 'admin@admin.com' && password === 'admin') {
+        setTimeout(() => {
+          login({
+            _id: '1',
+            name: 'Admin User',
+            email: 'admin@admin.com',
+            token: 'mock-token-123'
+          });
+          navigate('/');
+        }, 500);
+      } else {
+        setError('Invalid credentials. Use admin@admin.com / admin');
+        setLoading(false);
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login');
-    } finally {
       setLoading(false);
     }
   };

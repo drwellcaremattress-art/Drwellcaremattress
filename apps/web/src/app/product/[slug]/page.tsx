@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { connectDB } from '@/lib/db';
+import { Product as ProductModel } from '@/lib/models/Product';
 import { ImageGallery } from '@/components/ui/product/ImageGallery';
 import { ProductInfo } from '@/components/ui/product/ProductInfo';
 import { ProductDetails } from '@/components/ui/product/ProductDetails';
@@ -13,65 +15,109 @@ interface PageProps {
   };
 }
 
-export default function ProductPage({ params }: PageProps) {
+export default async function ProductPage({ params }: PageProps) {
   // Use params.slug directly in Next.js 14 App Router
   const { slug } = params;
   
   const productCatalog = [
     { 
-      slug: 'ecolatex-6', title: 'Ecolatex', subtitle: 'Premium Latex Mattress - 6 Inch', price: 12999, originalPrice: 16999, rating: 4.8, reviews: 1240, firmness: 'Medium Firm',
+      slug: 'ecolatex-6', title: 'Ecolatex', subtitle: '100% Organic Latex Core', price: 12999, originalPrice: 16999, rating: 4.8, reviews: 1240, firmness: 'Medium Firm',
       features: ['Advanced spine support', 'Pressure relief', 'Eco-friendly materials'],
       images: ["/images/products/ecolatex 6'.png", "/images/products/ecolatex 6'.png", "/images/products/ecolatex 6'.png"] 
     },
     { 
-      slug: 'ecolatex-8', title: 'Ecolatex', subtitle: 'Premium Latex Mattress - 8 Inch', price: 14999, originalPrice: 18999, rating: 4.9, reviews: 1100, firmness: 'Medium Firm',
-      features: ['Advanced spine support', 'Pressure relief', 'Eco-friendly materials'],
-      images: ["/images/products/ecolatex 8'.png", "/images/products/ecolatex 8'.png", "/images/products/ecolatex 8'.png"] 
-    },
-    { 
-      slug: 'lax-o-bond', title: 'Lax-o-Bond', subtitle: 'Premium Orthopaedic', price: 11999, originalPrice: 15999, rating: 4.7, reviews: 980, firmness: 'Firm',
-      features: ['Orthopaedic support', 'Zero Partner Disturbance', 'Breathable Fabric'],
-      images: ["/images/products/lax-o-bond.png", "/images/products/lax-o-bond.png", "/images/products/lax-o-bond.png"] 
-    },
-    { 
-      slug: 'luxoria', title: 'Luxoria', subtitle: 'Luxury Hybrid Mattress', price: 18999, originalPrice: 24999, rating: 4.9, reviews: 850, firmness: 'Medium Soft',
-      features: ['Cloud-like comfort', 'Cooling technology', 'Premium quilting'],
+      slug: 'luxoria-latex', title: 'Luxoria Latex', subtitle: 'Luxury HR & Natural Latex Hybrid', price: 17999, originalPrice: 23999, rating: 4.9, reviews: 920, firmness: 'Medium Soft',
+      features: ['100% Natural Latex', 'Pocket Spring Core', 'Zero Partner Disturbance'],
       images: ["/images/products/luxoria.png", "/images/products/luxoria.png", "/images/products/luxoria.png"] 
     },
     { 
-      slug: 'memory-bond', title: 'Memory Bond', subtitle: 'Memory Foam Mattress', price: 15999, originalPrice: 20999, rating: 4.8, reviews: 1540, firmness: 'Medium',
-      features: ['Adapts to body shape', 'Relieves pressure points', 'Hypoallergenic'],
-      images: ["/images/products/memory bond.png", "/images/products/memory bond.png", "/images/products/memory bond.png"] 
+      slug: 'natural-latex', title: 'Natural Latex', subtitle: '100% Pure Organic Latex Core', price: 16999, originalPrice: 21999, rating: 4.9, reviews: 1100, firmness: 'Medium Firm',
+      features: ['Pure Organic Latex', 'Hypoallergenic & Antimicrobial', 'Pin-core Ventilation'],
+      images: ["/images/products/ecolatex 8'.png", "/images/products/ecolatex 8'.png", "/images/products/ecolatex 8'.png"] 
     },
     { 
-      slug: 'memory-dump-6', title: 'Memory Dump', subtitle: 'Memory Foam Mattress - 6 Inch', price: 13999, originalPrice: 17999, rating: 4.7, reviews: 620, firmness: 'Soft',
+      slug: 'lax-o-bond-6', title: 'Lax-o-Bond 6"', subtitle: 'High-Density Bonded Foam - 6 Inch', price: 11999, originalPrice: 15999, rating: 4.7, reviews: 980, firmness: 'Firm',
+      features: ['Strong & Durable Support', 'Excellent Weight Distribution', 'Orthopaedic Back Support', 'Ideal for Heavy Weight Sleepers'],
+      images: ["/images/products/lax-o-bond.png", "/images/products/lax-o-bond.png", "/images/products/lax-o-bond.png"] 
+    },
+    { 
+      slug: 'lax-o-bond-8', title: 'Lax-o-Bond 8"', subtitle: 'High-Density Bonded Foam - 8 Inch', price: 14999, originalPrice: 19999, rating: 4.8, reviews: 850, firmness: 'Firm',
+      features: ['Strong & Durable Support', 'Excellent Weight Distribution', 'Orthopaedic Back Support', 'Long-Lasting Comfort'],
+      images: ["/images/products/lax-o-bond.png", "/images/products/lax-o-bond.png", "/images/products/lax-o-bond.png"] 
+    },
+    { 
+      slug: 'memory-dump-6', title: 'Memory Dump', subtitle: 'Cooling Gel Memory Foam', price: 13999, originalPrice: 17999, rating: 4.7, reviews: 620, firmness: 'Soft',
       features: ['Cloud-like comfort', 'Pressure relief', 'Cooling Gel Memory Foam'],
       images: ["/images/products/Memory Dump 6'.png", "/images/products/Memory Dump 6'.png", "/images/products/Memory Dump 6'.png"] 
     },
     { 
-      slug: 'memory-dump-8', title: 'Memory Dump', subtitle: 'Memory Foam Mattress - 8 Inch', price: 16999, originalPrice: 21999, rating: 4.8, reviews: 890, firmness: 'Medium Soft',
-      features: ['Cloud-like comfort', 'Deep support layer', 'Cooling Gel Memory Foam'],
+      slug: 'memory-bond', title: 'Memory Bond', subtitle: 'Bonded Core & Plush Memory Top', price: 15999, originalPrice: 20999, rating: 4.8, reviews: 1540, firmness: 'Medium',
+      features: ['Adapts to body shape', 'Relieves pressure points', 'Heavy Weight Support above 80 kg'],
+      images: ["/images/products/memory bond.png", "/images/products/memory bond.png", "/images/products/memory bond.png"] 
+    },
+    { 
+      slug: 'memory-bond-plus', title: 'Memory Bond Plus', subtitle: 'Enhanced Memory Contour & Bonded Core', price: 17999, originalPrice: 22999, rating: 4.9, reviews: 1240, firmness: 'Medium',
+      features: ['Deep Plush Memory Top', 'Heavy Weight Ortho Support', 'Zero Partner Disturbance'],
       images: ["/images/products/Memory Dump 8'.png", "/images/products/Memory Dump 8'.png", "/images/products/Memory Dump 8'.png"] 
     },
     { 
-      slug: 'mono-softy', title: 'Mono Softy', subtitle: 'Comfort Hybrid Mattress', price: 10999, originalPrice: 14999, rating: 4.6, reviews: 1450, firmness: 'Medium Soft',
-      features: ['Plush Cloud Feel', 'Pressure Relief', 'Breathable cover'],
-      images: ["/images/products/mono softy.png", "/images/products/mono softy.png", "/images/products/mono softy.png"] 
-    },
-    { 
-      slug: 'softy-bond-6', title: 'Softy Bond', subtitle: 'Comfort Orthopaedic - 6 Inch', price: 12499, originalPrice: 16499, rating: 4.7, reviews: 920, firmness: 'Medium Soft',
+      slug: 'softy-bond', title: 'Softy Bond', subtitle: 'Orthopaedic Bonded Mattress', price: 12499, originalPrice: 16499, rating: 4.7, reviews: 920, firmness: 'Medium Soft',
       features: ['Orthopaedic alignment', 'Plush comfort layer', 'Zero Partner Disturbance'],
       images: ["/images/products/softy bond 6'.png", "/images/products/softy bond 6'.png", "/images/products/softy bond 6'.png"] 
     },
     { 
-      slug: 'softybond-plus-8', title: 'Softybond Plus', subtitle: 'Premium Orthopaedic - 8 Inch', price: 15499, originalPrice: 20499, rating: 4.9, reviews: 1120, firmness: 'Medium',
-      features: ['Enhanced orthopaedic support', 'Deep plush feel', 'Cooling technology'],
+      slug: 'softy-bond-plus', title: 'Softy Bond Plus', subtitle: 'Premium Bonded Ortho Support', price: 15499, originalPrice: 20499, rating: 4.9, reviews: 1120, firmness: 'Medium',
+      features: ['Enhanced orthopaedic support', 'Deep plush feel', 'Cooling technology', 'Heavy Weight Support'],
       images: ["/images/products/softybond plus 8'.png", "/images/products/softybond plus 8'.png", "/images/products/softybond plus 8'.png"] 
+    },
+    { 
+      slug: 'luxoria', title: 'Luxoria', subtitle: 'Luxury HR Pocket Spring', price: 18999, originalPrice: 24999, rating: 4.9, reviews: 850, firmness: 'Medium Soft',
+      features: ['Cloud-like comfort', 'Independent Pocket Springs', 'Premium quilting', 'Zero Partner Disturbance'],
+      images: ["/images/products/luxoria.png", "/images/products/luxoria.png", "/images/products/luxoria.png"] 
+    },
+    { 
+      slug: 'mona-lite', title: 'Mona Lite', subtitle: 'Comfort Budget Mattress', price: 7999, originalPrice: 10999, rating: 4.6, reviews: 1450, firmness: 'Medium Firm',
+      features: ['Unbeatable Value', 'Durable Foam Core', 'Breathable Fabric'],
+      images: ["/images/products/mono softy.png", "/images/products/mono softy.png", "/images/products/mono softy.png"] 
+    },
+    { 
+      slug: 'mona-softy', title: 'Mona Softy', subtitle: 'Plush Comfort Budget Mattress', price: 8999, originalPrice: 12999, rating: 4.7, reviews: 1620, firmness: 'Medium Soft',
+      features: ['Plush Cloud Feel', 'Pressure Relief', 'Budget Friendly'],
+      images: ["/images/products/mono softy.png", "/images/products/mono softy.png", "/images/products/mono softy.png"] 
     }
   ];
 
-  const foundProduct = productCatalog.find(p => p.slug === slug);
-  const product = foundProduct ? { id: slug, ...foundProduct } : null;
+  let dbProduct: any = null;
+  try {
+    await connectDB();
+    dbProduct = await ProductModel.findOne({ slug }).lean();
+  } catch (err) {
+    console.error("Error fetching product from DB:", err);
+  }
+
+  let product: any = null;
+  if (dbProduct) {
+    const firstVariant = dbProduct.variants && dbProduct.variants[0] ? dbProduct.variants[0] : null;
+    const priceVal = firstVariant ? firstVariant.price : 12999;
+    const mrpVal = firstVariant ? firstVariant.mrp : 16999;
+    
+    product = {
+      id: dbProduct.slug,
+      slug: dbProduct.slug,
+      title: dbProduct.name,
+      subtitle: dbProduct.description ? dbProduct.description.split('.')[0] : 'Premium Mattress',
+      price: priceVal,
+      originalPrice: mrpVal,
+      rating: dbProduct.ratingAvg || 4.8,
+      reviews: dbProduct.ratingCount || 120,
+      firmness: dbProduct.firmness || 'Medium Firm',
+      features: dbProduct.benefits || ['Advanced spine support', 'Pressure relief', 'Eco-friendly materials'],
+      images: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images.map((i: any) => i.url) : ["/images/products/ecolatex 6'.png", "/images/products/ecolatex 6'.png", "/images/products/ecolatex 6'.png"]
+    };
+  } else {
+    const foundProduct = productCatalog.find(p => p.slug === slug);
+    product = foundProduct ? { id: slug, ...foundProduct } : null;
+  }
 
   if (!product) {
     notFound();
