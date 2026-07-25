@@ -1,9 +1,22 @@
 "use client";
 
+import { useState } from 'react';
 import { FAQAccordion } from '@/components/ui/FAQAccordion';
-import { HelpCircle, Shield, Truck, Package } from 'lucide-react';
+import { HelpCircle, Shield, Truck, Package, Download, FileText, X } from 'lucide-react';
+import Link from 'next/link';
 
 export default function FAQPage() {
+  const [showCatalogueModal, setShowCatalogueModal] = useState(false);
+
+  const downloadPdf = (path: string, filename: string) => {
+    const link = document.createElement('a');
+    link.href = path;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const trialFAQs = [
     {
       question: "How does the 100-Night Risk-Free Trial work?",
@@ -50,8 +63,71 @@ export default function FAQPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col pt-20">
+    <div className="min-h-screen bg-slate-50 flex flex-col pt-20 font-body relative">
       
+      {/* CATALOGUE DOWNLOAD MODAL */}
+      {showCatalogueModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative">
+            <button 
+              onClick={() => setShowCatalogueModal(false)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-[#0682E4]/10 text-[#0682E4] flex items-center justify-center mb-4">
+              <FileText className="w-7 h-7" />
+            </div>
+
+            <h3 className="text-xl font-extrabold text-[#0B1A2A] mb-1 font-heading">
+              Download Dr.Well Care Catalogue
+            </h3>
+            <p className="text-xs text-slate-500 mb-6">
+              Select the PDF price list and product catalogue to download directly:
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => downloadPdf('/catalogue-1.pdf', 'catalogue-1.pdf')}
+                className="w-full p-4 rounded-2xl bg-slate-50 hover:bg-[#0682E4]/10 border border-slate-200 hover:border-[#0682E4] transition-all flex items-center justify-between group text-left"
+              >
+                <div>
+                  <span className="font-extrabold text-sm text-[#0B1A2A] group-hover:text-[#0682E4] block">
+                    📄 Official Price List & Specs (PDF)
+                  </span>
+                  <span className="text-[11px] text-slate-400">Catalogue Part 1 • Complete Dimensions & Pricing</span>
+                </div>
+                <Download className="w-5 h-5 text-[#0682E4] shrink-0" />
+              </button>
+
+              <button
+                onClick={() => downloadPdf('/catalogue-2.pdf', 'catalogue-2.pdf')}
+                className="w-full p-4 rounded-2xl bg-slate-50 hover:bg-[#7cb93e]/10 border border-slate-200 hover:border-[#7cb93e] transition-all flex items-center justify-between group text-left"
+              >
+                <div>
+                  <span className="font-extrabold text-sm text-[#0B1A2A] group-hover:text-[#7cb93e] block">
+                    📄 Product Series Catalogue (PDF)
+                  </span>
+                  <span className="text-[11px] text-slate-400">Catalogue Part 2 • Full Specifications & Features</span>
+                </div>
+                <Download className="w-5 h-5 text-[#7cb93e] shrink-0" />
+              </button>
+            </div>
+
+            <button
+              onClick={() => {
+                downloadPdf('/catalogue-1.pdf', 'catalogue.pdf');
+                downloadPdf('/catalogue-2.pdf', 'catalogue-2.pdf');
+              }}
+              className="w-full mt-4 py-3 rounded-2xl bg-[#0B1A2A] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#16273B]"
+            >
+              <Download className="w-4 h-4 text-[#7cb93e]" /> Download Both Catalogues (.pdf)
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="bg-[#0B1A2A] text-white py-20 lg:py-28 relative overflow-hidden">
         {/* Abstract Background Shapes */}
@@ -129,11 +205,17 @@ export default function FAQPage() {
             Our sleep experts are available 7 days a week to help you find the perfect mattress.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-[#0B1A2A] hover:bg-[#16273B] text-white px-8 py-4 rounded-xl font-bold shadow-lg transition-transform hover:-translate-y-0.5">
+            <Link 
+              href="/contact" 
+              className="bg-[#0B1A2A] hover:bg-[#16273B] text-white px-8 py-4 rounded-xl font-bold shadow-lg transition-transform hover:-translate-y-0.5 flex items-center justify-center"
+            >
               Contact Support
-            </button>
-            <button className="bg-[#f8f9fa] hover:bg-gray-100 border border-gray-200 text-[#0B1A2A] px-8 py-4 rounded-xl font-bold transition-colors">
-              Read Sleep Guide
+            </Link>
+            <button 
+              onClick={() => setShowCatalogueModal(true)}
+              className="bg-[#f8f9fa] hover:bg-gray-100 border border-gray-200 text-[#0B1A2A] px-8 py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+            >
+              <Download className="w-4 h-4 text-[#0682E4]" /> Read Sleep Guide / Download Catalogue
             </button>
           </div>
         </div>
@@ -142,3 +224,4 @@ export default function FAQPage() {
     </div>
   );
 }
+

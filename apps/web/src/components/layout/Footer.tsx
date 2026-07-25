@@ -17,7 +17,8 @@ import {
   PhoneCall, 
   MessageCircle,
   MapPin,
-  ChevronRight
+  ChevronRight,
+  Download
 } from 'lucide-react';
 
 export function Footer() {
@@ -178,6 +179,14 @@ export function Footer() {
                       </div>
                       <span>Contact Us</span>
                     </Link>
+                  </li>
+                  <li>
+                    <a href="/catalogue-1.pdf" download="catalogue.pdf" className="hover:text-white transition-colors flex items-center gap-2.5 group">
+                      <div className="w-6 h-6 rounded-md bg-[#7cb93e]/20 flex items-center justify-center text-[#7cb93e] group-hover:bg-[#7cb93e] group-hover:text-white transition-colors">
+                        <Download className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-[#7cb93e] font-bold">Download Catalogue (PDF)</span>
+                    </a>
                   </li>
                   <li>
                     <a href="http://localhost:5173" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 group">
