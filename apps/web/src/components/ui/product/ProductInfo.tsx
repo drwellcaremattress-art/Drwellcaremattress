@@ -383,7 +383,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                     }`}
                     style={
                       isSelected
-                        ? { backgroundColor: sizeData.bgLight, ringColor: sizeData.color }
+                        ? { backgroundColor: sizeData.bgLight, borderColor: sizeData.color }
                         : { backgroundColor: 'transparent' }
                     }
                   >
