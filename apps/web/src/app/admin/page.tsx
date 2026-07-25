@@ -1,67 +1,52 @@
 import React from 'react';
 import { connectDB } from '@/lib/db';
 import { Product } from '@/lib/models/Product';
-import AdminProductTable from '@/components/admin/AdminProductTable';
-import { Package } from 'lucide-react';
+import { Order } from '@/lib/models/Order';
+import AdminDashboardClient from '@/components/admin/AdminDashboardClient';
 
-// Force dynamic rendering since we are fetching from DB directly
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
-  // Connect to DB
   await connectDB();
 
-  // Fetch all products
+  // Fetch products
   const productsRaw = await Product.find({}).sort({ createdAt: -1 }).lean();
-  
-  // Serialize for passing to client component
   const products = productsRaw.map((p: any) => ({
     _id: p._id.toString(),
     slug: p.slug,
     name: p.name,
-    brand: p.brand,
+    brand: p.brand || 'Dr.Well Care',
     category: p.category,
     description: p.description,
     benefits: p.benefits || [],
     images: p.images || [],
     variants: p.variants || [],
-    firmness: p.firmness,
-    warranty_years: p.warranty_years,
-    trialNights: p.trialNights,
-    ratingAvg: p.ratingAvg,
-    ratingCount: p.ratingCount,
+    firmness: p.firmness || 'Medium Firm',
+    warranty_years: p.warranty_years || 10,
+    trialNights: p.trialNights || 100,
+    ratingAvg: p.ratingAvg || 4.9,
+    ratingCount: p.ratingCount || 28,
     seo: p.seo || { title: '', description: '', keywords: '' },
-    status: p.status,
+    status: p.status || 'active',
     createdAt: p.createdAt?.toISOString() || new Date().toISOString(),
   }));
 
-  return (
-    <div className="min-h-screen bg-gray-50/50 p-6 md:p-12">
-      <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-              <div className="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-600/20">
-                <Package size={24} />
-              </div>
-              Product Inventory
-            </h1>
-            <p className="mt-2 text-gray-500">
-              Manage and view all existing products in your store.
-            </p>
-          </div>
-          
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-600/20 active:scale-95">
-            + Add New Product
-          </button>
-        </div>
+  // Fetch orders
+  const ordersRaw = await Order.find({}).sort({ createdAt: -1 }).lean();
+  const orders = ordersRaw.map((o: any) => ({
+    _id: o._id.toString(),
+    orderNumber: o.orderNumber || `ORD-${o._id.toString().slice(-6)}`,
+    customerName: o.customerName || 'Customer',
+    customerPhone: o.customerPhone || 'N/A',
+    customerEmail: o.customerEmail || 'N/A',
+    shippingAddress: o.shippingAddress || {},
+    paymentMethod: o.paymentGateway || o.paymentMethod || 'Razorpay',
+    totalPrice: o.total || o.totalPrice || 0,
+    isPaid: o.isPaid || false,
+    orderStatus: o.orderStatus || o.status || 'Processing',
+    items: o.items || o.orderItems || [],
+    createdAt: o.createdAt?.toISOString() || new Date().toISOString(),
+  }));
 
-        {/* Product Table */}
-        <AdminProductTable products={products} />
-        
-      </div>
-    </div>
-  );
+  return <AdminDashboardClient initialProducts={products} initialOrders={orders} />;
 }

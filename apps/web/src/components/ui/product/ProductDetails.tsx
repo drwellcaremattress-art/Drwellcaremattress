@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { ShieldCheck, Activity, Moon, CircleDot, User, Wind, Leaf, Award } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
+import { ReviewSection } from './ReviewSection';
 
 export function ProductDetails() {
   const containerVariants: Variants = {
@@ -227,6 +229,9 @@ export function ProductDetails() {
             </div>
           </div>
         </div>
+
+        {/* Customer Testimonials & Reviews System */}
+        <ReviewSection productName="Dr.Well Care Orthopaedic Mattress" />
       </section>
     </div>
   );
