@@ -11,6 +11,8 @@ import { useRouter } from 'next/navigation';
 
 interface ProductInfoProps {
   product: any;
+  externalVariantIndex?: number;
+  onVariantChange?: (idx: number, slug?: string) => void;
 }
 
 // ─── Base size dimensions & area per category ─────────────────────────────────
@@ -82,9 +84,10 @@ const getDynamicSizeData = (rate: number) => {
   return result;
 };
 
-export function ProductInfo({ product }: ProductInfoProps) {
+export function ProductInfo({ product, externalVariantIndex, onVariantChange }: ProductInfoProps) {
   const initialVariantIndex = product.thicknessVariants ? Math.max(0, product.thicknessVariants.findIndex((v: any) => v.slug === product.slug || v.thickness === product.thickness)) : 0;
-  const [activeVariantIndex, setActiveVariantIndex] = useState<number>(initialVariantIndex);
+  const [internalVariantIndex, setInternalVariantIndex] = useState<number>(initialVariantIndex);
+  const activeVariantIndex = externalVariantIndex !== undefined ? externalVariantIndex : internalVariantIndex;
   const activeVariant = product.thicknessVariants && product.thicknessVariants.length > 0 ? product.thicknessVariants[activeVariantIndex] : null;
 
   // Determine exact price per sq.ft rate for this product or selected thickness variant
@@ -293,9 +296,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
                     type="button"
                     onClick={() => {
                       if (product.thicknessVariants && product.thicknessVariants.length > 0) {
-                        setActiveVariantIndex(idx);
-                        if (variant.slug && typeof window !== 'undefined') {
-                          window.history.replaceState(null, '', `/product/${variant.slug}`);
+                        if (onVariantChange) {
+                          onVariantChange(idx, variant.slug);
+                        } else {
+                          setInternalVariantIndex(idx);
+                          if (variant.slug && typeof window !== 'undefined') {
+                            window.history.replaceState(null, '', `/product/${variant.slug}`);
+                          }
                         }
                       }
                     }}

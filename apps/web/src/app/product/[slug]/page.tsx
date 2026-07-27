@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import { Product as ProductModel } from '@/lib/models/Product';
 import { ImageGallery } from '@/components/ui/product/ImageGallery';
 import { ProductInfo } from '@/components/ui/product/ProductInfo';
+import { ProductMainDisplay } from '@/components/ui/product/ProductMainDisplay';
 import { ProductDetails } from '@/components/ui/product/ProductDetails';
 import { Heart, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -83,18 +84,7 @@ export default async function ProductPage({ params }: PageProps) {
         </div>
 
         {/* Main Product Display: 2 Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-          
-          {/* Left: Gallery (6 cols) */}
-          <div className="lg:col-span-7">
-            <ImageGallery images={product.images} title={product.title} badge="LUXURY" />
-          </div>
-
-          {/* Right: Info & Purchase (5 cols) */}
-          <div className="lg:col-span-5 sticky top-28 z-30">
-            <ProductInfo product={product} />
-          </div>
-        </div>
+        <ProductMainDisplay product={product} />
       </div>
 
       <hr className="my-12 border-gray-100" />

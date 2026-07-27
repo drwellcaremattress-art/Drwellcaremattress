@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 interface ImageGalleryProps {
@@ -11,6 +11,10 @@ interface ImageGalleryProps {
 
 export function ImageGallery({ images, title, badge }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [images]);
 
   return (
     <div className="flex flex-col gap-4">
