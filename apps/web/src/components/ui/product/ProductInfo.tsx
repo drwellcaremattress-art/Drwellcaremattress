@@ -91,6 +91,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const [selectedDim, setSelectedDim] = useState('72" × 36"'); // default 72"×36"
   const selectedThickness = product.thickness || '6 Inch';
   const [popupOpen, setPopupOpen] = useState(false);
+  const [customOpen, setCustomOpen] = useState(false);
+  const [customL, setCustomL] = useState('');
+  const [customW, setCustomW] = useState('');
   const { addItem, toggleCart } = useCartStore();
   const { data: session } = useSession();
   const router = useRouter();
@@ -113,6 +116,14 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const displayPrice = selectedSubSize ? selectedSubSize.price : (typeof product.price === 'number' ? product.price : (product.priceValue || 9828));
   const baseOriginalPrice = product.originalPrice || Math.round(displayPrice * 1.3);
   const discountRatio = baseOriginalPrice && displayPrice ? (baseOriginalPrice / (typeof product.price === 'number' ? product.price : (product.priceValue || displayPrice))) : 1.3;
+
+  // Custom size price calculation
+  const customSqft = customL && customW
+    ? ((parseFloat(customL) * parseFloat(customW)) / 144).toFixed(2)
+    : null;
+  const customPrice = customSqft
+    ? Math.round(parseFloat(customSqft) * rate)
+    : null;
   const displayOriginalPrice = selectedSubSize ? Math.round(selectedSubSize.price * discountRatio) : baseOriginalPrice;
 
 
@@ -304,6 +315,113 @@ export function ProductInfo({ product }: ProductInfoProps) {
               </div>
             </div>
           </div>
+
+          {/* Custom Size Toggle */}
+          <button
+            onClick={() => setCustomOpen(o => !o)}
+            className="mt-3 w-full border border-dashed border-gray-300 rounded-xl p-3 text-sm font-medium text-[#64748b] hover:bg-gray-50 transition-colors flex items-center justify-between"
+          >
+            <span>Need a Custom Size?</span>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${customOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Custom Size Panel */}
+          <AnimatePresence>
+            {customOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="mt-2 border border-dashed border-gray-200 rounded-xl p-4 bg-gray-50 space-y-4">
+                  <p className="text-xs text-[#64748b] font-medium">Enter your custom dimensions (in inches):</p>
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <label className="block text-xs font-semibold text-[#0B1A2A] mb-1">Length (L)&quot;</label>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="e.g. 75"
+                        value={customL}
+                        onChange={e => setCustomL(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B1A2A] focus:outline-none focus:border-[#0682E4] focus:ring-1 focus:ring-[#0682E4]/30 bg-white"
+                      />
+                    </div>
+                    <div className="flex items-end pb-2 text-[#94a3b8] font-bold text-lg">×</div>
+                    <div className="flex-1">
+                      <label className="block text-xs font-semibold text-[#0B1A2A] mb-1">Width (W)&quot;</label>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="e.g. 42"
+                        value={customW}
+                        onChange={e => setCustomW(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B1A2A] focus:outline-none focus:border-[#0682E4] focus:ring-1 focus:ring-[#0682E4]/30 bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {customSqft && customPrice && (
+                    <div className="bg-white border border-[#0682E4]/20 rounded-xl p-3 flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-[11px] text-[#64748b] font-medium">
+                          {customL}&quot; × {customW}&quot; = <span className="font-bold text-[#0B1A2A]">{customSqft} sq.ft</span>
+                        </p>
+                        <p className="text-[11px] text-[#64748b] mt-0.5">Estimated price</p>
+                      </div>
+                      <span className="text-lg font-black text-[#0682E4]">
+                        ₹{customPrice.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  )}
+
+                  {customSqft && customPrice && (
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => {
+                          addItem({
+                            id: product.id.toString(),
+                            name: product.title,
+                            size: `Custom ${customL}" × ${customW}" - ${selectedThickness}`,
+                            price: customPrice,
+                            image: product.images[0],
+                            qty: 1,
+                          });
+                          toggleCart();
+                        }}
+                        className="w-full bg-[#0682E4] hover:bg-[#056ec1] text-white rounded-xl py-2.5 font-bold text-sm transition-colors"
+                      >
+                        Add Custom Size to Cart — ₹{customPrice.toLocaleString('en-IN')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          addItem({
+                            id: product.id.toString(),
+                            name: product.title,
+                            size: `Custom ${customL}" × ${customW}" - ${selectedThickness}`,
+                            price: customPrice,
+                            image: product.images[0],
+                            qty: 1,
+                          });
+                          if (!session) {
+                            alert('Please login or create an account first to complete your purchase!');
+                            router.push('/login?callbackUrl=/checkout');
+                          } else {
+                            router.push('/checkout');
+                          }
+                        }}
+                        className="w-full bg-[#7cb93e] hover:bg-[#68a032] text-white rounded-xl py-2.5 font-extrabold text-sm transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                      >
+                        <Zap className="w-4 h-4" /> Buy Custom Size Now
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Actions */}
