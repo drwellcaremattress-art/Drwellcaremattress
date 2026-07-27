@@ -6,7 +6,11 @@ import {
   Moon,
   ShieldCheck,
   Activity,
-  Bone
+  Bone,
+  Truck,
+  Wind,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
@@ -87,51 +91,94 @@ export default function CollectionsPage() {
       {/* 2. Reusable Product Listing Component */}
       <ProductListing />
 
-      {/* 3. Bottom Trust Banner (Dark Mode Glow) */}
-      <section className="container mx-auto px-4 mb-24 relative z-10 mt-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-[#0B1A2A] rounded-[2rem] p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative overflow-hidden border border-white/10"
-        >
-          {/* Subtle background glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#7cb93e]/10 blur-[100px] pointer-events-none"></div>
+      {/* 3. The Dr Well Care Advantage - Premium Glass Grid */}
+      <section className="container mx-auto px-4 mb-28 relative z-10 mt-16">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span className="bg-[#0682E4]/10 text-[#0682E4] text-xs font-black tracking-widest px-4 py-1.5 rounded-full uppercase mb-3 inline-block">The Wellcare Difference</span>
+          <h2 className="font-heading text-3xl sm:text-4xl font-black text-[#0B1A2A]">Why Choose Our Orthopaedic Series?</h2>
+        </div>
 
-          <div className="flex items-start gap-4 relative z-10 group">
-            <Moon className="w-8 h-8 text-[#7cb93e] flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-            <div>
-              <h4 className="font-heading font-bold text-white text-lg mb-1">100-Night Trial</h4>
-              <p className="text-white/60 text-sm leading-relaxed">Sleep on it for 100 nights. Not perfect? We&apos;ll pick it up.</p>
-            </div>
-          </div>
-          
-          <div className="flex items-start gap-4 relative z-10 group">
-            <ShieldCheck className="w-8 h-8 text-[#7cb93e] flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-            <div>
-              <h4 className="font-heading font-bold text-white text-lg mb-1">10-Year Warranty</h4>
-              <p className="text-white/60 text-sm leading-relaxed">Guaranteed durability and support for a full decade.</p>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              tag: "SCIENTIFIC ALIGNMENT",
+              tagColor: "bg-[#0682E4]/15 text-[#0682E4] border-[#0682E4]/30",
+              title: "5-Zone Ortho Core",
+              desc: "Engineered with multi-density HR & bonded foam layers to contour to your spine's natural curves and relieve lumbar pressure.",
+              icon: <Activity className="w-6 h-6 text-[#0682E4]" />,
+              glow: "hover:shadow-[0_20px_40px_rgba(6,130,228,0.12)] hover:border-[#0682E4]/40",
+              iconBg: "bg-[#0682E4]/10 border-[#0682E4]/20",
+              watermark: <Layers className="w-32 h-32 text-[#0682E4]" />
+            },
+            {
+              tag: "ZERO DISTURBANCE SLEEP",
+              tagColor: "bg-[#7cb93e]/15 text-[#5a8b2a] border-[#7cb93e]/30",
+              title: "Motion Isolation Tech",
+              desc: "Advanced energy-absorbing foam core eliminates partner disturbance and motion transfer, giving you deep, uninterrupted sleep every night.",
+              icon: <Moon className="w-6 h-6 text-[#7cb93e]" />,
+              glow: "hover:shadow-[0_20px_40px_rgba(124,185,62,0.12)] hover:border-[#7cb93e]/40",
+              iconBg: "bg-[#7cb93e]/10 border-[#7cb93e]/20",
+              watermark: <Moon className="w-32 h-32 text-[#7cb93e]" />
+            },
+            {
+              tag: "DOORSTEP PAYMENT",
+              tagColor: "bg-[#f59e0b]/15 text-[#b45309] border-[#f59e0b]/30",
+              title: "Cash on Delivery",
+              desc: "Free express dispatch across India via BlueDart & Delhivery. Inspect your order and pay via Cash or UPI right when it arrives.",
+              icon: <Truck className="w-6 h-6 text-[#f59e0b]" />,
+              glow: "hover:shadow-[0_20px_40px_rgba(245,158,11,0.12)] hover:border-[#f59e0b]/40",
+              iconBg: "bg-[#f59e0b]/10 border-[#f59e0b]/20",
+              watermark: <Truck className="w-32 h-32 text-[#f59e0b]" />
+            },
+            {
+              tag: "COOL SLEEP GUARANTEE",
+              tagColor: "bg-[#06b6d4]/15 text-[#0e7490] border-[#06b6d4]/30",
+              title: "Airflow Cooling Tech",
+              desc: "Infused with open-cell cooling memory foam and premium knitted bamboo-cotton cover for zero heat trapping all night long.",
+              icon: <Wind className="w-6 h-6 text-[#06b6d4]" />,
+              glow: "hover:shadow-[0_20px_40px_rgba(6,182,212,0.12)] hover:border-[#06b6d4]/40",
+              iconBg: "bg-[#06b6d4]/10 border-[#06b6d4]/20",
+              watermark: <Sparkles className="w-32 h-32 text-[#06b6d4]" />
+            }
+          ].map((item, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1, duration: 0.5 }}
+              className={`bg-white rounded-3xl p-7 border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:-translate-y-2 group relative overflow-hidden flex flex-col justify-between ${item.glow}`}
+            >
+              {/* Background Watermark Icon */}
+              <div className="absolute -bottom-6 -right-6 opacity-[0.03] group-hover:opacity-[0.08] group-hover:scale-110 transition-all duration-700 pointer-events-none">
+                {item.watermark}
+              </div>
 
-          <div className="flex items-start gap-4 relative z-10 group">
-            <Activity className="w-8 h-8 text-[#7cb93e] flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-            <div>
-              <h4 className="font-heading font-bold text-white text-lg mb-1">Doctor Recommended</h4>
-              <p className="text-white/60 text-sm leading-relaxed">Approved by leading orthopaedists for back support.</p>
-            </div>
-          </div>
+              <div>
+                {/* Top Header: Icon & Badge */}
+                <div className="flex items-center justify-between gap-3 mb-6 relative z-10">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-transform duration-500 group-hover:scale-110 ${item.iconBg}`}>
+                    {item.icon}
+                  </div>
+                  <span className={`text-[10px] font-extrabold px-3 py-1.5 rounded-full border tracking-wider uppercase ${item.tagColor}`}>
+                    {item.tag}
+                  </span>
+                </div>
 
-          <div className="flex items-start gap-4 relative z-10 group">
-            <div className="w-8 h-8 rounded-full border-2 border-[#7cb93e] flex items-center justify-center flex-shrink-0 text-[#7cb93e] font-bold group-hover:scale-110 transition-transform duration-300">
-              0%
-            </div>
-            <div>
-              <h4 className="font-heading font-bold text-white text-lg mb-1">No Cost EMI</h4>
-              <p className="text-white/60 text-sm leading-relaxed">Easy payment options with 0% interest on credit cards.</p>
-            </div>
-          </div>
-        </motion.div>
+                {/* Title & Description */}
+                <h3 className="font-heading font-extrabold text-xl text-[#0B1A2A] mb-3 group-hover:text-[#0682E4] transition-colors relative z-10">
+                  {item.title}
+                </h3>
+                <p className="text-slate-600 text-sm leading-relaxed font-medium relative z-10">
+                  {item.desc}
+                </p>
+              </div>
+
+              {/* Bottom Decorative Line */}
+              <div className="w-12 h-1 rounded-full bg-slate-200 group-hover:w-full group-hover:bg-[#0682E4] transition-all duration-500 mt-6 relative z-10"></div>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* Marquee Footer Banner */}

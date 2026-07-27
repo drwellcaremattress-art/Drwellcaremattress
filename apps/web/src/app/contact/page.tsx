@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
+import {
+  MapPin,
+  Phone,
+  Mail,
   Send,
   MessageSquare,
   Clock,
@@ -80,7 +80,7 @@ export default function ContactPage() {
     {
       icon: <Phone className="w-6 h-6 text-emerald-600" />,
       title: "Call / WhatsApp Support",
-      details: ["+91 93429 22044 / +91 98432 40703", "Mon - Sat: 9:00 AM – 8:00 PM IST"],
+      details: ["+91 93429 22044 / +91 81244 65404 ", "Mon - Sat: 9:00 AM – 8:00 PM IST"],
       color: "bg-emerald-50/80 border-emerald-100",
     },
     {
@@ -99,7 +99,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pt-20 font-body">
-      
+
       {/* Hero Banner */}
       <section className="bg-[#0B1A2A] text-white py-16 sm:py-24 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#0682E4]/10 rounded-full blur-3xl pointer-events-none" />
@@ -121,7 +121,7 @@ export default function ContactPage() {
       {/* Main Content */}
       <section className="container mx-auto px-4 py-16 sm:py-20 max-w-6xl -mt-8 relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          
+
           {/* Contact Cards Left Column */}
           <div className="lg:col-span-5 space-y-4">
             <h2 className="font-heading text-2xl font-black text-[#0B1A2A] mb-2 flex items-center gap-2">
@@ -168,9 +168,9 @@ export default function ContactPage() {
             {/* Error Banner */}
             <AnimatePresence>
               {error && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -10 }} 
-                  animate={{ opacity: 1, y: 0 }} 
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 text-red-700 text-xs sm:text-sm font-semibold shadow-sm"
                 >
@@ -183,9 +183,9 @@ export default function ContactPage() {
             {/* Success Modal / Banner */}
             <AnimatePresence>
               {isSubmitted ? (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }} 
-                  animate={{ opacity: 1, scale: 1 }} 
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   className="py-12 px-6 text-center bg-emerald-50/70 border border-emerald-200 rounded-3xl space-y-4"
                 >
                   <div className="w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
@@ -196,8 +196,8 @@ export default function ContactPage() {
                     Thank you for reaching out to Dr. Well Care. We have generated support ticket <span className="font-mono font-bold text-[#0682E4] bg-white px-2 py-0.5 rounded border border-blue-200">{ticketId}</span> for your request.
                   </p>
                   <div className="pt-4">
-                    <Button 
-                      onClick={() => setIsSubmitted(false)} 
+                    <Button
+                      onClick={() => setIsSubmitted(false)}
                       className="bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold px-8 py-3.5 rounded-xl shadow-md transition-colors"
                     >
                       Send Another Message
@@ -246,7 +246,7 @@ export default function ContactPage() {
                         name="phone"
                         value={formState.phone}
                         onChange={handleChange}
-                        placeholder="+91 98765 43210"
+                        placeholder="+91 93429 22044"
                         className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium"
                       />
                     </div>
@@ -264,7 +264,7 @@ export default function ContactPage() {
                         <option value="General Inquiry / Mattress Sizing">General Inquiry / Mattress Sizing</option>
                         <option value="Custom Size Mattress Quotation">Custom Size Mattress Quotation</option>
                         <option value="Order Tracking & Dispatch">Order Tracking & Dispatch</option>
-                        <option value="100-Night Trial & Returns">100-Night Trial & Returns</option>
+                        <option value="Returns & Exchanges">Returns & Exchanges</option>
                         <option value="10-Year Warranty Support">10-Year Warranty Support</option>
                         <option value="Bulk / Hotel Hospitality Orders">Bulk / Hotel Hospitality Orders</option>
                       </select>
@@ -307,7 +307,7 @@ export default function ContactPage() {
 
         </div>
       </section>
-      
+
     </div>
   );
 }

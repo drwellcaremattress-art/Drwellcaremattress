@@ -218,8 +218,8 @@ export function ProductDetails({ product }: { product?: any }) {
                 <p className="text-[#0B1A2A] font-medium">{product?.warranty || 10}-Year Limited Warranty</p>
               </div>
               <div className="p-6">
-                <p className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Trial Period</p>
-                <p className="text-[#0B1A2A] font-medium">100 Nights Risk-Free</p>
+                <p className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Shipping & Delivery</p>
+                <p className="text-[#0B1A2A] font-medium">Free Doorstep Delivery Across India</p>
               </div>
             </div>
             <div className="h-px w-full bg-gray-100"></div>

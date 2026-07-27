@@ -139,7 +139,7 @@ export default function CheckoutPage() {
         itemTitle: orderItems[0]?.name || 'Dr.Well Care Orthopaedic Series',
         size: orderItems[0]?.size || 'King (78" × 72" × 8")',
         qty: orderItems.reduce((sum: number, i: any) => sum + (i.qty || 1), 0),
-        payment: 'UPI / Online Paid (100% Secured)',
+        payment: form.payment === 'cod' ? 'Cash on Delivery (COD) / Pay at Doorstep' : 'UPI / Online Paid (100% Secured)',
         warrantyId: `WAR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
         steps: [
           { label: 'Order Confirmed', time: 'Just now', done: true },
@@ -326,7 +326,7 @@ export default function CheckoutPage() {
                 <div>
                   <span className="text-slate-400 font-medium block">Payment Status</span>
                   <span className="font-bold text-emerald-600">
-                    Paid / Authorized (100% Secured)
+                    {confirmedOrder.paymentMethod === 'cod' ? 'Pay Cash/UPI on Delivery' : 'Paid / Authorized (100% Secured)'}
                   </span>
                 </div>
               </div>
@@ -365,7 +365,7 @@ export default function CheckoutPage() {
 
               {/* Total Calculation */}
               <div className="bg-[#0B1A2A] text-white p-4 rounded-2xl flex justify-between items-center font-bold text-base sm:text-lg">
-                <span>Total Amount Paid:</span>
+                <span>{confirmedOrder.paymentMethod === 'cod' ? 'Total Amount to Pay on Delivery:' : 'Total Amount Paid:'}</span>
                 <span className="font-mono text-[#7cb93e] text-xl">₹{(confirmedOrder.totalPrice || total).toLocaleString('en-IN')}</span>
               </div>
             </div>
@@ -540,6 +540,15 @@ export default function CheckoutPage() {
                 </div>
                 <QrCode className="w-6 h-6 text-[#0682E4] shrink-0" />
               </label>
+
+              <label className={`flex items-center gap-4 p-4 border rounded-2xl cursor-pointer transition-all ${formData.payment === 'cod' ? 'border-[#0682E4] bg-[#0682E4]/5 ring-1 ring-[#0682E4]' : 'border-slate-200 hover:bg-slate-50'}`}>
+                <input type="radio" name="payment" value="cod" checked={formData.payment === 'cod'} onChange={handleInputChange} className="text-[#0682E4] focus:ring-[#0682E4] h-5 w-5" />
+                <div className="flex-grow">
+                  <span className="font-extrabold text-[#0B1A2A] text-sm block">Cash on Delivery (COD) / Pay at Doorstep</span>
+                  <span className="text-xs text-slate-500">Pay cash or UPI directly to our delivery agent when your mattress arrives</span>
+                </div>
+                <Truck className="w-6 h-6 text-[#7cb93e] shrink-0" />
+              </label>
             </div>
           </div>
 
@@ -595,7 +604,7 @@ export default function CheckoutPage() {
             
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-400">
               <ShieldCheck className="h-4 w-4 text-emerald-500" />
-              100-Night Risk-Free Trial Guarantee Included
+              10-Year Manufacturer Warranty Guarantee Included
             </div>
           </div>
         </div>

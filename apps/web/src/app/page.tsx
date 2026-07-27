@@ -587,7 +587,7 @@ export default function Home() {
                       </div>
                       {/* Product info */}
                       <div className="flex-grow min-w-0">
-                        <h4 className="font-bold text-white text-[15px] group-hover:text-[#0682E4] transition-colors leading-tight">{prod.name}</h4>
+                        <h4 className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0682E4] to-[#7cb93e] text-[15px] group-hover:from-white group-hover:to-[#7cb93e] transition-all leading-tight">{prod.name}</h4>
                         <p className="text-[11px] text-white/50 leading-tight mt-0.5 whitespace-pre-line">{prod.desc}</p>
                       </div>
                       {/* Tag badge - dark bg with colored border & text */}

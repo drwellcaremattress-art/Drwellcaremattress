@@ -117,7 +117,7 @@ export default async function ProductPage({ params }: PageProps) {
                 
                 {/* Content */}
                 <div className="flex-grow flex flex-col">
-                  <h3 className="font-heading font-bold text-lg text-[#0B1A2A] mb-1">{relatedProduct.title}</h3>
+                  <h3 className="font-heading font-extrabold text-lg text-transparent bg-clip-text bg-gradient-to-r from-[#0682E4] to-[#7cb93e] mb-1">{relatedProduct.title}</h3>
                   <p className="text-blue-500 text-xs font-medium mb-3">
                     {relatedProduct.subtitle}
                   </p>

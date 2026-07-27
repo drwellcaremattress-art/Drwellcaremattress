@@ -15,7 +15,7 @@ const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 
 export const metadata: Metadata = {
   title: "Dr Well Care - Orthopaedic & Wellness Mattresses",
-  description: "Say No To Back Pain with Dr Well Care's orthopaedic and memory foam mattresses. 100-Night Trial.",
+  description: "Say No To Back Pain with Dr Well Care's orthopaedic and memory foam mattresses. 10-Year Warranty.",
 };
 
 export default function RootLayout({

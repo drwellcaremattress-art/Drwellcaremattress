@@ -647,7 +647,7 @@ export default function AccountPage() {
                       </div>
                       <h3 className="font-heading font-black text-xl text-[#0B1A2A] dark:text-white">No Orders Found</h3>
                       <p className="text-slate-500 text-sm max-w-md mx-auto leading-relaxed">
-                        You haven't placed any mattress orders yet. Explore our orthopaedic collection and experience our 100-night risk-free trial.
+                        You haven't placed any mattress orders yet. Explore our orthopaedic collection backed by our 10-year warranty.
                       </p>
                       <div className="pt-4">
                         <Link href="/">

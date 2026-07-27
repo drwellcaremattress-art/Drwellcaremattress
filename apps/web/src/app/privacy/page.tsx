@@ -16,7 +16,7 @@ export default function PrivacyPage() {
     },
     {
       title: "3. How We Use Your Data",
-      content: "Your data is strictly utilized to: (a) Dispatch and deliver your mattress orders via trusted logistics partners like BlueDart, Delhivery, or Xpressbees; (b) Register and verify your 10-Year Orthopaedic Warranty and 100-Night Trial eligibility; (c) Send critical order tracking SMS/WhatsApp updates and invoice receipts."
+      content: "Your data is strictly utilized to: (a) Dispatch and deliver your mattress orders via trusted logistics partners like BlueDart, Delhivery, or Xpressbees; (b) Register and verify your 10-Year Orthopaedic Warranty eligibility; (c) Send critical order tracking SMS/WhatsApp updates and invoice receipts."
     },
     {
       title: "4. Zero Data Selling Guarantee",

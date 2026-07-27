@@ -128,7 +128,7 @@ export default function WarrantyPage() {
       title: "What IS NOT Covered (Exclusions)",
       items: [
         "Normal softening of memory foam over time that does not affect orthopaedic support.",
-        "Comfort preference or firmness adjustments after the 100-night trial period.",
+        "Personal comfort preferences or changes in firmness preference over time.",
         "Physical damage from spills, stains, burns, cuts, or improper support frame.",
         "Mattresses sold by unauthorized resellers or second-hand purchases."
       ],

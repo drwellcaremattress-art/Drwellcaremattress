@@ -2,14 +2,19 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IOrder extends Document {
   orderNumber: string;
-  userId: mongoose.Types.ObjectId;
+  userId?: mongoose.Types.ObjectId;
+  userEmail?: string;
+  customerName?: string;
+  customerPhone?: string;
   items: {
-    productId: mongoose.Types.ObjectId;
-    variantSku: string;
+    productId?: string;
+    name?: string;
+    variantSku?: string;
     qty: number;
     price: number;
+    image?: string;
   }[];
-  shippingAddress: any; // Would be typed properly in a real app
+  shippingAddress: any;
   billingAddress: any;
   subtotal: number;
   discount: number;
@@ -18,6 +23,7 @@ export interface IOrder extends Document {
   total: number;
   paymentStatus: string;
   paymentGateway: string;
+  paymentMethod: string;
   paymentRef: string;
   orderStatus: string;
   trackingId: string;
@@ -28,13 +34,18 @@ export interface IOrder extends Document {
 const OrderSchema: Schema = new Schema(
   {
     orderNumber: { type: String, required: true, unique: true },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    userEmail: { type: String, required: false },
+    customerName: { type: String },
+    customerPhone: { type: String },
     items: [
       {
-        productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-        variantSku: { type: String, required: true },
+        productId: { type: String, required: false },
+        name: { type: String },
+        variantSku: { type: String },
         qty: { type: Number, required: true },
         price: { type: Number, required: true },
+        image: { type: String }
       },
     ],
     shippingAddress: { type: Schema.Types.Mixed },
@@ -46,10 +57,10 @@ const OrderSchema: Schema = new Schema(
     total: { type: Number, required: true },
     paymentStatus: {
       type: String,
-      enum: ['pending', 'paid', 'failed', 'refunded'],
       default: 'pending',
     },
-    paymentGateway: { type: String, enum: ['razorpay', 'stripe'] },
+    paymentGateway: { type: String, default: 'razorpay' },
+    paymentMethod: { type: String, default: 'razorpay' },
     paymentRef: { type: String },
     orderStatus: {
       type: String,
@@ -65,4 +76,8 @@ const OrderSchema: Schema = new Schema(
   }
 );
 
-export const Order = mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+if (mongoose.models.Order) {
+  delete mongoose.models.Order;
+}
+
+export const Order = mongoose.model<IOrder>('Order', OrderSchema);

@@ -26,7 +26,7 @@ export default function ReturnsPage() {
     orderId: "",
     email: "",
     phone: "",
-    actionType: "Return & Full Refund (100-Night Guarantee)",
+    actionType: "Return & Full Refund (10-Year Warranty Guarantee)",
     reason: "Firmness Preference (Too Firm / Too Soft)",
     notes: ""
   });
@@ -70,7 +70,7 @@ export default function ReturnsPage() {
     },
     {
       step: "02",
-      title: "Day 31 – 100: Hassle-Free Request",
+      title: "Hassle-Free Request",
       desc: "If you are still not 100% satisfied after the adjustment period, simply fill out the return or exchange form below. No need to keep or re-pack in the original cardboard box!",
       icon: <RefreshCw className="w-6 h-6 text-purple-600" />,
       color: "border-purple-200 bg-purple-50/60"
@@ -94,13 +94,13 @@ export default function ReturnsPage() {
 
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-[#7cb93e] font-bold text-xs uppercase tracking-wider mb-4 border border-white/10">
-            <HeartHandshake className="w-4 h-4" /> Zero Risk Sleep Trial
+            <HeartHandshake className="w-4 h-4" /> 10-Year Orthopaedic Protection
           </div>
           <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-black mb-6 tracking-tight">
-            100-Night Trial & <span className="text-[#7cb93e]">Returns Portal</span>
+            Warranty & <span className="text-[#7cb93e]">Returns Portal</span>
           </h1>
           <p className="text-base sm:text-lg text-white/80 font-medium max-w-2xl mx-auto leading-relaxed">
-            We believe you must sleep on a mattress in your own bedroom—not just test it for 5 minutes in a showroom—to know if it&apos;s right for you. Try Dr. Well Care risk-free for 100 nights.
+            We believe in building mattresses that provide long-lasting orthopaedic support. Every Dr. Well Care mattress is backed by our comprehensive 10-year warranty and dedicated customer care.
           </p>
         </div>
       </section>
@@ -202,7 +202,7 @@ export default function ReturnsPage() {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Requested Action *</label>
                   <select name="actionType" value={form.actionType} onChange={handleChange} className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium text-slate-700">
-                    <option value="Return & Full Refund (100-Night Guarantee)">Return &amp; Full Refund (100-Night Guarantee)</option>
+                    <option value="Return & Full Refund (10-Year Warranty Guarantee)">Return &amp; Full Refund (10-Year Warranty Guarantee)</option>
                     <option value="Model Exchange (Upgrade to Orthopaedic / Dual Comfort)">Model Exchange (Upgrade to Orthopaedic / Dual Comfort)</option>
                     <option value="Size Exchange (Wrong Cot Dimensions Ordered)">Size Exchange (Wrong Cot Dimensions Ordered)</option>
                   </select>
@@ -224,7 +224,7 @@ export default function ReturnsPage() {
               </div>
 
               <Button type="submit" disabled={isSubmitting} className="w-full bg-[#0682E4] hover:bg-[#056ec1] text-white font-black py-4 rounded-xl text-base shadow-lg transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Verifying Trial Window...</> : <><RefreshCw className="w-5 h-5" /> Submit 100-Night Return / Exchange Authorization</>}
+                {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Verifying Order Details...</> : <><RefreshCw className="w-5 h-5" /> Submit Return / Exchange Authorization</>}
               </Button>
             </form>
           )}

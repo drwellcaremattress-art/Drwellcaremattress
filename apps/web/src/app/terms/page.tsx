@@ -8,7 +8,7 @@ export default function TermsPage() {
   const terms = [
     {
       title: "1. Acceptance of Terms",
-      content: "By accessing, browsing, or purchasing from the Dr. Well Care Mattress website, you acknowledge that you have read, understood, and agreed to be bound by these Terms of Service, along with our Privacy Policy, 100-Night Trial guidelines, and 10-Year Warranty terms."
+      content: "By accessing, browsing, or purchasing from the Dr. Well Care Mattress website, you acknowledge that you have read, understood, and agreed to be bound by these Terms of Service, along with our Privacy Policy and 10-Year Warranty terms."
     },
     {
       title: "2. Product Descriptions & Sizing Tolerances",
@@ -23,8 +23,8 @@ export default function TermsPage() {
       content: "We provide free standard delivery across eligible Indian zip codes via logistics partners (BlueDart, Delhivery, Xpressbees). Delivery timelines typically range from 3 to 7 business days. While we strive for punctual dispatch, Dr. Well Care is not liable for minor delays caused by unforeseen logistical, weather, or regional transit disruptions."
     },
     {
-      title: "5. 100-Night Risk-Free Trial & Warranty Conditions",
-      content: "The 100-Night Trial applies exclusively to first-time mattress purchases by standard residential customers. A minimum 30-night body adjustment period is required before initiating a return. The 10-Year Warranty covers structural foam sagging (>1 inch) and zipper defects as defined in our official Warranty Certificate."
+      title: "5. 10-Year Orthopaedic Warranty Conditions",
+      content: "Our comprehensive 10-Year Warranty applies exclusively to mattress purchases by standard residential customers. The 10-Year Warranty covers structural foam sagging (>1 inch) and zipper defects as defined in our official Warranty Certificate."
     },
     {
       title: "6. Limitation of Liability & Governing Law",

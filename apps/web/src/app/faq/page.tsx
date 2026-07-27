@@ -17,18 +17,18 @@ export default function FAQPage() {
     document.body.removeChild(link);
   };
 
-  const trialFAQs = [
-    {
-      question: "How does the 100-Night Risk-Free Trial work?",
-      answer: "We believe you need to sleep on a mattress in your own home to know if it's right for you. Your 100-night trial begins the day your mattress is delivered. We ask that you sleep on it for at least 30 nights to let your body adjust. If you still don't love it, we'll pick it up for free and give you a full refund."
-    },
+  const warrantyFAQs = [
     {
       question: "What is covered under the 10-Year Warranty?",
       answer: "Our 10-year warranty covers manufacturing defects, such as foam indentations deeper than 1 inch that aren't associated with an improper foundation, and physical flaws in the cover zipper. It does not cover normal wear and tear, firmness preferences, or damage caused by improper support."
     },
     {
+      question: "How do I claim warranty support?",
+      answer: "You can easily submit a warranty claim or service request through our online Returns & Warranty portal or contact our customer support team directly with your order ID and photos of the issue."
+    },
+    {
       question: "Do I need to keep the original box?",
-      answer: "No, you do not need to keep the box. If you decide to return the mattress during your 100-night trial, our team will come pick it up as is."
+      answer: "No, you do not need to keep the box. If our service team needs to inspect or service your mattress, our logistics team will coordinate doorstep pickup as is."
     }
   ];
 
@@ -153,18 +153,18 @@ export default function FAQPage() {
       {/* FAQ Content */}
       <section className="container mx-auto px-4 py-20 max-w-5xl">
         
-        {/* Category 1: Trial & Warranty */}
+        {/* Category 1: Warranty & Protection */}
         <div className="mb-20">
           <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
               <Shield className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h2 className="font-heading text-2xl font-bold text-[#0B1A2A]">Trial & Warranty</h2>
-              <p className="text-sm text-[#5B6B7B] font-medium">Details about your 100-night trial and 10-year protection.</p>
+              <h2 className="font-heading text-2xl font-bold text-[#0B1A2A]">Warranty & Protection</h2>
+              <p className="text-sm text-[#5B6B7B] font-medium">Details about your 10-year protection and service guarantee.</p>
             </div>
           </div>
-          <FAQAccordion items={trialFAQs} />
+          <FAQAccordion items={warrantyFAQs} />
         </div>
 
         {/* Category 2: Product Information */}

@@ -427,7 +427,7 @@ function ProductListingContent() {
                   {/* Content */}
                   <div className="flex-grow flex flex-col px-2 pb-2">
                     <div className="flex justify-between items-start mb-2 gap-4">
-                      <h3 className="font-heading font-extrabold text-xl text-[#0B1A2A] leading-tight">{product.title}</h3>
+                      <h3 className="font-heading font-extrabold text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#0682E4] to-[#7cb93e] leading-tight group-hover:scale-[1.02] transition-transform origin-left">{product.title}</h3>
                       <div className="text-right shrink-0">
                         <span className="text-[10px] uppercase font-bold tracking-widest text-[#64748b] block mb-0.5">From</span>
                         <div className="flex items-baseline justify-end gap-1.5">

@@ -164,7 +164,7 @@ export default function LoginPage() {
               Transform Your Sleep Experience
             </h1>
             <p className="text-lg text-white/80 font-medium max-w-md">
-              Join thousands of rested customers. Unlock exclusive offers, track your 100-night trial, and manage your orders in one place.
+              Join thousands of rested customers. Unlock exclusive offers, track your 10-year warranty, and manage your orders in one place.
             </p>
           </div>
         </div>
@@ -176,8 +176,8 @@ export default function LoginPage() {
               <CheckCircle2 className="w-5 h-5 text-[#7cb93e]" />
             </div>
             <div>
-              <h4 className="font-bold text-base">100-Night Risk Free Trial</h4>
-              <p className="text-sm text-white/60">Sleep on it, test it, love it.</p>
+              <h4 className="font-bold text-base">Doctor Approved Orthopaedic</h4>
+              <p className="text-sm text-white/60">Engineered for spinal alignment.</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -395,7 +395,7 @@ export default function LoginPage() {
                   <p className="text-[#5B6B7B] text-sm sm:text-base">
                     {isLogin 
                       ? 'Enter your credentials to access your account.' 
-                      : 'Sign up to manage your orders and track your trial.'}
+                      : 'Sign up to manage your orders and track your warranty.'}
                   </p>
                 </div>
 

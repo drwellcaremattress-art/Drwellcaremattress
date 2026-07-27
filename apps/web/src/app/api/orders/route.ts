@@ -41,7 +41,10 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const {
+      orderNumber,
       orderItems,
+      customerName,
+      customerPhone,
       shippingAddress,
       billingAddress,
       paymentMethod,
@@ -56,12 +59,16 @@ export async function POST(req: NextRequest) {
     }
 
     const order = new Order({
-      orderNumber: `ORD-${Date.now()}`,
+      orderNumber: orderNumber || `ORD-${Date.now()}`,
       userEmail: token.email,
+      customerName,
+      customerPhone,
       items: orderItems,
       shippingAddress,
       billingAddress,
-      paymentGateway: paymentMethod,
+      paymentGateway: paymentMethod || 'razorpay',
+      paymentMethod: paymentMethod || 'razorpay',
+      paymentStatus: paymentMethod === 'cod' ? 'cod' : 'paid',
       subtotal: itemsPrice,
       tax: taxPrice,
       shipping: shippingPrice,

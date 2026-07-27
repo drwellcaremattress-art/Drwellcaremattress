@@ -186,7 +186,7 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
                 </div>
               </div>
 
-              <h1 className="font-heading text-3xl sm:text-4xl font-bold text-[#0B1A2A] leading-tight mb-2">
+              <h1 className="font-heading text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0682E4] to-[#7cb93e] leading-tight mb-2">
                 {product.title}
               </h1>
               <p className="text-[#5B6B7B] text-sm sm:text-base font-medium">

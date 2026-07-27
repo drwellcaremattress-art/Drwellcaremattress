@@ -141,7 +141,7 @@ export default function ProductPage() {
               </div>
               <div className="flex flex-col items-center text-center gap-2">
                 <Activity className="h-6 w-6 text-brand-green" />
-                <span className="text-xs font-semibold text-ink">100-Night Trial</span>
+                <span className="text-xs font-semibold text-ink">Ortho Support</span>
               </div>
             </div>
 

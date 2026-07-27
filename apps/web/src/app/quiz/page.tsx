@@ -121,7 +121,7 @@ export default function QuizPage() {
             desc: "Our most versatile mattress featuring one medium-firm side for everyday comfort and one firm orthopaedic side for spinal realignment. Perfect for couples and combination sleepers.",
             price: "₹10,542",
             image: "/images/wellcare.png",
-            features: ["Dual Sided Reversible Comfort", "Orthopaedic Doctor Approved", "100-Night Risk-Free Trial", "10-Year Warranty"],
+            features: ["Dual Sided Reversible Comfort", "Orthopaedic Doctor Approved", "Free Doorstep Delivery", "10-Year Warranty"],
             link: "/product/dr-well-care-orthopaedic-mattress"
           });
         }
@@ -212,7 +212,7 @@ export default function QuizPage() {
             </div>
 
             <div className="bg-slate-50 border-t border-slate-200/80 p-6 text-center flex flex-wrap items-center justify-center gap-6 text-xs font-bold text-slate-600">
-              <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-emerald-600" /> 100-Night Risk-Free Trial Included</span>
+              <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-emerald-600" /> Free Doorstep Delivery Across India</span>
               <span className="flex items-center gap-1.5"><Award className="w-4 h-4 text-[#0682E4]" /> 10-Year Manufacturer Warranty</span>
               <button onClick={() => { setResult(null); setStep(1); }} className="text-[#0682E4] hover:underline flex items-center gap-1 font-extrabold">
                 <RefreshCw className="w-3.5 h-3.5" /> Retake Quiz
