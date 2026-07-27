@@ -15,28 +15,49 @@ import {
   Filter
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { PRODUCT_CATALOG } from '@/lib/catalog';
 
 function ProductListingContent() {
   const searchParams = useSearchParams();
   const typeParam = searchParams ? searchParams.get('type') : null;
 
-  const defaultProducts = [
-    { id: 1, title: 'Ecolatex', slug: 'ecolatex-6', type: 'Latex', firmness: 'Medium Firm', subtitle: '100% Organic Latex Core', description: 'Advanced spine support, pressure relief, and eco-friendly natural materials.', badge: 'NEW', badgeColor: 'bg-[#7cb93e] text-white', thickness: '6 Inch', price: '₹12,999', priceValue: 12999, image: "/images/products/ecolatex 6'.png" },
-    { id: 2, title: 'Luxoria Latex', slug: 'luxoria-latex', type: 'Latex', firmness: 'Medium Soft', subtitle: 'Luxury HR & Natural Latex Hybrid', description: 'Experience luxury with 100% natural latex and pocket springs for ultimate comfort.', badge: 'LUXURY', badgeColor: 'bg-[#0B1A2A] text-white', thickness: '8 Inch', price: '₹17,999', priceValue: 17999, image: "/images/products/luxoria.png" },
-    { id: 3, title: 'Natural Latex', slug: 'natural-latex', type: 'Latex', firmness: 'Medium Firm', subtitle: '100% Pure Organic Latex', description: 'Pure natural latex core providing zero chemical emissions and responsive support.', badge: 'BEST SELLER', badgeColor: 'bg-[#3b82f6] text-white', thickness: '8 Inch', price: '₹16,999', priceValue: 16999, image: "/images/products/ecolatex 8'.png" },
-    { id: 4, title: 'Lax-o-Bond 6"', slug: 'lax-o-bond-6', type: 'Bonded Series', firmness: 'Firm', subtitle: 'High-Density Bonded Foam - 6 Inch', description: 'Specially designed for individuals weighing above 80 kg with strong & durable support.', badge: 'POPULAR', badgeColor: 'bg-[#8b5cf6] text-white', thickness: '6 Inch', price: '₹11,999', priceValue: 11999, image: "/images/products/lax-o-bond.png" },
-    { id: 5, title: 'Lax-o-Bond 8"', slug: 'lax-o-bond-8', type: 'Bonded Series', firmness: 'Firm', subtitle: 'High-Density Bonded Foam - 8 Inch', description: 'Extra deep orthopaedic back support and excellent weight distribution for heavy weight sleepers.', badge: 'HEAVY DUTY', badgeColor: 'bg-[#059669] text-white', thickness: '8 Inch', price: '₹14,999', priceValue: 14999, image: "/images/products/lax-o-bond.png" },
-    { id: 6, title: 'Memory Dump', slug: 'memory-dump-6', type: 'Memory Foam', firmness: 'Soft', subtitle: 'Cooling Gel Memory Foam', description: 'Cloud-like comfort that contours to your body shape and relieves pressure points.', badge: 'NEW', badgeColor: 'bg-[#7cb93e] text-white', thickness: '6 Inch', price: '₹13,999', priceValue: 13999, image: "/images/products/Memory Dump 6'.png" },
-    { id: 7, title: 'Memory Bond', slug: 'memory-bond', type: 'Bonded Series', firmness: 'Medium', subtitle: 'Bonded Core & Plush Memory Top', description: 'Specially designed for heavy weight sleepers above 80 kg with cloud-like memory contour.', badge: 'PREMIUM', badgeColor: 'bg-[#10b981] text-white', thickness: '6 Inch', price: '₹15,999', priceValue: 15999, image: "/images/products/memory bond.png" },
-    { id: 8, title: 'Memory Bond Plus', slug: 'memory-bond-plus', type: 'Bonded Series', firmness: 'Medium', subtitle: 'Enhanced Memory Contour & Bonded Core', description: 'Long-lasting comfort combined with high-density bonded support for deep sleep.', badge: 'EXCLUSIVE', badgeColor: 'bg-[#ef4444] text-white', thickness: '8 Inch', price: '₹17,999', priceValue: 17999, image: "/images/products/Memory Dump 8'.png" },
-    { id: 9, title: 'Softy Bond', slug: 'softy-bond', type: 'Bonded Series', firmness: 'Medium Soft', subtitle: 'Orthopaedic Bonded Mattress', description: 'Engineered with High-Density Bonded Foam for strong spine alignment and soft top feel.', badge: 'NEW', badgeColor: 'bg-[#3b82f6] text-white', thickness: '6 Inch', price: '₹12,499', priceValue: 12499, image: "/images/products/softy bond 6'.png" },
-    { id: 10, title: 'Softy Bond Plus', slug: 'softy-bond-plus', type: 'Bonded Series', firmness: 'Medium', subtitle: 'Premium Bonded Ortho Support', description: 'Superior weight distribution and orthopaedic support for long-lasting durability.', badge: 'EXCLUSIVE', badgeColor: 'bg-[#ef4444] text-white', thickness: '8 Inch', price: '₹15,499', priceValue: 15499, image: "/images/products/softybond plus 8'.png" },
-    { id: 11, title: 'Luxoria', slug: 'luxoria', type: 'Pocket Spring', firmness: 'Medium Soft', subtitle: 'Luxury HR Pocket Spring', description: 'Crafted with premium pocket springs and HR foam to deliver exceptional hotel comfort.', badge: 'LUXURY', badgeColor: 'bg-[#0B1A2A] text-white', thickness: '8 Inch', price: '₹18,999', priceValue: 18999, image: "/images/products/luxoria.png" },
-    { id: 12, title: 'Mona Lite', slug: 'mona-lite', type: 'Budget Mattress', firmness: 'Medium Firm', subtitle: 'Comfort Budget Mattress', description: 'Quality sleep at an unbeatable price point with durable orthopaedic foam support.', badge: 'VALUE', badgeColor: 'bg-[#f59e0b] text-white', thickness: '5 Inch', price: '₹7,999', priceValue: 7999, image: "/images/products/mono softy.png" },
-    { id: 13, title: 'Mona Softy', slug: 'mona-softy', type: 'Budget Mattress', firmness: 'Medium Soft', subtitle: 'Plush Comfort Budget Mattress', description: 'Soft, breathable comfort layer designed for daily rest and relaxation at a budget price.', badge: 'POPULAR', badgeColor: 'bg-[#8b5cf6] text-white', thickness: '6 Inch', price: '₹8,999', priceValue: 8999, image: "/images/products/mono softy.png" }
-  ];
+  const defaultProducts = PRODUCT_CATALOG;
 
   const [products, setProducts] = useState<any[]>(defaultProducts);
+  const [wishlist, setWishlist] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('drwell_user_wishlist');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setWishlist(parsed.map((item: any) => typeof item === 'string' ? item : item.slug));
+      }
+    } catch (e) {}
+  }, []);
+
+  const toggleWishlist = (product: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const savedStr = localStorage.getItem('drwell_user_wishlist');
+      let current: any[] = savedStr ? JSON.parse(savedStr) : [];
+      const exists = current.some((item: any) => (typeof item === 'string' ? item : item.slug) === product.slug);
+      if (exists) {
+        current = current.filter((item: any) => (typeof item === 'string' ? item : item.slug) !== product.slug);
+      } else {
+        current.push({
+          title: product.title,
+          slug: product.slug,
+          price: product.price || '₹14,999',
+          mrp: product.originalPrice ? `₹${Number(product.originalPrice).toLocaleString('en-IN')}` : '₹21,000',
+          badge: product.badge || 'ORTHOPEDIC',
+        });
+      }
+      localStorage.setItem('drwell_user_wishlist', JSON.stringify(current));
+      setWishlist(current.map(item => typeof item === 'string' ? item : item.slug));
+    } catch (err) {}
+  };
 
   useEffect(() => {
     axios.get('/api/products').then((res) => {
@@ -54,8 +75,8 @@ function ProductListingContent() {
         
         const mapped = res.data.map((p: any, idx: number) => {
           const firstVariant = p.variants && p.variants[0] ? p.variants[0] : null;
-          const priceVal = firstVariant ? firstVariant.price : 12999;
-          const thicknessVal = firstVariant && firstVariant.thickness_cm ? `${Math.round(firstVariant.thickness_cm / 2.54)} Inch` : '6 Inch';
+          const priceVal = p.sqftPrice ? p.sqftPrice * 18 : (firstVariant ? firstVariant.price : 12999);
+          const thicknessVal = p.thickness || (firstVariant && firstVariant.thickness_cm ? `${Math.round(firstVariant.thickness_cm / 2.54)} Inch` : '6 Inch');
           
           return {
             id: p._id || idx + 1,
@@ -70,7 +91,10 @@ function ProductListingContent() {
             thickness: thicknessVal,
             price: `₹${priceVal.toLocaleString('en-IN')}`,
             priceValue: priceVal,
-            image: p.images && p.images[0] ? p.images[0].url : "/images/products/ecolatex 6'.png"
+            originalPrice: p.originalPrice || (firstVariant ? firstVariant.mrp : Math.round(priceVal * 1.3)),
+            sqftPrice: p.sqftPrice || 546,
+            warranty: p.warranty_years || p.warranty || 10,
+            image: p.images && p.images[0] ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : "/images/products/ecolatex-6.jpeg"
           };
         });
         setProducts(mapped);
@@ -101,7 +125,7 @@ function ProductListingContent() {
   const [sortBy, setSortBy] = useState('Best Selling');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const typesList = ['Latex', 'Memory Foam', 'Pocket Spring', 'Bonded Series', 'Luxury HR Series', 'Budget Mattress', 'Orthopaedic', 'Hybrid'];
+  const typesList = ['Latex', 'Memory Foam', 'Pocket Spring', 'Luxury HR Series', 'Bonded Series', 'Budget Mattress', 'Orthopaedic', 'Hybrid'];
   const firmnessList = ['Soft', 'Medium Soft', 'Medium', 'Medium Firm', 'Firm'];
   const sizesList = ['Single (72 x 36 in)', 'Queen (60 x 72 in)', 'King (72 x 72 in)', 'Custom Size'];
 
@@ -330,8 +354,13 @@ function ProductListingContent() {
                     <div className={`absolute top-4 left-4 px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg shadow-md ${product.badgeColor}`}>
                       {product.badge}
                     </div>
-                    <button className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg hover:text-red-500 hover:bg-white transition-all transform active:scale-90">
-                      <Heart className="w-4 h-4 text-[#64748b]" strokeWidth={2.5} />
+                    <button 
+                      onClick={(e) => toggleWishlist(product, e)}
+                      className={`absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all transform active:scale-90 ${
+                        wishlist.includes(product.slug) ? 'text-red-500' : 'text-[#64748b] hover:text-red-500'
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 ${wishlist.includes(product.slug) ? 'fill-red-500 text-red-500' : ''}`} strokeWidth={2.5} />
                     </button>
                   </div>
                   
@@ -341,7 +370,14 @@ function ProductListingContent() {
                       <h3 className="font-heading font-extrabold text-xl text-[#0B1A2A] leading-tight">{product.title}</h3>
                       <div className="text-right shrink-0">
                         <span className="text-[10px] uppercase font-bold tracking-widest text-[#64748b] block mb-0.5">From</span>
-                        <span className="text-xl font-black text-[#0B1A2A]">{product.price}</span>
+                        <div className="flex items-baseline justify-end gap-1.5">
+                          {product.originalPrice && (
+                            <span className="text-xs font-semibold text-gray-400 line-through">
+                              ₹{product.originalPrice.toLocaleString('en-IN')}
+                            </span>
+                          )}
+                          <span className="text-xl font-black text-[#0B1A2A]">{product.price}</span>
+                        </div>
                       </div>
                     </div>
                     <p className="text-[#7cb93e] text-xs font-bold uppercase tracking-wider mb-3">{product.subtitle}</p>
@@ -355,7 +391,7 @@ function ProductListingContent() {
                       <div className="w-px h-4 bg-gray-300 hidden sm:block"></div>
                       <div className="flex items-center gap-2 text-[#0B1A2A]">
                         <ShieldCheck className="w-4 h-4 text-[#0B1A2A]" />
-                        10-Year Warranty
+                        {product.warranty || 10}-Year Warranty
                       </div>
                     </div>
                     

@@ -6,7 +6,7 @@ import { ShieldCheck, Activity, Moon, CircleDot, User, Wind, Leaf, Award } from 
 import { motion, type Variants } from 'framer-motion';
 import { ReviewSection } from './ReviewSection';
 
-export function ProductDetails() {
+export function ProductDetails({ product }: { product?: any }) {
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -204,7 +204,7 @@ export function ProductDetails() {
             <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
               <div className="p-6">
                 <p className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Firmness</p>
-                <p className="text-[#0B1A2A] font-medium">Medium Firm (7/10)</p>
+                <p className="text-[#0B1A2A] font-medium">{product?.firmness || 'Medium Firm (7/10)'}</p>
               </div>
               <div className="p-6">
                 <p className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Cover Material</p>
@@ -215,7 +215,7 @@ export function ProductDetails() {
             <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
               <div className="p-6">
                 <p className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Warranty</p>
-                <p className="text-[#0B1A2A] font-medium">10-Year Limited Warranty</p>
+                <p className="text-[#0B1A2A] font-medium">{product?.warranty || 10}-Year Limited Warranty</p>
               </div>
               <div className="p-6">
                 <p className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-1">Trial Period</p>
@@ -231,7 +231,11 @@ export function ProductDetails() {
         </div>
 
         {/* Customer Testimonials & Reviews System */}
-        <ReviewSection productName="Dr.Well Care Orthopaedic Mattress" />
+        <ReviewSection 
+          productName={product?.title || "Dr.Well Care Orthopaedic Mattress"} 
+          productSlug={product?.slug} 
+          productCategory={product?.category} 
+        />
       </section>
     </div>
   );

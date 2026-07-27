@@ -89,7 +89,7 @@ export default function FAQPage() {
 
             <div className="space-y-3">
               <button
-                onClick={() => downloadPdf('/catalogue-1.pdf', 'catalogue-1.pdf')}
+                onClick={() => downloadPdf('/catalogue-1.pdf', 'DR.WELL CARE CATALOGUE (1).pdf')}
                 className="w-full p-4 rounded-2xl bg-slate-50 hover:bg-[#0682E4]/10 border border-slate-200 hover:border-[#0682E4] transition-all flex items-center justify-between group text-left"
               >
                 <div>
@@ -102,7 +102,7 @@ export default function FAQPage() {
               </button>
 
               <button
-                onClick={() => downloadPdf('/catalogue-2.pdf', 'catalogue-2.pdf')}
+                onClick={() => downloadPdf('/catalogue-2.pdf', 'DR.WELL CARE CATALOGUE (2).pdf')}
                 className="w-full p-4 rounded-2xl bg-slate-50 hover:bg-[#7cb93e]/10 border border-slate-200 hover:border-[#7cb93e] transition-all flex items-center justify-between group text-left"
               >
                 <div>
@@ -117,8 +117,8 @@ export default function FAQPage() {
 
             <button
               onClick={() => {
-                downloadPdf('/catalogue-1.pdf', 'catalogue.pdf');
-                downloadPdf('/catalogue-2.pdf', 'catalogue-2.pdf');
+                downloadPdf('/catalogue-1.pdf', 'DR.WELL CARE CATALOGUE (1).pdf');
+                downloadPdf('/catalogue-2.pdf', 'DR.WELL CARE CATALOGUE (2).pdf');
               }}
               className="w-full mt-4 py-3 rounded-2xl bg-[#0B1A2A] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#16273B]"
             >

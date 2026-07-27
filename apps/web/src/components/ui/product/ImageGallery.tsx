@@ -5,9 +5,11 @@ import Image from 'next/image';
 
 interface ImageGalleryProps {
   images: string[];
+  title?: string;
+  badge?: string;
 }
 
-export function ImageGallery({ images }: ImageGalleryProps) {
+export function ImageGallery({ images, title, badge }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (

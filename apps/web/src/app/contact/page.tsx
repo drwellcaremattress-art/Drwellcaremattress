@@ -2,305 +2,312 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   MapPin, 
   Phone, 
   Mail, 
   Send,
   MessageSquare,
-  Clock
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  ShieldCheck,
+  Loader2,
+  Sparkles
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function ContactPage() {
   const [formState, setFormState] = useState({
     name: "",
     email: "",
-    subject: "",
+    phone: "",
+    subject: "General Inquiry / Mattress Sizing",
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [ticketId, setTicketId] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
+    if (error) setError("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
+    // Strict Validation
+    if (!formState.name.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+    if (!formState.email.trim() || !formState.email.includes("@") || !formState.email.includes(".")) {
+      setError("Please enter a valid email address so our team can respond to you.");
+      return;
+    }
+    if (!formState.phone.trim() || formState.phone.replace(/[^0-9]/g, "").length < 10) {
+      setError("Please enter a valid 10-digit phone or WhatsApp number.");
+      return;
+    }
+    if (!formState.message.trim() || formState.message.trim().length < 10) {
+      setError("Please describe your inquiry with at least 10 characters.");
+      return;
+    }
+
     setIsSubmitting(true);
-    // Mock API call
+
+    // Simulate reliable network dispatch
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
-      setFormState({ name: "", email: "", subject: "", message: "" });
-      
-      // Reset success message after 5 seconds
-      setTimeout(() => setIsSubmitted(false), 5000);
-    }, 1500);
+      const generatedId = `DW-SUP-${Math.floor(1000 + Math.random() * 9000)}`;
+      setTicketId(generatedId);
+      setFormState({ name: "", email: "", phone: "", subject: "General Inquiry / Mattress Sizing", message: "" });
+    }, 1200);
   };
 
   const contactInfo = [
     {
-      icon: <MapPin className="w-6 h-6 text-blue-500" />,
-      title: "Our Headquarters",
-      details: ["No.551, Sivapragasam Nagar,", "Surapet, Chennai-600066."],
-      color: "bg-blue-50 dark:bg-blue-900/20",
-      borderColor: "border-blue-100 dark:border-blue-800"
+      icon: <MapPin className="w-6 h-6 text-[#0682E4]" />,
+      title: "Our Headquarters & Plant",
+      details: ["No. 551, Sivapragasam Nagar,", "Surapet, Chennai — 600066, Tamil Nadu."],
+      color: "bg-blue-50/80 border-blue-100",
     },
     {
-      icon: <Phone className="w-6 h-6 text-green-500" />,
-      title: "Call Us",
-      details: ["+91 93429 22044", "Mon-Fri, 9am - 6pm IST"],
-      color: "bg-green-50 dark:bg-green-900/20",
-      borderColor: "border-green-100 dark:border-green-800"
+      icon: <Phone className="w-6 h-6 text-emerald-600" />,
+      title: "Call / WhatsApp Support",
+      details: ["+91 93429 22044 / +91 98432 40703", "Mon - Sat: 9:00 AM – 8:00 PM IST"],
+      color: "bg-emerald-50/80 border-emerald-100",
     },
     {
-      icon: <Mail className="w-6 h-6 text-purple-500" />,
-      title: "Email Us",
-      details: ["drwellcaremattress@gmail.com"],
-      color: "bg-purple-50 dark:bg-purple-900/20",
-      borderColor: "border-purple-100 dark:border-purple-800"
+      icon: <Mail className="w-6 h-6 text-purple-600" />,
+      title: "Direct Email Desk",
+      details: ["drwellcaremattress@gmail.com", "support@drwellmattress.com"],
+      color: "bg-purple-50/80 border-purple-100",
     },
     {
-      icon: <Clock className="w-6 h-6 text-orange-500" />,
-      title: "Store Hours",
-      details: ["Everyday: 10am - 8pm", "Holidays: Closed"],
-      color: "bg-orange-50 dark:bg-orange-900/20",
-      borderColor: "border-orange-100 dark:border-orange-800"
+      icon: <Clock className="w-6 h-6 text-amber-600" />,
+      title: "Store & Dispatch Hours",
+      details: ["Everyday: 9:00 AM – 8:30 PM", "Rapid 24-Hour Dispatch Active"],
+      color: "bg-amber-50/80 border-amber-100",
     }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-16 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col pt-20 font-body">
       
-      {/* Background Logo */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none">
-        <Image src="/images/logo.png" alt="Dr Well Care Background Logo" fill className="object-contain p-10 md:p-32" />
-      </div>
+      {/* Hero Banner */}
+      <section className="bg-[#0B1A2A] text-white py-16 sm:py-24 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#0682E4]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#7cb93e]/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Header Section */}
-      <div className="text-center max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium text-sm mb-6"
-        >
-          <MessageSquare className="w-4 h-4" />
-          Get in Touch
-        </motion.div>
-        
-        <motion.h1 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-4xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-6"
-        >
-          We're here to help you <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">sleep better.</span>
-        </motion.h1>
-        
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg text-slate-600 dark:text-slate-400"
-        >
-          Whether you have a question about our mattresses, need help with your order, or just want to talk about sleep science, our team is ready to listen.
-        </motion.p>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-8 items-start">
-        
-        {/* Contact Info Grid */}
-        <div className="lg:col-span-2 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="grid sm:grid-cols-2 lg:grid-cols-1 gap-6"
-          >
-            {contactInfo.map((info, index) => (
-              <motion.div 
-                key={index}
-                whileHover={{ scale: 1.02 }}
-                className={`flex items-start p-6 rounded-2xl border ${info.borderColor} ${info.color} transition-colors`}
-              >
-                <div className="bg-white dark:bg-slate-900 p-3 rounded-xl shadow-sm mr-4 flex-shrink-0">
-                  {info.icon}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{info.title}</h3>
-                  {info.details.map((detail, idx) => (
-                    <p key={idx} className="text-slate-600 dark:text-slate-400 text-sm font-medium">
-                      {detail}
-                    </p>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+        <div className="container mx-auto px-4 relative z-10 text-center max-w-3xl">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-[#7cb93e] font-bold text-xs uppercase tracking-wider mb-4 border border-white/10">
+            <Sparkles className="w-4 h-4" /> 100% Dedicated Customer Support
+          </span>
+          <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-black mb-6 tracking-tight">
+            We&apos;re Here to Help You <span className="text-[#7cb93e]">Sleep Better</span>
+          </h1>
+          <p className="text-base sm:text-lg text-white/80 font-medium leading-relaxed">
+            Have a question about orthopaedic sizing, custom mattress firmness, or order delivery? Speak directly with our sleep consultants and Chennai dispatch team.
+          </p>
         </div>
+      </section>
 
-        {/* Contact Form */}
-        <motion.div 
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="lg:col-span-3 bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-blue-900/5 dark:shadow-none border border-slate-100 dark:border-slate-800 p-8 md:p-12 relative overflow-hidden"
-        >
-          {/* Decorative background element for form */}
-          <div className="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">Send us a message</h2>
+      {/* Main Content */}
+      <section className="container mx-auto px-4 py-16 sm:py-20 max-w-6xl -mt-8 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
-          <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  required
-                  value={formState.name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white transition-all outline-none"
-                  placeholder="John Doe"
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  value={formState.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white transition-all outline-none"
-                  placeholder="john@example.com"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="subject" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Subject
-              </label>
-              <input
-                type="text"
-                id="subject"
-                name="subject"
-                required
-                value={formState.subject}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white transition-all outline-none"
-                placeholder="How can we help?"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="message" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows={5}
-                required
-                value={formState.message}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white transition-all outline-none resize-none"
-                placeholder="Tell us everything..."
-              />
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full py-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-2 transition-all ${
-                isSubmitting ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-blue-600/30"
-              }`}
-            >
-              {isSubmitting ? (
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  Send Message <Send className="w-5 h-5" />
-                </>
-              )}
-            </motion.button>
-            
-            {/* Success Message Animation */}
-            {isSubmitted && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute inset-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center text-center p-8"
-              >
-                <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mb-6">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", damping: 10, delay: 0.2 }}
-                  >
-                    <Send className="w-10 h-10" />
-                  </motion.div>
-                </div>
-                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Message Sent!</h3>
-                <p className="text-slate-600 dark:text-slate-400 text-lg">
-                  Thanks for reaching out. Our sleep experts will get back to you shortly.
-                </p>
-              </motion.div>
-            )}
-          </form>
-        </motion.div>
-      </div>
-
-      {/* Interactive Google Map & Street View Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 relative z-10"
-      >
-        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 p-6 md:p-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#0682E4] bg-[#0682E4]/10 px-3 py-1 rounded-full">
-                Visit Our Showroom
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-2">
-                Live Location & Street View
-              </h2>
-            </div>
-            <p className="text-sm text-slate-500 font-medium">
-              No. 551, Sivapragasam Nagar, Surapet, Chennai-600066
+          {/* Contact Cards Left Column */}
+          <div className="lg:col-span-5 space-y-4">
+            <h2 className="font-heading text-2xl font-black text-[#0B1A2A] mb-2 flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-[#0682E4]" /> Connect With Us
+            </h2>
+            <p className="text-slate-600 text-sm mb-6 leading-relaxed">
+              Reach out through any channel below. Our average reply time is under 15 minutes during business hours.
             </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+              {contactInfo.map((info, idx) => (
+                <div key={idx} className={`p-5 rounded-2xl border ${info.color} bg-white shadow-sm transition-all hover:shadow-md flex items-start gap-4`}>
+                  <div className="p-3 rounded-xl bg-white shadow-sm border border-slate-100 shrink-0">
+                    {info.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-extrabold text-sm text-[#0B1A2A] mb-1">{info.title}</h3>
+                    {info.details.map((line, i) => (
+                      <p key={i} className="text-xs text-slate-600 font-medium">{line}</p>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-5 bg-gradient-to-br from-[#0B1A2A] to-[#162a42] rounded-2xl text-white shadow-lg mt-6">
+              <div className="flex items-center gap-3 mb-2">
+                <ShieldCheck className="w-6 h-6 text-[#7cb93e]" />
+                <h4 className="font-bold text-base">Custom Size Mattresses?</h4>
+              </div>
+              <p className="text-xs text-white/80 leading-relaxed">
+                Need a non-standard cot size (e.g. 75&quot; × 66&quot;)? We manufacture custom orthopaedic mattresses at our Chennai facility within 48 hours! Mention your exact cot measurements in the form.
+              </p>
+            </div>
           </div>
 
-          <div className="relative w-full h-[450px] rounded-2xl overflow-hidden shadow-inner border border-slate-200 dark:border-slate-800">
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3885.3106831213377!2d80.1844535750794!3d13.14279238718852!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a52649df083458f%3A0x570c69f166e4dc62!2sDr.Well%20Care%20Mattress!5e0!3m2!1sen!2sin!4v1784973063647!5m2!1sen!2sin" 
-              width="100%" 
-              height="100%" 
-              style={{ border: 0 }} 
-              allowFullScreen={true} 
-              loading="lazy" 
-              referrerPolicy="strict-origin-when-cross-origin"
-              title="Dr.Well Care Mattress Business Location Map"
-            />
+          {/* Contact Form Right Column */}
+          <div className="lg:col-span-7 bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 sm:p-10">
+            <div className="mb-8">
+              <span className="text-xs font-black uppercase tracking-wider text-[#0682E4] block mb-1">Send a Message</span>
+              <h2 className="font-heading text-2xl sm:text-3xl font-black text-[#0B1A2A]">Online Support Desk</h2>
+            </div>
+
+            {/* Error Banner */}
+            <AnimatePresence>
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 text-red-700 text-xs sm:text-sm font-semibold shadow-sm"
+                >
+                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+                  <span>{error}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Success Modal / Banner */}
+            <AnimatePresence>
+              {isSubmitted ? (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }} 
+                  animate={{ opacity: 1, scale: 1 }} 
+                  className="py-12 px-6 text-center bg-emerald-50/70 border border-emerald-200 rounded-3xl space-y-4"
+                >
+                  <div className="w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
+                    <CheckCircle2 className="w-10 h-10 animate-bounce" />
+                  </div>
+                  <h3 className="font-heading text-2xl font-black text-emerald-950">Inquiry Received Successfully!</h3>
+                  <p className="text-slate-600 text-sm max-w-md mx-auto leading-relaxed">
+                    Thank you for reaching out to Dr. Well Care. We have generated support ticket <span className="font-mono font-bold text-[#0682E4] bg-white px-2 py-0.5 rounded border border-blue-200">{ticketId}</span> for your request.
+                  </p>
+                  <div className="pt-4">
+                    <Button 
+                      onClick={() => setIsSubmitted(false)} 
+                      className="bg-[#0B1A2A] hover:bg-[#162a42] text-white font-bold px-8 py-3.5 rounded-xl shadow-md"
+                    >
+                      Send Another Message
+                    </Button>
+                  </div>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Your Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formState.name}
+                        onChange={handleChange}
+                        placeholder="Ramesh Kumar"
+                        className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formState.email}
+                        onChange={handleChange}
+                        placeholder="ramesh@example.com"
+                        className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Phone / WhatsApp Number *
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formState.phone}
+                        onChange={handleChange}
+                        placeholder="+91 98765 43210"
+                        className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Inquiry Topic *
+                      </label>
+                      <select
+                        name="subject"
+                        value={formState.subject}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium text-slate-700"
+                      >
+                        <option value="General Inquiry / Mattress Sizing">General Inquiry / Mattress Sizing</option>
+                        <option value="Custom Size Mattress Quotation">Custom Size Mattress Quotation</option>
+                        <option value="Order Tracking & Dispatch">Order Tracking & Dispatch</option>
+                        <option value="100-Night Trial & Returns">100-Night Trial & Returns</option>
+                        <option value="10-Year Warranty Support">10-Year Warranty Support</option>
+                        <option value="Bulk / Hotel Hospitality Orders">Bulk / Hotel Hospitality Orders</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Your Message or Custom Cot Measurements *
+                    </label>
+                    <textarea
+                      name="message"
+                      rows={5}
+                      value={formState.message}
+                      onChange={handleChange}
+                      placeholder="Please describe your requirement or mention your exact cot dimensions (e.g. Length 78 inches by Width 60 inches)..."
+                      className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium resize-none"
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#0682E4] hover:bg-[#056ec1] text-white font-black py-4 rounded-xl text-base shadow-lg transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" /> Dispatching Inquiry...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" /> Submit Support Ticket
+                      </>
+                    )}
+                  </Button>
+                </form>
+              )}
+            </AnimatePresence>
           </div>
+
         </div>
-      </motion.div>
+      </section>
+      
     </div>
   );
 }

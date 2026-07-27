@@ -19,6 +19,9 @@ export interface IProduct extends Document {
   }[];
   firmness: string;
   warranty_years: number;
+  originalPrice?: number;
+  sqftPrice?: number;
+  thickness?: string;
   trialNights: number;
   ratingAvg: number;
   ratingCount: number;
@@ -61,10 +64,13 @@ const ProductSchema: Schema = new Schema(
     ],
     firmness: {
       type: String,
-      enum: ['Soft', 'Medium Soft', 'Medium', 'Medium Firm', 'Firm', 'Orthopaedic Firm'],
+      enum: ['Soft', 'Medium Soft', 'Medium', 'Medium Firm', 'Firm', 'Orthopaedic Firm', 'Plush'],
       required: true,
     },
     warranty_years: { type: Number, default: 10 },
+    originalPrice: { type: Number },
+    sqftPrice: { type: Number, default: 546 },
+    thickness: { type: String, default: '6 Inch' },
     trialNights: { type: Number, default: 100 },
     ratingAvg: { type: Number, default: 0 },
     ratingCount: { type: Number, default: 0 },

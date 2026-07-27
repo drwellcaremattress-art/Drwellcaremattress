@@ -1,16 +1,25 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { Button } from '../ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export function CartDrawer() {
   const { items, isOpen, toggleCart, removeItem, updateQty, getCartTotal } = useCartStore();
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  if (!isOpen) return null;
+  if (!mounted || !isOpen) return null;
 
   return (
     <>
@@ -90,11 +99,21 @@ export function CartDrawer() {
               <span className="font-semibold text-ink-muted">Subtotal</span>
               <span className="font-mono font-bold text-2xl text-ink">₹{getCartTotal().toLocaleString('en-IN')}</span>
             </div>
-            <Link href="/checkout" onClick={toggleCart}>
-              <Button size="lg" className="w-full bg-brand-green hover:bg-brand-green-dark text-white rounded-full text-lg shadow-lg shadow-brand-green/20">
-                Proceed to Checkout
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              onClick={() => {
+                toggleCart();
+                if (!session) {
+                  alert('Please login or create an account first to proceed to checkout!');
+                  router.push('/login?callbackUrl=/checkout');
+                } else {
+                  router.push('/checkout');
+                }
+              }}
+              className="w-full bg-brand-green hover:bg-brand-green-dark text-white rounded-full text-lg shadow-lg shadow-brand-green/20 font-bold"
+            >
+              Proceed to Checkout
+            </Button>
             <p className="text-center text-xs text-ink-muted mt-4 flex items-center justify-center gap-1">
               Shipping & taxes calculated at checkout
             </p>

@@ -181,7 +181,7 @@ export function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <a href="/catalogue-1.pdf" download="catalogue.pdf" className="hover:text-white transition-colors flex items-center gap-2.5 group">
+                    <a href="/catalogue-1.pdf" download="DR.WELL CARE CATALOGUE (1).pdf" className="hover:text-white transition-colors flex items-center gap-2.5 group">
                       <div className="w-6 h-6 rounded-md bg-[#7cb93e]/20 flex items-center justify-center text-[#7cb93e] group-hover:bg-[#7cb93e] group-hover:text-white transition-colors">
                         <Download className="w-3.5 h-3.5" />
                       </div>

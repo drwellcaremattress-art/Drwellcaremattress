@@ -25,6 +25,7 @@ export interface ProductType {
   }[];
   firmness: string;
   warranty_years: number;
+  originalPrice?: number;
   trialNights: number;
   ratingAvg: number;
   ratingCount: number;

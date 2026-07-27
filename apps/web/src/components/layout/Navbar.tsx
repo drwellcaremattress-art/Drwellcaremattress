@@ -1,21 +1,38 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, Menu, ShieldCheck, Truck, Search, Moon, Phone, Mail, X } from 'lucide-react';
+import { ShoppingCart, User, Menu, ShieldCheck, Search, Phone, Mail, X, ArrowRight } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
 import { useCartStore } from '@/store/cartStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PRODUCT_CATALOG } from '@/lib/catalog';
 
 export function Navbar() {
   const pathname = usePathname();
   const { toggleCart, items } = useCartStore();
-  const itemCount = items.reduce((total, item) => total + item.qty, 0);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  const itemCount = mounted ? items.reduce((total, item) => total + item.qty, 0) : 0;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const matchingProducts = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.trim().toLowerCase();
+    return PRODUCT_CATALOG.filter(p => 
+      p.title.toLowerCase().includes(query) || 
+      p.subtitle.toLowerCase().includes(query) || 
+      p.description.toLowerCase().includes(query) ||
+      (p.badge && p.badge.toLowerCase().includes(query)) ||
+      (p.thickness && p.thickness.toLowerCase().includes(query))
+    ).slice(0, 6);
+  }, [searchQuery]);
 
   if (pathname === '/login') return null;
 
@@ -46,16 +63,6 @@ export function Navbar() {
         {/* Trust Badges */}
         <div className="flex items-center justify-center gap-4 md:gap-6 w-full md:w-auto text-[12px]">
           <div className="flex items-center gap-2">
-            <Moon className="w-3.5 h-3.5 text-white"/>
-            <span className="text-white">100-Night Trial</span>
-          </div>
-          <span className="opacity-30 font-light text-[10px] text-white hidden sm:inline">|</span>
-          <div className="flex items-center gap-2">
-            <Truck className="w-3.5 h-3.5 text-white"/>
-            <span className="text-white">Free Shipping</span>
-          </div>
-          <span className="opacity-30 font-light text-[10px] text-white hidden sm:inline">|</span>
-          <div className="flex items-center gap-2 hidden sm:flex">
             <ShieldCheck className="w-3.5 h-3.5 text-white"/>
             <span className="text-white">
               10-Year <span className="relative inline-block text-white">
@@ -95,13 +102,13 @@ export function Navbar() {
               Products
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#0682E4] group-hover:w-full transition-all duration-300"></span>
             </Link>
-            <Link href="/collections?type=Bonded+Series" className="hover:text-[#0682E4] transition-colors relative group text-[#0682E4] font-bold flex items-center gap-1 bg-[#0682E4]/10 px-3 py-1.5 rounded-full border border-[#0682E4]/30">
-              Bonded Series
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#0682E4] group-hover:w-full transition-all duration-300"></span>
-            </Link>
             <Link href="/collections?type=Luxury+HR+Series" className="hover:text-[#6CB50E] transition-colors relative group text-[#6CB50E] font-bold flex items-center gap-1 bg-[#6CB50E]/10 px-3 py-1.5 rounded-full border border-[#6CB50E]/30">
               Luxury HR Series
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#6CB50E] group-hover:w-full transition-all duration-300"></span>
+            </Link>
+            <Link href="/collections?type=Bonded+Series" className="hover:text-[#0682E4] transition-colors relative group text-[#0682E4] font-bold flex items-center gap-1 bg-[#0682E4]/10 px-3 py-1.5 rounded-full border border-[#0682E4]/30">
+              Bonded Series
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#0682E4] group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link href="/faq" className="hover:text-[#6CB50E] transition-colors relative group">
               FAQ
@@ -117,7 +124,7 @@ export function Navbar() {
             <Button variant="ghost" size="icon" className="hover:text-[#0682E4] hover:bg-[#0682E4]/10 rounded-full transition-colors" onClick={() => setIsSearchOpen(!isSearchOpen)}>
               <Search className="w-[18px] h-[18px]" strokeWidth={2} />
             </Button>
-            <Link href="/login">
+            <Link href="/account">
               <Button variant="ghost" size="icon" className="hover:text-[#6CB50E] hover:bg-[#6CB50E]/10 rounded-full transition-colors">
                 <User className="w-[18px] h-[18px]" strokeWidth={2} />
               </Button>
@@ -140,24 +147,94 @@ export function Navbar() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 right-0 mt-2 mx-auto w-[98%] max-w-[1600px] bg-white rounded-2xl shadow-lg border border-gray-100 p-4 z-40"
+              className="absolute top-full left-0 right-0 mt-2 mx-auto w-[98%] max-w-[1600px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 sm:p-6 z-50"
             >
               <form onSubmit={handleSearch} className="flex gap-4 items-center">
                 <div className="relative flex-grow">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search mattresses, pillows, or accessories..."
+                    placeholder="Search mattresses (e.g. Orthopaedic, Memory Foam, Latex, 8 Inch, King Size)..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent focus:border-[#0682E4] focus:bg-white rounded-xl outline-none transition-all text-sm font-medium"
+                    className="w-full pl-12 pr-10 py-3.5 bg-gray-50 border border-gray-200 focus:border-[#0682E4] focus:bg-white rounded-xl outline-none transition-all text-sm font-semibold text-[#0B1A2A]"
                     autoFocus
                   />
+                  {searchQuery && (
+                    <button 
+                      type="button" 
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
-                <Button type="submit" className="bg-[#0682E4] hover:bg-[#0682E4]/90 text-white rounded-xl px-6 py-6 font-bold">
+                <Button type="submit" className="bg-[#0682E4] hover:bg-[#0682E4]/90 text-white rounded-xl px-8 py-6 font-bold shadow-md shrink-0">
                   Search
                 </Button>
               </form>
+
+              {/* Live Search Results Dropdown List */}
+              {searchQuery.trim() && (
+                <div className="mt-5 border-t border-gray-100 pt-4">
+                  <div className="flex items-center justify-between text-xs font-black text-gray-400 uppercase tracking-widest mb-3 px-2">
+                    <span>Relevant Products ({matchingProducts.length})</span>
+                    <Link 
+                      href={`/collections?search=${encodeURIComponent(searchQuery.trim())}`}
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery('');
+                      }}
+                      className="text-[#0682E4] hover:underline flex items-center gap-1 font-bold"
+                    >
+                      View All Results <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+
+                  {matchingProducts.length === 0 ? (
+                    <div className="py-10 text-center text-sm text-gray-500 font-medium bg-gray-50/80 rounded-2xl border border-dashed border-gray-200">
+                      No mattresses or sleep products found matching "{searchQuery}".
+                      <div className="mt-2 text-xs text-gray-400">Try searching for "Ortho", "Latex", "Memory Foam", or "Bonded".</div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1">
+                      {matchingProducts.map((prod) => (
+                        <Link
+                          key={prod.id}
+                          href={`/product/${prod.slug}`}
+                          onClick={() => {
+                            setIsSearchOpen(false);
+                            setSearchQuery('');
+                          }}
+                          className="flex items-center justify-between p-3.5 rounded-2xl hover:bg-gray-50 transition-all group border border-gray-100/80 hover:border-gray-200 hover:shadow-sm"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-xl bg-gray-100 relative overflow-hidden shrink-0 shadow-inner">
+                              <Image src={prod.image} alt={prod.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-extrabold text-[#0B1A2A] group-hover:text-[#0682E4] transition-colors line-clamp-1">{prod.title}</h4>
+                              <p className="text-xs font-semibold text-[#7cb93e] mt-0.5 line-clamp-1">{prod.subtitle}</p>
+                              <div className="flex items-center gap-2 mt-1 text-[11px] text-gray-500 font-medium">
+                                <span className="bg-gray-100 px-2 py-0.5 rounded-md font-mono">{prod.thickness}</span>
+                                <span>• {prod.warranty || 10}Y Warranty</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0 pl-3">
+                            <div className="text-xs uppercase font-bold text-gray-400">From</div>
+                            <div className="text-base font-black text-[#0B1A2A]">{prod.price}</div>
+                            {prod.originalPrice && (
+                              <div className="text-[11px] text-gray-400 line-through font-mono">₹{prod.originalPrice.toLocaleString('en-IN')}</div>
+                            )}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -193,13 +270,13 @@ export function Navbar() {
                 <Link href="/" className="px-6 py-4 hover:bg-gray-50 hover:text-[#0682E4] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
                 <Link href="/about" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>About</Link>
                 <Link href="/collections" className="px-6 py-4 hover:bg-gray-50 hover:text-[#0682E4] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Products</Link>
-                <Link href="/collections?type=Bonded+Series" className="px-6 py-3 bg-[#0682E4]/10 text-[#0682E4] font-bold mx-6 my-1 rounded-xl hover:bg-[#0682E4]/20 transition-colors flex items-center justify-between border border-[#0682E4]/30" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span>Bonded Series</span>
-                  <span className="text-[10px] bg-[#0682E4] text-white font-bold px-2 py-0.5 rounded">80kg+ Support</span>
-                </Link>
                 <Link href="/collections?type=Luxury+HR+Series" className="px-6 py-3 bg-[#6CB50E]/10 text-[#6CB50E] font-bold mx-6 my-1 rounded-xl hover:bg-[#6CB50E]/20 transition-colors flex items-center justify-between border border-[#6CB50E]/30" onClick={() => setIsMobileMenuOpen(false)}>
                   <span>Luxury HR Series</span>
                   <span className="text-[10px] bg-[#6CB50E] text-white font-bold px-2 py-0.5 rounded">Flagship</span>
+                </Link>
+                <Link href="/collections?type=Bonded+Series" className="px-6 py-3 bg-[#0682E4]/10 text-[#0682E4] font-bold mx-6 my-1 rounded-xl hover:bg-[#0682E4]/20 transition-colors flex items-center justify-between border border-[#0682E4]/30" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span>Bonded Series</span>
+                  <span className="text-[10px] bg-[#0682E4] text-white font-bold px-2 py-0.5 rounded">80kg+ Support</span>
                 </Link>
                 <Link href="/faq" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>FAQ</Link>
                 <Link href="/contact" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link>

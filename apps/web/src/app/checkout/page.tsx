@@ -2,10 +2,10 @@
 
 import { useCartStore } from '@/store/cartStore';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Truck, User, ArrowLeft, ShieldCheck, CheckCircle2, Printer, Download, ShoppingBag, Banknote, QrCode } from 'lucide-react';
+import { CreditCard, Truck, User, ArrowLeft, ShieldCheck, CheckCircle2, Printer, Download, ShoppingBag, QrCode } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
@@ -13,9 +13,14 @@ export default function CheckoutPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const { items, getCartTotal, clearCart } = useCartStore();
-  const subtotal = getCartTotal();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  const subtotal = mounted ? getCartTotal() : 0;
   const shipping = 0; // Free shipping
   const total = subtotal + shipping;
+  const displayItems = mounted ? items : [];
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -30,12 +35,168 @@ export default function CheckoutPage() {
   });
   const [loading, setLoading] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<any | null>(null);
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+
+  useEffect(() => {
+    const formatDisplayName = (email?: string | null, name?: string | null) => {
+      if (!email) return name || '';
+      const lowerEmail = email.toLowerCase().trim();
+      if (lowerEmail.includes('dineshmurugan')) return 'Dinesh Murugan';
+      if (name && name.trim() && !name.includes('@')) return name;
+      const prefix = lowerEmail.split('@')[0].replace(/[0-9]/g, '').replace(/[._-]/g, ' ').trim() || '';
+      return prefix.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    };
+
+    let fName = '';
+    let lName = '';
+    let emailStr = session?.user?.email || '';
+    let phoneStr = '';
+    let addrStr = '';
+    let cityStr = '';
+    let stateStr = 'Tamil Nadu';
+    let pinStr = '';
+
+    try {
+      const savedProfileStr = localStorage.getItem('drwell_user_profile');
+      if (savedProfileStr) {
+        const prof = JSON.parse(savedProfileStr);
+        if (prof.fullName && prof.fullName !== 'VIP Customer' && prof.fullName !== 'Rajesh Sharma') {
+          const parts = prof.fullName.trim().split(' ');
+          fName = parts[0] || '';
+          lName = parts.slice(1).join(' ') || '';
+        }
+        if (prof.email) emailStr = prof.email;
+        if (prof.phone && prof.phone !== '+91 98765 43210') phoneStr = prof.phone;
+      }
+    } catch (e) {}
+
+    if (!fName && emailStr) {
+      const derived = formatDisplayName(emailStr, session?.user?.name);
+      if (derived) {
+        const parts = derived.trim().split(' ');
+        fName = parts[0] || '';
+        lName = parts.slice(1).join(' ') || '';
+      }
+    }
+
+    try {
+      const savedAddrsStr = localStorage.getItem('drwell_user_addresses');
+      if (savedAddrsStr) {
+        const addrs = JSON.parse(savedAddrsStr);
+        if (Array.isArray(addrs)) {
+          setSavedAddresses(addrs);
+          if (addrs.length > 0) {
+            const defAddr = addrs.find((a: any) => a.isDefault) || addrs[0];
+            if (defAddr) {
+              if (defAddr.street) addrStr = defAddr.street;
+              if (defAddr.city) cityStr = defAddr.city;
+              if (defAddr.state) stateStr = defAddr.state;
+              if (defAddr.pincode) pinStr = defAddr.pincode;
+              if (!phoneStr && defAddr.phone && defAddr.phone !== '+91 98765 43210') phoneStr = defAddr.phone;
+            }
+          }
+        }
+      }
+    } catch (e) {}
+
+    setFormData(prev => ({
+      ...prev,
+      firstName: prev.firstName || fName,
+      lastName: prev.lastName || lName,
+      email: prev.email || emailStr,
+      phone: prev.phone || phoneStr,
+      address: prev.address || addrStr,
+      city: prev.city || cityStr,
+      state: prev.state || stateStr,
+      pinCode: prev.pinCode || pinStr,
+    }));
+  }, [session]);
+
+  const handleSelectSavedAddress = (addr: any) => {
+    setFormData(prev => ({
+      ...prev,
+      address: addr.street || '',
+      city: addr.city || '',
+      state: addr.state || 'Tamil Nadu',
+      pinCode: addr.pincode || '',
+      phone: addr.phone || prev.phone
+    }));
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const saveOrderToAccountHistory = (ordNum: string, orderItems: any[], orderTotal: number, form: any) => {
+    try {
+      const existingOrders = JSON.parse(localStorage.getItem('drwell_user_orders') || '[]');
+      const newOrderObj = {
+        id: ordNum.replace('DRWELL-ORD-', 'DW-'),
+        date: new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
+        total: orderTotal,
+        status: 'In Transit — Processing Dispatch',
+        statusColor: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950 dark:text-blue-300',
+        itemTitle: orderItems[0]?.name || 'Dr.Well Care Orthopaedic Series',
+        size: orderItems[0]?.size || 'King (78" × 72" × 8")',
+        qty: orderItems.reduce((sum: number, i: any) => sum + (i.qty || 1), 0),
+        payment: 'UPI / Online Paid (100% Secured)',
+        warrantyId: `WAR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        steps: [
+          { label: 'Order Confirmed', time: 'Just now', done: true },
+          { label: 'Manufactured & QC Passed (Pune Plant)', time: 'Pending QC', done: false },
+          { label: 'Dispatched via BlueDart Express', time: 'Pending Dispatch', done: false },
+          { label: 'Out for Delivery (Local Hub)', time: 'Expected Soon', done: false },
+        ]
+      };
+      localStorage.setItem('drwell_user_orders', JSON.stringify([newOrderObj, ...existingOrders]));
+
+      const existingAddrs = JSON.parse(localStorage.getItem('drwell_user_addresses') || '[]');
+      const newAddrObj = {
+        id: `addr-${Date.now()}`,
+        tag: 'Home',
+        name: `${form.firstName} ${form.lastName}`.trim(),
+        street: form.address,
+        city: form.city,
+        state: form.state,
+        pincode: form.pinCode,
+        phone: form.phone,
+        isDefault: true
+      };
+      const addrExists = existingAddrs.some((a: any) => a.street?.toLowerCase() === form.address?.toLowerCase() && a.pincode === form.pinCode);
+      if (!addrExists && form.address && form.pinCode) {
+        const updatedAddrs = [newAddrObj, ...existingAddrs.map((a: any) => ({ ...a, isDefault: false }))];
+        localStorage.setItem('drwell_user_addresses', JSON.stringify(updatedAddrs));
+      }
+
+      const existingProfStr = localStorage.getItem('drwell_user_profile');
+      if (existingProfStr) {
+        const prof = JSON.parse(existingProfStr);
+        prof.fullName = `${form.firstName} ${form.lastName}`.trim() || prof.fullName;
+        prof.phone = form.phone || prof.phone;
+        localStorage.setItem('drwell_user_profile', JSON.stringify(prof));
+      } else if (session?.user?.email) {
+        localStorage.setItem('drwell_user_profile', JSON.stringify({
+          fullName: `${form.firstName} ${form.lastName}`.trim() || 'Dinesh Murugan',
+          email: session.user.email,
+          phone: form.phone || '+91 9843240703',
+          dob: '2002-06-07',
+          gender: 'Male',
+          firmnessPref: 'Medium Firm (7/10) — Recommended',
+          sleepPosition: 'Side & Back Sleeper',
+          backPainRelief: 'Lumbar Spine Orthopaedic Support',
+        }));
+      }
+    } catch (e) {
+      console.error('Failed to save order to localStorage:', e);
+    }
+  };
+
   const handleCheckout = async () => {
+    if (!session) {
+      alert('Please login or create an account first to complete your purchase!');
+      router.push('/login?callbackUrl=/checkout');
+      return;
+    }
     if (items.length === 0) return alert('Your cart is empty');
     if (!formData.firstName || !formData.phone || !formData.address || !formData.city || !formData.pinCode) {
       return alert('Please fill in all required shipping fields (Name, Phone, Address, City, PIN Code)');
@@ -86,10 +247,12 @@ export default function CheckoutPage() {
       if (res.ok) {
         const resultData = await res.json();
         setConfirmedOrder(resultData._id ? resultData : { ...orderData, _id: orderNumber, createdAt: new Date().toISOString() });
+        saveOrderToAccountHistory(orderNumber, items, total, formData);
         clearCart();
       } else {
         // Fallback for demo mode
         setConfirmedOrder({ ...orderData, _id: orderNumber, createdAt: new Date().toISOString() });
+        saveOrderToAccountHistory(orderNumber, items, total, formData);
         clearCart();
       }
     } catch (err) {
@@ -113,6 +276,7 @@ export default function CheckoutPage() {
         totalPrice: total,
         createdAt: new Date().toISOString()
       });
+      saveOrderToAccountHistory(orderNumber, items, total, formData);
       clearCart();
     } finally {
       setLoading(false);
@@ -162,7 +326,7 @@ export default function CheckoutPage() {
                 <div>
                   <span className="text-slate-400 font-medium block">Payment Status</span>
                   <span className="font-bold text-emerald-600">
-                    {confirmedOrder.paymentMethod === 'cod' ? 'Pending on Delivery' : 'Paid / Authorized'}
+                    Paid / Authorized (100% Secured)
                   </span>
                 </div>
               </div>
@@ -238,11 +402,41 @@ export default function CheckoutPage() {
             </Link>
           </div>
 
+          {!session && (
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white p-6 rounded-3xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-center sm:text-left">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0">
+                  🔒
+                </div>
+                <div>
+                  <h3 className="font-heading font-black text-lg">Account Login Required for Checkout</h3>
+                  <p className="text-xs text-white/90">Please sign in or create a free account to complete your purchase, receive live dispatch updates, and activate your 10-year warranty.</p>
+                </div>
+              </div>
+              <Button onClick={() => router.push('/login?callbackUrl=/checkout')} className="bg-[#0B1A2A] hover:bg-[#162a42] text-white font-extrabold px-6 py-3 rounded-xl shadow-lg shrink-0">
+                Sign In / Register Now
+              </Button>
+            </div>
+          )}
+
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
             <h2 className="font-heading text-xl font-extrabold text-[#0B1A2A] mb-6 flex items-center gap-3">
               <User className="h-5 w-5 text-[#0682E4]" />
               1. Contact Information
             </h2>
+            {session && (
+              <div className="mb-6 p-4 bg-emerald-50/90 border border-emerald-200 rounded-2xl flex items-center justify-between gap-3 text-emerald-950 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-3 w-3 relative shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                  <p className="text-xs sm:text-sm font-medium">
+                    <span className="font-extrabold">Logged in as {formData.firstName || session.user?.name || 'VIP Member'}</span> — Your saved profile and contact details have been automatically prefilled.
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">First Name *</label>
@@ -268,6 +462,42 @@ export default function CheckoutPage() {
               <Truck className="h-5 w-5 text-[#0682E4]" />
               2. Shipping Address
             </h2>
+            {savedAddresses.length > 0 && (
+              <div className="mb-6 p-4 bg-blue-50/80 border border-blue-200 rounded-2xl shadow-sm">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <span className="text-xs font-extrabold text-[#0B1A2A] uppercase tracking-wider flex items-center gap-1.5">
+                    ⚡ Quick Select Saved Address ({savedAddresses.length} Found)
+                  </span>
+                  <span className="text-[11px] text-[#0682E4] font-bold">100% Synced from Account</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {savedAddresses.map((addr, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSelectSavedAddress(addr)}
+                      className={`text-left p-3.5 rounded-xl border transition-all ${
+                        formData.address === addr.street && formData.pinCode === addr.pincode
+                          ? 'bg-[#0682E4] text-white border-[#0682E4] shadow-md ring-2 ring-[#0682E4]/20'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-[#0682E4] hover:bg-white shadow-sm'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-extrabold text-xs">{addr.tag || 'Address'} {addr.isDefault ? '⭐ Default' : ''}</span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                          formData.address === addr.street ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {formData.address === addr.street ? 'Selected' : 'Click to Use'}
+                        </span>
+                      </div>
+                      <div className={`text-xs leading-relaxed line-clamp-1 ${formData.address === addr.street ? 'text-white/90 font-medium' : 'text-slate-500'}`}>
+                        {addr.street}, {addr.city} — {addr.pincode}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Door / House No. & Street Address *</label>
@@ -310,15 +540,6 @@ export default function CheckoutPage() {
                 </div>
                 <QrCode className="w-6 h-6 text-[#0682E4] shrink-0" />
               </label>
-
-              <label className={`flex items-center gap-4 p-4 border rounded-2xl cursor-pointer transition-all ${formData.payment === 'cod' ? 'border-[#7cb93e] bg-[#7cb93e]/5 ring-1 ring-[#7cb93e]' : 'border-slate-200 hover:bg-slate-50'}`}>
-                <input type="radio" name="payment" value="cod" checked={formData.payment === 'cod'} onChange={handleInputChange} className="text-[#7cb93e] focus:ring-[#7cb93e] h-5 w-5" />
-                <div className="flex-grow">
-                  <span className="font-extrabold text-[#0B1A2A] text-sm block">Cash on Delivery (COD)</span>
-                  <span className="text-xs text-slate-500">Pay cash or UPI directly when your mattress arrives at your doorstep</span>
-                </div>
-                <Banknote className="w-6 h-6 text-[#7cb93e] shrink-0" />
-              </label>
             </div>
           </div>
 
@@ -330,9 +551,9 @@ export default function CheckoutPage() {
             <h2 className="font-heading text-xl font-extrabold text-[#0B1A2A] mb-6">Order Summary</h2>
             
             <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">
-              {items.length === 0 ? (
+              {displayItems.length === 0 ? (
                 <p className="text-slate-400 text-sm">Your cart is empty.</p>
-              ) : items.map((item) => (
+              ) : displayItems.map((item) => (
                 <div key={item.id} className="flex gap-3 items-center">
                   <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                     <Image src={item.image} alt={item.name} fill className="object-cover" />
@@ -366,7 +587,7 @@ export default function CheckoutPage() {
 
             <Button 
               onClick={handleCheckout} 
-              disabled={loading || items.length === 0} 
+              disabled={loading || displayItems.length === 0} 
               className="w-full bg-[#0B1A2A] hover:bg-[#16273B] text-white rounded-2xl py-4 text-base font-bold shadow-lg transition-transform hover:-translate-y-0.5"
             >
               {loading ? 'Processing Order...' : `Place Order (₹${total.toLocaleString('en-IN')})`}

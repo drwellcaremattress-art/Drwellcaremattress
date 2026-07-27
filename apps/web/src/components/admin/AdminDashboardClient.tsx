@@ -60,6 +60,7 @@ export default function AdminDashboardClient({
       ],
       firmness: 'Medium Firm',
       warranty_years: 10,
+      originalPrice: basePrice * 25,
       trialNights: 100,
       ratingAvg: 5.0,
       ratingCount: 1,
