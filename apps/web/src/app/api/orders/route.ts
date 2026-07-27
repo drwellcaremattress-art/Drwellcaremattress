@@ -1,24 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getToken } from 'next-auth/jwt';
 import { connectDB } from '@/lib/db';
 import { Order } from '@/lib/models/Order';
 
+const SECRET = process.env.NEXTAUTH_SECRET || process.env.SECRET || 'fallback-secret';
+
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    // getToken reads the JWT cookie directly — works reliably in all Route Handler environments
+    const token = await getToken({ req, secret: SECRET });
 
-    if (!session?.user?.email) {
+    if (!token?.email) {
       return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
     }
 
     await connectDB();
 
-    // Find orders by email stored on order, or by userEmail field
     const orders = await Order.find({
       $or: [
-        { userEmail: session.user.email },
-        { 'shippingAddress.email': session.user.email },
+        { userEmail: token.email },
+        { 'shippingAddress.email': token.email },
       ],
     }).sort({ createdAt: -1 });
 
@@ -31,9 +32,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const token = await getToken({ req, secret: SECRET });
 
-    if (!session?.user?.email) {
+    if (!token?.email) {
       return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
     }
 
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     const order = new Order({
       orderNumber: `ORD-${Date.now()}`,
-      userEmail: session.user.email,
+      userEmail: token.email,
       items: orderItems,
       shippingAddress,
       billingAddress,
