@@ -1,17 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { Order } from '@/lib/models/Order';
-import { protect } from '@/lib/authMiddleware';
+
+export async function GET(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
+    }
+
+    await connectDB();
+
+    // Find orders by email stored on order, or by userEmail field
+    const orders = await Order.find({
+      $or: [
+        { userEmail: session.user.email },
+        { 'shippingAddress.email': session.user.email },
+      ],
+    }).sort({ createdAt: -1 });
+
+    return NextResponse.json(orders);
+  } catch (error: any) {
+    console.error('[GET /api/orders]', error);
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
-    await connectDB();
-    const user = await protect(req);
-    
-    if (!user) {
-      // Allow guest checkout if we want, but currently it's protected in express
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.email) {
       return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
     }
+
+    await connectDB();
 
     const {
       orderItems,
@@ -24,13 +50,13 @@ export async function POST(req: NextRequest) {
       totalPrice,
     } = await req.json();
 
-    if (orderItems && orderItems.length === 0) {
+    if (!orderItems || orderItems.length === 0) {
       return NextResponse.json({ message: 'No order items' }, { status: 400 });
     }
 
     const order = new Order({
       orderNumber: `ORD-${Date.now()}`,
-      userId: user._id,
+      userEmail: session.user.email,
       items: orderItems,
       shippingAddress,
       billingAddress,
@@ -42,27 +68,9 @@ export async function POST(req: NextRequest) {
     });
 
     const createdOrder = await order.save();
-
     return NextResponse.json(createdOrder, { status: 201 });
   } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
-  }
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    await connectDB();
-    const user = await protect(req);
-    
-    if (!user) {
-      return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
-    }
-
-    const orders = await Order.find({ userId: user._id });
-    return NextResponse.json(orders);
-  } catch (error: any) {
-    console.error(error);
+    console.error('[POST /api/orders]', error);
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

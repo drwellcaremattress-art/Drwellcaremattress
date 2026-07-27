@@ -2,7 +2,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
@@ -15,7 +15,7 @@ const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
         try {
           // Fix for Vercel: use NEXTAUTH_URL, fallback to VERCEL_URL, then localhost
@@ -33,7 +33,6 @@ const authOptions: NextAuthOptions = {
           const user = await res.json();
           
           if (res.ok && user) {
-            // User object will have _id, name, email, token from express API
             return {
               id: user._id,
               name: user.name,

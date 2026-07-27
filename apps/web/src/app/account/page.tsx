@@ -334,11 +334,63 @@ export default function AccountPage() {
           </motion.div>
         )}
 
+        {/* ─── Mobile Tab Bar (hidden on lg) ─────────────────────────────── */}
+        <div className="lg:hidden mb-6 overflow-x-auto scrollbar-hide -mx-4 px-4">
+          <div className="flex gap-2 w-max pb-1">
+            {[
+              { id: 'profile', label: 'Profile', icon: User },
+              { id: 'orders', label: `Orders (${orders.length})`, icon: Package },
+              { id: 'addresses', label: `Addresses (${addresses.length})`, icon: MapPin },
+              { id: 'reviews', label: `Reviews (${userReviews.length})`, icon: Star },
+              { id: 'wishlist', label: `Wishlist (${wishlist.length})`, icon: Heart },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isSelected = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id as any)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
+                    isSelected
+                      ? 'bg-[#0B1A2A] text-white shadow-md'
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isSelected ? 'text-[#7cb93e]' : 'text-slate-400'}`} />
+                  {item.label}
+                </button>
+              );
+            })}
+            {session ? (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    localStorage.removeItem('drwell_user_profile');
+                    localStorage.removeItem('drwell_user_addresses');
+                    localStorage.removeItem('drwell_user_orders');
+                  } catch (e) {}
+                  await signOut({ callbackUrl: '/login' });
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap bg-red-50 dark:bg-red-950/40 text-red-600 border border-red-200 dark:border-red-900 shrink-0"
+              >
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+            ) : (
+              <Link href="/login">
+                <button type="button" className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap bg-[#7cb93e] text-white shrink-0">
+                  <User className="w-4 h-4" /> Sign In
+                </button>
+              </Link>
+            )}
+          </div>
+        </div>
+
         {/* ─── Main Content Layout ───────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Navigation Sidebar (4 Cols) */}
-          <aside className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 sticky top-28">
+          {/* Navigation Sidebar (hidden on mobile, shown on lg) */}
+          <aside className="hidden lg:block lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 sticky top-28">
             <div className="text-xs font-black uppercase tracking-widest text-slate-400 px-3 mb-3">
               Account Menu
             </div>
@@ -428,8 +480,8 @@ export default function AccountPage() {
             </div>
           </aside>
 
-          {/* Main Content Pane (8 Cols) */}
-          <main className="lg:col-span-8 space-y-6">
+          {/* Main Content Pane (full width on mobile, 8 cols on lg) */}
+          <main className="col-span-1 lg:col-span-8 space-y-6 min-w-0">
             <AnimatePresence mode="wait">
               
               {/* ─── TAB 1: MY PROFILE & ERGONOMICS ────────────────────────── */}
