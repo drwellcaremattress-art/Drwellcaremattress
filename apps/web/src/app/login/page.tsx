@@ -368,7 +368,7 @@ export default function LoginPage() {
                             </div>
                           </div>
 
-                          <Button disabled={isResetting} type="submit" className="w-full bg-[#0B1A2A] hover:bg-[#16273B] text-white h-12 rounded-xl font-extrabold text-base shadow-lg transition-transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
+                          <Button disabled={isResetting} type="submit" className="w-full bg-[#0682E4] hover:bg-[#7cb93e] text-white h-12 rounded-xl font-extrabold text-base shadow-lg transition-transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
                             {isResetting && <Loader2 className="w-4 h-4 animate-spin" />}
                             Reset Password & Sign In
                           </Button>
@@ -488,7 +488,7 @@ export default function LoginPage() {
                       </div>
                     )}
 
-                    <Button disabled={isLoading} type="submit" className="w-full bg-[#0B1A2A] hover:bg-[#16273B] text-white h-12 rounded-xl font-bold text-base shadow-lg transition-transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
+                    <Button disabled={isLoading} type="submit" className="w-full bg-[#0682E4] hover:bg-[#7cb93e] text-white h-12 rounded-xl font-bold text-base shadow-lg transition-transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
                       {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                       {isLogin ? 'Sign In' : 'Create Account'}
                     </Button>

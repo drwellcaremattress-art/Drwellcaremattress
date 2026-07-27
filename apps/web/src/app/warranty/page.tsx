@@ -232,8 +232,8 @@ export default function WarrantyPage() {
                   </div>
 
                   <div className="pt-4 flex flex-wrap justify-center gap-4">
-                    <Button onClick={() => window.print()} className="bg-[#0B1A2A] hover:bg-[#162a42] text-white font-bold px-6 py-3.5 rounded-xl flex items-center gap-2">
-                      <Download className="w-4 h-4 text-[#7cb93e]" /> Print / Save Certificate (.PDF)
+                    <Button onClick={() => window.print()} className="bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold px-6 py-3.5 rounded-xl flex items-center gap-2 transition-colors">
+                      <Download className="w-4 h-4 text-white" /> Print / Save Certificate (.PDF)
                     </Button>
                     <Link href="/account">
                       <Button variant="outline" className="border-slate-300 hover:bg-slate-100 text-slate-800 font-bold px-6 py-3.5 rounded-xl">
@@ -305,8 +305,8 @@ export default function WarrantyPage() {
                     </div>
                   </div>
 
-                  <Button type="submit" disabled={isSubmitting} className="w-full bg-[#0B1A2A] hover:bg-[#162a42] text-white font-black py-4 rounded-xl text-base shadow-lg transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                    {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Verifying & Registering...</> : <><ShieldCheck className="w-5 h-5 text-[#7cb93e]" /> Activate 10-Year Warranty</>}
+                  <Button type="submit" disabled={isSubmitting} className="w-full bg-[#0682E4] hover:bg-[#7cb93e] text-white font-black py-4 rounded-xl text-base shadow-lg transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Verifying & Registering...</> : <><ShieldCheck className="w-5 h-5 text-white" /> Activate 10-Year Warranty</>}
                   </Button>
                 </form>
               )}
@@ -326,7 +326,7 @@ export default function WarrantyPage() {
                     Our quality control team at the Surapet Chennai plant has received your claim. A senior technical officer will review the details and contact you within 24 hours to schedule a complimentary home inspection.
                   </p>
                   <div className="pt-4">
-                    <Button onClick={() => setClaimSuccessId("")} className="bg-[#0B1A2A] hover:bg-[#162a42] text-white font-bold px-8 py-3.5 rounded-xl">
+                    <Button onClick={() => setClaimSuccessId("")} className="bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold px-8 py-3.5 rounded-xl transition-colors">
                       Submit Another Query
                     </Button>
                   </div>

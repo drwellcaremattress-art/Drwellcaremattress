@@ -151,7 +151,7 @@ export default async function ProductPage({ params }: PageProps) {
                       </span>
                     </div>
                     <Link href={`/product/${relatedProduct.slug}`}>
-                      <button className="w-full bg-[#0B1A2A] hover:bg-gray-800 text-white rounded-lg py-3 font-semibold transition-colors">
+                      <button className="w-full bg-[#0682E4] hover:bg-[#7cb93e] text-white rounded-lg py-3 font-semibold transition-colors shadow-sm hover:shadow-md">
                         View Details
                       </button>
                     </Link>

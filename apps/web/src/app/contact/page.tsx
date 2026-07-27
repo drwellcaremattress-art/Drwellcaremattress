@@ -198,7 +198,7 @@ export default function ContactPage() {
                   <div className="pt-4">
                     <Button 
                       onClick={() => setIsSubmitted(false)} 
-                      className="bg-[#0B1A2A] hover:bg-[#162a42] text-white font-bold px-8 py-3.5 rounded-xl shadow-md"
+                      className="bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold px-8 py-3.5 rounded-xl shadow-md transition-colors"
                     >
                       Send Another Message
                     </Button>

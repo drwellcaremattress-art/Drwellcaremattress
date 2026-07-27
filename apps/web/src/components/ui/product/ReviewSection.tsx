@@ -642,7 +642,7 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
                       </button>
                       <button
                         type="submit"
-                        className="px-7 py-2.5 rounded-xl bg-[#0B1A2A] hover:bg-[#162a42] text-white font-extrabold text-sm shadow-lg flex items-center gap-2 transition-transform hover:-translate-y-0.5"
+                        className="px-7 py-2.5 rounded-xl bg-[#0682E4] hover:bg-[#7cb93e] text-white font-extrabold text-sm shadow-lg flex items-center gap-2 transition-transform hover:-translate-y-0.5"
                       >
                         Submit Verified Review <Send className="w-4 h-4 text-[#7cb93e]" />
                       </button>
@@ -665,7 +665,7 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
           <p className="text-xs text-slate-500 mb-4">Try clearing your filters or search terms to see all verified customer reviews.</p>
           <button
             onClick={() => { setActiveFilter('all'); setSearchQuery(''); }}
-            className="px-4 py-2 rounded-xl bg-[#0B1A2A] text-white font-bold text-xs"
+            className="px-4 py-2 rounded-xl bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold text-xs transition-colors"
           >
             Show All Reviews
           </button>
@@ -742,7 +742,7 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
                   onClick={() => handleLike(rev.id)}
                   className={`inline-flex items-center gap-1.5 font-bold px-4 py-2 rounded-full transition-all ${
                     likedMap[rev.id]
-                      ? 'bg-[#0B1A2A] text-white shadow-sm'
+                      ? 'bg-[#0682E4] text-white shadow-sm'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                   }`}
                 >

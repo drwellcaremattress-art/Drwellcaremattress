@@ -101,11 +101,18 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.5 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <Button size="lg" className="bg-[#7cb93e] hover:bg-[#68a032] text-white rounded-full px-8 h-14 text-base font-bold shadow-[0_8px_20px_-8px_rgba(124,185,62,0.8)] transition-all hover:-translate-y-1 group">
-                Explore Collection
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-
+              <Link href="/collections">
+                <Button size="lg" className="bg-[#7cb93e] hover:bg-[#68a032] text-white rounded-full px-8 h-14 text-base font-bold shadow-[0_8px_20px_-8px_rgba(124,185,62,0.8)] transition-all hover:-translate-y-1 group">
+                  Explore Collection
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link href="/quiz">
+                <Button size="lg" className="bg-[#0682E4] hover:bg-[#056ec1] text-white rounded-full px-8 h-14 text-base font-bold shadow-[0_8px_20px_-8px_rgba(6,130,228,0.6)] transition-all hover:-translate-y-1 group">
+                  Take Mattress Quiz
+                  <Sparkles className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
             </motion.div>
           </div>
         </div>

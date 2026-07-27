@@ -171,7 +171,7 @@ export default function ReturnsPage() {
               </div>
 
               <div className="pt-4 flex flex-wrap justify-center gap-4">
-                <Button onClick={() => setTicketId("")} className="bg-[#0B1A2A] hover:bg-[#162a42] text-white font-bold px-8 py-3.5 rounded-xl">
+                <Button onClick={() => setTicketId("")} className="bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold px-8 py-3.5 rounded-xl transition-colors">
                   Submit Another Request
                 </Button>
                 <Link href="/collections">

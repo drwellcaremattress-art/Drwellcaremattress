@@ -34,8 +34,8 @@ export default function NotFoundPage() {
 
         <div className="flex flex-wrap items-center justify-center gap-4 mb-14">
           <Link href="/">
-            <Button className="bg-[#0B1A2A] hover:bg-[#162a42] text-white font-extrabold px-8 py-4 rounded-2xl shadow-lg flex items-center gap-2 text-base">
-              <Home className="w-5 h-5 text-[#7cb93e]" /> Back to Homepage
+            <Button className="bg-[#0682E4] hover:bg-[#7cb93e] text-white font-extrabold px-8 py-4 rounded-2xl shadow-lg flex items-center gap-2 text-base transition-colors">
+              <Home className="w-5 h-5 text-white" /> Back to Homepage
             </Button>
           </Link>
 

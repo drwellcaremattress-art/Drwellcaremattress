@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, Menu, ShieldCheck, Search, Phone, Mail, X, ArrowRight } from 'lucide-react';
+import { ShoppingCart, User, Menu, ShieldCheck, Search, Phone, Mail, X, ArrowRight, Truck } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
 import { useCartStore } from '@/store/cartStore';
@@ -63,10 +63,10 @@ export function Navbar() {
         {/* Trust Badges */}
         <div className="flex items-center justify-center gap-4 md:gap-6 w-full md:w-auto text-[12px]">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-3.5 h-3.5 text-white"/>
+            <Truck className="w-3.5 h-3.5 text-white"/>
             <span className="text-white">
-              10-Year <span className="relative inline-block text-white">
-                Warranty
+              Free <span className="relative inline-block text-white">
+                Shipping
                 <svg className="absolute w-full h-1 -bottom-0.5 left-0 text-white/50" viewBox="0 0 100 20" preserveAspectRatio="none">
                   <path d="M0 10 Q50 20 100 10" stroke="currentColor" strokeWidth="12" fill="none" strokeLinecap="round" />
                 </svg>

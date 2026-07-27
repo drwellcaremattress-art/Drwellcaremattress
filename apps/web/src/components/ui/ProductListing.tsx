@@ -396,7 +396,7 @@ function ProductListingContent() {
                     </div>
                     
                     <Link href={`/product/${product.slug}`} className="mt-auto block">
-                      <Button className="w-full bg-[#0B1A2A] hover:bg-[#7cb93e] text-white rounded-xl py-6 font-bold text-[15px] shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(124,185,62,0.3)] transition-all duration-300 relative overflow-hidden group/btn">
+                      <Button className="w-full bg-[#0682E4] hover:bg-[#7cb93e] text-white rounded-xl py-6 font-bold text-[15px] shadow-[0_4px_14px_0_rgba(6,130,228,0.25)] hover:shadow-[0_6px_20px_rgba(124,185,62,0.3)] transition-all duration-300 relative overflow-hidden group/btn">
                         <span className="relative z-10 flex items-center justify-center gap-2">
                           View Details
                           <svg className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
-import { Star, ShieldCheck, Truck, Check, ChevronDown, RotateCcw, X, BedDouble, Zap } from 'lucide-react';
+import { Star, ShieldCheck, Truck, Check, ChevronDown, RotateCcw, X, BedDouble, Zap, Sparkles, Layers } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '@/store/cartStore';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -90,9 +91,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const [selectedDim, setSelectedDim] = useState('72" × 36"'); // default 72"×36"
   const selectedThickness = product.thickness || '6 Inch';
   const [popupOpen, setPopupOpen] = useState(false);
-  const [customOpen, setCustomOpen] = useState(false);
-  const [customL, setCustomL] = useState('');
-  const [customW, setCustomW] = useState('');
   const { addItem, toggleCart } = useCartStore();
   const { data: session } = useSession();
   const router = useRouter();
@@ -117,13 +115,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const discountRatio = baseOriginalPrice && displayPrice ? (baseOriginalPrice / (typeof product.price === 'number' ? product.price : (product.priceValue || displayPrice))) : 1.3;
   const displayOriginalPrice = selectedSubSize ? Math.round(selectedSubSize.price * discountRatio) : baseOriginalPrice;
 
-  // Custom size price calculation
-  const customSqft = customL && customW
-    ? ((parseFloat(customL) * parseFloat(customW)) / 144).toFixed(2)
-    : null;
-  const customPrice = customSqft
-    ? Math.round(parseFloat(customSqft) * rate)
-    : null;
 
   const handleAddToCart = () => {
     addItem({
@@ -257,102 +248,62 @@ export function ProductInfo({ product }: ProductInfoProps) {
             ))}
           </div>
 
-          {/* Custom Size Toggle */}
-          <button
-            onClick={() => setCustomOpen(o => !o)}
-            className="mt-3 w-full border border-dashed border-gray-300 rounded-xl p-3 text-sm font-medium text-[#64748b] hover:bg-gray-50 transition-colors flex items-center justify-between"
-          >
-            <span>Need a Custom Size?</span>
-            <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${customOpen ? 'rotate-180' : ''}`} />
-          </button>
+          {/* 3D Thickness Display */}
+          <div className="mt-4">
+            <div className="w-full relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-[#0B1A2A] via-[#112338] to-[#0B1A2A] text-white shadow-[0_10px_25px_-5px_rgba(6,130,228,0.3)] border border-[#0682E4]/30 flex items-center gap-4">
+              {/* Background Glow */}
+              <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#0682E4]/20 rounded-full blur-2xl" />
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-[#7cb93e]/15 rounded-full blur-2xl" />
 
-          {/* Custom Size Panel */}
-          {customOpen && (
-            <div className="mt-2 border border-dashed border-gray-200 rounded-xl p-4 bg-gray-50 space-y-4">
-              <p className="text-xs text-[#64748b] font-medium">Enter your custom dimensions (in inches):</p>
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs font-semibold text-[#0B1A2A] mb-1">Length (L)"</label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder='e.g. 75'
-                    value={customL}
-                    onChange={e => setCustomL(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B1A2A] focus:outline-none focus:border-[#055bc7] focus:ring-1 focus:ring-[#055bc7]/30 bg-white"
-                  />
+              <div className="flex items-center gap-4 relative z-10 w-full">
+                {/* 3D Isometric Floating Mattress Profile Icon */}
+                <div className="w-14 h-14 shrink-0 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center relative overflow-hidden shadow-inner">
+                  <div className="relative w-8 h-8 flex items-center justify-center" style={{ perspective: '400px' }}>
+                    <motion.div
+                      animate={{ rotateZ: [0, 3, -3, 0], y: [0, -2, 0] }}
+                      transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+                      className="relative w-full h-full flex flex-col justify-end items-center"
+                      style={{ transformStyle: 'preserve-3d', transform: 'rotateX(55deg) rotateZ(-35deg)' }}
+                    >
+                      {/* Top Comfort Layer */}
+                      <div
+                        className="w-8 h-6 rounded-sm bg-gradient-to-tr from-white via-blue-100 to-white shadow-md border border-white/80 absolute"
+                        style={{ transform: 'translateZ(10px)' }}
+                      />
+                      {/* Transition Layer */}
+                      <div
+                        className="w-8 h-6 rounded-sm bg-gradient-to-tr from-[#7cb93e] to-[#9ad15c] shadow-sm absolute opacity-90"
+                        style={{ transform: 'translateZ(5px)' }}
+                      />
+                      {/* Base Core Layer */}
+                      <div className="w-8 h-6 rounded-sm bg-gradient-to-tr from-[#0682E4] to-[#3a9ef5] shadow-lg absolute" />
+                    </motion.div>
+                  </div>
                 </div>
-                <div className="flex items-end pb-2 text-[#94a3b8] font-bold text-lg">×</div>
-                <div className="flex-1">
-                  <label className="block text-xs font-semibold text-[#0B1A2A] mb-1">Width (W)"</label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder='e.g. 42'
-                    value={customW}
-                    onChange={e => setCustomW(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B1A2A] focus:outline-none focus:border-[#055bc7] focus:ring-1 focus:ring-[#055bc7]/30 bg-white"
-                  />
+
+                {/* Text Details */}
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#7cb93e]/20 text-[#7cb93e] border border-[#7cb93e]/30 text-[10px] font-extrabold uppercase tracking-wider">
+                      <Sparkles className="w-2.5 h-2.5" /> 3D Engineered Profile
+                    </span>
+                  </div>
+                  <h4 className="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
+                    <span className="text-[#0682E4] text-2xl font-black tabular-nums">
+                      {selectedThickness.split(' ')[0]}
+                    </span>
+                    <span className="text-[#7cb93e] font-extrabold">
+                      {selectedThickness.split(' ').slice(1).join(' ')}
+                    </span>
+                    <span className="text-white/80 font-semibold text-sm">Orthopaedic Thickness</span>
+                  </h4>
+                  <p className="text-xs text-slate-300 font-medium line-clamp-1">
+                    Multi-layered foam calibration & spine alignment
+                  </p>
                 </div>
               </div>
-
-              {customSqft && customPrice && (
-                <div className="bg-white border border-[#055bc7]/20 rounded-xl p-3 flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] text-[#64748b] font-medium">
-                      {customL}" × {customW}" = <span className="font-bold text-[#0B1A2A]">{customSqft} sq.ft</span>
-                    </p>
-                    <p className="text-[11px] text-[#64748b] mt-0.5">Estimated price</p>
-                  </div>
-                  <span className="text-lg font-black text-[#055bc7]">
-                    ₹{customPrice.toLocaleString('en-IN')}
-                  </span>
-                </div>
-              )}
-
-              {customSqft && customPrice && (
-                <div className="flex flex-col gap-2">
-                  <button
-                    onClick={() => {
-                      addItem({
-                        id: product.id.toString(),
-                        name: product.title,
-                        size: `Custom ${customL}" × ${customW}" - ${selectedThickness}`,
-                        price: customPrice,
-                        image: product.images[0],
-                        qty: 1,
-                      });
-                      toggleCart();
-                    }}
-                    className="w-full bg-[#055bc7] hover:bg-[#044aab] text-white rounded-xl py-2.5 font-bold text-sm transition-colors"
-                  >
-                    Add Custom Size to Cart — ₹{customPrice.toLocaleString('en-IN')}
-                  </button>
-                  <button
-                    onClick={() => {
-                      addItem({
-                        id: product.id.toString(),
-                        name: product.title,
-                        size: `Custom ${customL}" × ${customW}" - ${selectedThickness}`,
-                        price: customPrice,
-                        image: product.images[0],
-                        qty: 1,
-                      });
-                      if (!session) {
-                        alert('Please login or create an account first to complete your purchase!');
-                        router.push('/login?callbackUrl=/checkout');
-                      } else {
-                        router.push('/checkout');
-                      }
-                    }}
-                    className="w-full bg-[#0B1A2A] hover:bg-[#162a42] text-white rounded-xl py-2.5 font-extrabold text-sm transition-colors flex items-center justify-center gap-1.5 shadow-sm"
-                  >
-                    <Zap className="w-4 h-4 text-[#7cb93e] fill-[#7cb93e]" /> Buy Custom Size Now
-                  </button>
-                </div>
-              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Actions */}
@@ -366,7 +317,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           </Button>
           <Button
             size="lg"
-            className="w-full bg-[#0B1A2A] hover:bg-[#162a42] text-white h-14 rounded-xl font-extrabold text-base shadow-md transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
+            className="w-full bg-[#0682E4] hover:bg-[#7cb93e] text-white h-14 rounded-xl font-extrabold text-base shadow-md transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
             onClick={() => {
               handleAddToCart();
               if (!session) {

@@ -202,8 +202,8 @@ export default function QuizPage() {
 
                   <div className="flex items-center gap-3 w-full sm:w-auto">
                     <Link href={result.link} className="flex-1 sm:flex-none">
-                      <Button className="w-full bg-[#0B1A2A] hover:bg-[#162a42] text-white font-extrabold px-8 py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 text-base">
-                        <ShoppingBag className="w-5 h-5 text-[#7cb93e]" /> View &amp; Shop This Mattress
+                      <Button className="w-full bg-[#0682E4] hover:bg-[#7cb93e] text-white font-extrabold px-8 py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 text-base transition-colors">
+                        <ShoppingBag className="w-5 h-5 text-white" /> View &amp; Shop This Mattress
                       </Button>
                     </Link>
                   </div>

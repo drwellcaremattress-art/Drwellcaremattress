@@ -120,9 +120,9 @@ export default function FAQPage() {
                 downloadPdf('/catalogue-1.pdf', 'DR.WELL CARE CATALOGUE (1).pdf');
                 downloadPdf('/catalogue-2.pdf', 'DR.WELL CARE CATALOGUE (2).pdf');
               }}
-              className="w-full mt-4 py-3 rounded-2xl bg-[#0B1A2A] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#16273B]"
+              className="w-full mt-4 py-3 rounded-2xl bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors"
             >
-              <Download className="w-4 h-4 text-[#7cb93e]" /> Download Both Catalogues (.pdf)
+              <Download className="w-4 h-4 text-white" /> Download Both Catalogues (.pdf)
             </button>
           </div>
         </div>
@@ -207,7 +207,7 @@ export default function FAQPage() {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link 
               href="/contact" 
-              className="bg-[#0B1A2A] hover:bg-[#16273B] text-white px-8 py-4 rounded-xl font-bold shadow-lg transition-transform hover:-translate-y-0.5 flex items-center justify-center"
+              className="bg-[#0682E4] hover:bg-[#7cb93e] text-white px-8 py-4 rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center justify-center"
             >
               Contact Support
             </Link>
