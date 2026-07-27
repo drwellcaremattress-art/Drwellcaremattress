@@ -227,8 +227,6 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
   // Initialize reviews from API, LocalStorage, and Authentic Library
   useEffect(() => {
     let isMounted = true;
-    const baseAuthentic = getAuthenticReviews(productName, productCategory);
-
     // 1. Read locally submitted reviews from localStorage
     let localReviews: Review[] = [];
     try {
@@ -278,11 +276,6 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
       // Prepend user local reviews first so they appear at the top
       localReviews.forEach(r => mergedMap.set(r.id, r));
       dbReviews.forEach(r => mergedMap.set(r.id, r));
-      baseAuthentic.forEach(r => {
-        if (!mergedMap.has(r.id)) {
-          mergedMap.set(r.id, r);
-        }
-      });
 
       setReviews(Array.from(mergedMap.values()));
       setIsLoading(false);
@@ -430,14 +423,16 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
         {/* Rating Score */}
         <div className="lg:col-span-4 flex flex-col items-center justify-center text-center border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 pb-6 lg:pb-0 lg:pr-6">
           <div className="text-6xl font-black text-[#0B1A2A] dark:text-white font-heading tracking-tight">
-            {averageRating}
+            {reviews.length > 0 ? averageRating : 'New'}
           </div>
           <div className="flex items-center gap-1.5 my-2.5">
             {[1, 2, 3, 4, 5].map((star) => (
-              <Star key={star} className="w-6 h-6 fill-amber-400 text-amber-400 drop-shadow-sm" />
+              <Star key={star} className={`w-6 h-6 ${reviews.length > 0 ? 'fill-amber-400 text-amber-400' : 'text-slate-300'} drop-shadow-sm`} />
             ))}
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-300 font-bold">Based on {reviews.length} Verified Customer Ratings</p>
+          <p className="text-sm text-slate-600 dark:text-slate-300 font-bold">
+            {reviews.length > 0 ? `Based on ${reviews.length} Verified Customer Ratings` : 'No reviews yet — be the first to review!'}
+          </p>
           <div className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-700 dark:text-emerald-400 mt-3.5 bg-emerald-100/70 dark:bg-emerald-950/70 px-4 py-1.5 rounded-full border border-emerald-300/50 shadow-xs">
             <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             99.2% Clinically & Household Approved
@@ -661,14 +656,27 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
       ) : filteredReviews.length === 0 ? (
         <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800">
           <MessageSquare className="w-12 h-12 mx-auto text-slate-300 mb-3" />
-          <h4 className="text-lg font-bold text-[#0B1A2A] dark:text-white mb-1">No reviews found matching your search/filter</h4>
-          <p className="text-xs text-slate-500 mb-4">Try clearing your filters or search terms to see all verified customer reviews.</p>
-          <button
-            onClick={() => { setActiveFilter('all'); setSearchQuery(''); }}
-            className="px-4 py-2 rounded-xl bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold text-xs transition-colors"
-          >
-            Show All Reviews
-          </button>
+          <h4 className="text-lg font-bold text-[#0B1A2A] dark:text-white mb-1">
+            {reviews.length === 0 ? "No reviews yet for this product" : "No reviews found matching your search/filter"}
+          </h4>
+          <p className="text-xs text-slate-500 mb-4">
+            {reviews.length === 0 ? "Be the first verified customer to share your experience with this mattress!" : "Try clearing your filters or search terms to see all verified customer reviews."}
+          </p>
+          {reviews.length === 0 ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-6 py-3 rounded-xl bg-[#0682E4] hover:bg-[#7cb93e] text-white font-extrabold text-xs transition-all shadow-md"
+            >
+              Write First Review
+            </button>
+          ) : (
+            <button
+              onClick={() => { setActiveFilter('all'); setSearchQuery(''); }}
+              className="px-4 py-2 rounded-xl bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold text-xs transition-colors"
+            >
+              Show All Reviews
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">

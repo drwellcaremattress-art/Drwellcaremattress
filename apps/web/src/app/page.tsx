@@ -574,11 +574,11 @@ export default function Home() {
                 {/* Product cards */}
                 <div className="space-y-3 flex-grow">
                   {[
-                    { name: "Lax-o-Bond (6\" & 8\")", desc: "Flagship Bonded\nOrthopaedic Support", tag: "BEST SELLER", tagBorder: "border-[#f59e0b]", tagText: "text-[#f59e0b]", tagIcon: <Award className="w-3.5 h-3.5" />, image: "/images/products/lax-o-bond-6.jpeg" },
+                    { name: "Softy Bond (6\" & 8\")", desc: "Soft Comfort Layer\nover Ortho Bond", tag: "NEW", tagBorder: "border-[#22c55e]", tagText: "text-[#22c55e]", tagIcon: <Zap className="w-3.5 h-3.5" />, image: "/images/products/softy-bond-6.jpeg" },
+                    { name: "Softy Bond Plus", desc: "Deep Plush Cushioning &\nFirm Spine Alignment", tag: "EXCLUSIVE", tagBorder: "border-[#f59e0b]", tagText: "text-[#f59e0b]", tagIcon: <ShieldCheck className="w-3.5 h-3.5" />, image: "/images/products/softy-bond-plus-8.jpeg" },
                     { name: "Memory Bond", desc: "Bonded Foam with\nPlush Memory Top", tag: "POPULAR", tagBorder: "border-[#3b82f6]", tagText: "text-[#3b82f6]", tagIcon: <Star className="w-3.5 h-3.5" />, image: "/images/products/memory-bond-6.jpeg" },
                     { name: "Memory Bond Plus", desc: "Enhanced Memory Contour\n& Bonded Core", tag: "PREMIUM", tagBorder: "border-[#22c55e]", tagText: "text-[#22c55e]", tagIcon: <Sparkles className="w-3.5 h-3.5" />, image: "/images/products/memory-bond-plus-8.jpeg" },
-                    { name: "Softy Bond", desc: "Soft Comfort Layer\nover Ortho Bond", tag: "NEW", tagBorder: "border-[#22c55e]", tagText: "text-[#22c55e]", tagIcon: <Zap className="w-3.5 h-3.5" />, image: "/images/products/softy-bond-6.jpeg" },
-                    { name: "Softy Bond Plus", desc: "Deep Plush Cushioning &\nFirm Spine Alignment", tag: "EXCLUSIVE", tagBorder: "border-[#f59e0b]", tagText: "text-[#f59e0b]", tagIcon: <ShieldCheck className="w-3.5 h-3.5" />, image: "/images/products/softy-bond-plus-8.jpeg" },
+                    { name: "Lax-o-Bond (6\" & 8\")", desc: "Flagship Bonded\nOrthopaedic Support", tag: "BEST SELLER", tagBorder: "border-[#f59e0b]", tagText: "text-[#f59e0b]", tagIcon: <Award className="w-3.5 h-3.5" />, image: "/images/products/lax-o-bond-6.jpeg" },
                   ].map((prod, idx) => (
                     <Link key={idx} href="/collections?type=Bonded+Series" className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.06] hover:border-[#0682E4]/30 transition-all cursor-pointer group">
                       {/* Product thumbnail */}

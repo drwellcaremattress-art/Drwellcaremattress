@@ -15,13 +15,13 @@ import {
   Filter
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { PRODUCT_CATALOG } from '@/lib/catalog';
+import { PRODUCT_CATALOG, getDeduplicatedCatalog } from '@/lib/catalog';
 
 function ProductListingContent() {
   const searchParams = useSearchParams();
   const typeParam = searchParams ? searchParams.get('type') : null;
 
-  const defaultProducts = PRODUCT_CATALOG;
+  const defaultProducts = getDeduplicatedCatalog();
 
   const [products, setProducts] = useState<any[]>(defaultProducts);
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -73,21 +73,56 @@ function ProductListingContent() {
           'budget': 'Budget Mattress'
         };
         
-        const mapped = res.data.map((p: any, idx: number) => {
+        const staticDedupe = getDeduplicatedCatalog();
+        const seenNames = new Set<string>();
+        const cleanName = (name: string) => (name || 'Mattress').replace(/\s*-\s*\d+\s*(inch|")?|\s+\d+\s*(inch|")?$/i, '').replace(/\s+plus$/i, '').trim();
+
+        const mapped: any[] = [];
+        
+        staticDedupe.forEach((s, idx) => {
+          seenNames.add(s.title.toLowerCase().trim());
+          const priceVal = s.priceValue || 12999;
+          mapped.push({
+            id: s.id || idx + 1,
+            title: s.title,
+            slug: s.slug,
+            type: s.type || 'Orthopaedic',
+            firmness: s.firmness || 'Medium Firm',
+            subtitle: s.subtitle || 'Premium Mattress',
+            description: s.description || 'Advanced spine support and pressure relief.',
+            badge: s.badge || (idx === 0 ? 'BEST SELLER' : (idx === 1 ? 'NEW' : 'POPULAR')),
+            badgeColor: s.badgeColor || (idx % 2 === 0 ? 'bg-[#7cb93e] text-white' : 'bg-[#3b82f6] text-white'),
+            thickness: s.thickness,
+            price: s.price || `₹${priceVal.toLocaleString('en-IN')}`,
+            priceValue: priceVal,
+            originalPrice: s.originalPrice || Math.round(priceVal * 1.3),
+            sqftPrice: s.sqftPrice || 546,
+            warranty: s.warranty || 10,
+            image: s.image || "/images/products/ecolatex-6.jpeg",
+            thicknessVariants: s.thicknessVariants
+          });
+        });
+
+        res.data.forEach((p: any, idx: number) => {
+          const baseName = cleanName(p.name);
+          const nameLower = baseName.toLowerCase();
+          if (seenNames.has(nameLower)) return;
+          seenNames.add(nameLower);
+
           const firstVariant = p.variants && p.variants[0] ? p.variants[0] : null;
           const priceVal = p.sqftPrice ? p.sqftPrice * 18 : (firstVariant ? firstVariant.price : 12999);
           const thicknessVal = p.thickness || (firstVariant && firstVariant.thickness_cm ? `${Math.round(firstVariant.thickness_cm / 2.54)} Inch` : '6 Inch');
-          
-          return {
-            id: p._id || idx + 1,
-            title: p.name || 'Mattress',
+
+          mapped.push({
+            id: p._id || staticDedupe.length + idx + 1,
+            title: baseName,
             slug: p.slug,
             type: typeMap[p.category] || p.category || 'Orthopaedic',
             firmness: p.firmness || 'Medium Firm',
             subtitle: p.description ? p.description.split('.')[0] : 'Premium Mattress',
             description: p.description || 'Advanced spine support and pressure relief.',
-            badge: idx === 0 ? 'BEST SELLER' : (idx === 1 ? 'NEW' : 'POPULAR'),
-            badgeColor: idx % 2 === 0 ? 'bg-[#7cb93e] text-white' : 'bg-[#3b82f6] text-white',
+            badge: 'NEW',
+            badgeColor: 'bg-[#3b82f6] text-white',
             thickness: thicknessVal,
             price: `₹${priceVal.toLocaleString('en-IN')}`,
             priceValue: priceVal,
@@ -95,8 +130,9 @@ function ProductListingContent() {
             sqftPrice: p.sqftPrice || 546,
             warranty: p.warranty_years || p.warranty || 10,
             image: p.images && p.images[0] ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : "/images/products/ecolatex-6.jpeg"
-          };
+          });
         });
+
         setProducts(mapped);
       }
     }).catch(err => {
@@ -148,15 +184,21 @@ function ProductListingContent() {
   const processedProducts = useMemo(() => {
     let filtered = products.filter(p => {
       let typeMatch = selectedTypes.length === 0 || selectedTypes.some(t => {
-        const titleLower = (p.title || '').toLowerCase();
-        const slugLower = (p.slug || '').toLowerCase();
-        const typeLower = (p.type || '').toLowerCase();
+        const titleLower = (p.title || '').toLowerCase().trim();
+        const slugLower = (p.slug || '').toLowerCase().trim();
+        const typeLower = (p.type || '').toLowerCase().trim();
         if (t === 'Latex') return typeLower === 'latex' || titleLower.includes('latex') || slugLower.includes('lax-o-bond') || slugLower.includes('ecolatex');
         if (t === 'Memory Foam') return typeLower === 'memory foam' || titleLower.includes('memory') || slugLower.includes('memory');
         if (t === 'Pocket Spring') return typeLower === 'pocket spring' || titleLower.includes('pocket') || slugLower.includes('luxoria');
-        if (t === 'Bonded Series') return typeLower === 'bonded series' || titleLower.includes('bond') || slugLower.includes('bond') || titleLower.includes('lax-o-bond');
-        if (t === 'Luxury HR Series') return typeLower === 'luxury hr series' || titleLower.includes('hr') || slugLower.includes('luxoria') || titleLower.includes('natural latex') || p.badge === 'LUXURY' || typeLower === 'pocket spring' || titleLower.includes('memory dump') || titleLower.includes('memory bond');
-        if (t === 'Budget Mattress') return typeLower === 'budget mattress' || titleLower.includes('mona') || slugLower.includes('mona') || titleLower.includes('budget');
+        if (t === 'Bonded Series' || t === 'Bonded') {
+          return slugLower.includes('softy-bond') || slugLower.includes('memory-bond') || slugLower.includes('lax-o-bond') || titleLower.includes('softy bond') || titleLower.includes('memory bond') || titleLower.includes('lax-o-bond');
+        }
+        if (t === 'Luxury HR Series' || t === 'HR Series' || t === 'HR series') {
+          return slugLower.includes('mona-lite') || slugLower.includes('mona-softy') || slugLower.includes('ecolatex') || slugLower === 'luxoria' || slugLower.includes('luxoria-latex') || slugLower.includes('memory-dump') || titleLower.includes('mona lite') || titleLower.includes('mona softy') || titleLower.includes('eco latex') || titleLower === 'luxoria' || titleLower.includes('luxoria latex') || titleLower.includes('memory dump');
+        }
+        if (t === 'Budget Mattress' || t === 'Budget') {
+          return slugLower.includes('mona-lite') || slugLower.includes('mona-softy') || titleLower.includes('mona lite') || titleLower.includes('mona softy');
+        }
         return p.type === t;
       });
       let firmnessMatch = selectedFirmnesses.length === 0 || selectedFirmnesses.includes(p.firmness);
@@ -165,14 +207,32 @@ function ProductListingContent() {
       return typeMatch && firmnessMatch && sizeMatch;
     });
 
-    // Sorting
+    // Sorting & Custom Sequence Enforcement
     if (sortBy === 'Price: Low to High') {
       filtered.sort((a, b) => a.priceValue - b.priceValue);
     } else if (sortBy === 'Price: High to Low') {
       filtered.sort((a, b) => b.priceValue - a.priceValue);
     } else if (sortBy === 'Newest Arrivals') {
       filtered.sort((a, b) => b.id - a.id);
-    } // 'Best Selling' -> default order
+    } else {
+      // Best Selling / Default: enforce exact requested display order
+      const getMasterRank = (item: any) => {
+        const t = (item.title || item.name || '').toLowerCase().trim();
+        const s = (item.slug || '').toLowerCase().trim();
+        if (t === 'mona lite' || s.includes('mona-lite')) return 1;
+        if (t === 'mona softy' || s.includes('mona-softy')) return 2;
+        if (t === 'eco latex' || s.includes('ecolatex')) return 3;
+        if (t === 'luxoria' || s === 'luxoria') return 4;
+        if (t === 'luxoria latex' || s.includes('luxoria-latex')) return 5;
+        if (t === 'memory dump' || s.includes('memory-dump')) return 6;
+        if (t === 'softy bond' || s.includes('softy-bond')) return 7;
+        if (t === 'memory bond' || s.includes('memory-bond')) return 8;
+        if (t === 'lax-o-bond' || s.includes('lax-o-bond')) return 9;
+        if (t === 'natural latex' || s.includes('natural-latex')) return 10;
+        return 99;
+      };
+      filtered.sort((a, b) => getMasterRank(a) - getMasterRank(b));
+    }
 
     return filtered;
   }, [products, selectedTypes, selectedFirmnesses, selectedSizes, sortBy]);

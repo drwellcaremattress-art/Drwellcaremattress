@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Review } from '@/lib/models/Review';
 import { Product } from '@/lib/models/Product';
+import { User } from '@/lib/models/User';
 import { protect } from '@/lib/authMiddleware';
 
 export async function POST(
@@ -23,14 +24,22 @@ export async function POST(
     // Express path was /api/products/:id/reviews, let's assume params.slug is the productId
     const productId = params.slug;
 
-    const product = await Product.findById(productId);
+    let product = null;
+    if (productId.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findById(productId);
+    }
+    if (!product) {
+      product = await Product.findOne({ slug: productId }) || await Product.findOne({ slug: productId.replace(/-\d+(inch|")?$/i, '') });
+    }
 
     if (!product) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
+    const targetId = product.slug || productId;
+
     const alreadyReviewed = await Review.findOne({
-      productId,
+      productId: targetId,
       userId: user._id,
     });
 
@@ -39,7 +48,7 @@ export async function POST(
     }
 
     const review = await Review.create({
-      productId,
+      productId: targetId,
       userId: user._id,
       rating: Number(rating),
       body: body || 'Great product',
@@ -47,11 +56,11 @@ export async function POST(
       verifiedPurchase: true,
     });
 
-    const allReviews = await Review.find({ productId });
+    const allReviews = await Review.find({ productId: targetId });
     
     product.ratingCount = allReviews.length;
     product.ratingAvg =
-      allReviews.reduce((acc: number, item: any) => item.rating + acc, 0) / allReviews.length;
+      allReviews.reduce((acc: number, item: any) => item.rating + acc, 0) / (allReviews.length || 1);
 
     await product.save();
 
@@ -70,10 +79,16 @@ export async function GET(
     await connectDB();
     const productId = params.slug;
     
-    const reviews = await Review.find({ productId }).populate('userId', 'name');
+    const baseSlug = productId.replace(/-\d+(inch|")?$/i, '');
+    const queryIds = [productId];
+    if (baseSlug !== productId) {
+      queryIds.push(baseSlug);
+    }
+
+    const reviews = await Review.find({ productId: { $in: queryIds } }).populate('userId', 'name').sort({ createdAt: -1 });
     return NextResponse.json(reviews);
   } catch (error: any) {
-    console.error(error);
+    console.error("Error fetching reviews:", error);
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

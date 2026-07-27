@@ -12,7 +12,7 @@ export interface IReview extends Document {
 
 const ReviewSchema: Schema = new Schema(
   {
-    productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+    productId: { type: Schema.Types.Mixed, required: true },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
     title: { type: String, required: true },
@@ -24,5 +24,9 @@ const ReviewSchema: Schema = new Schema(
     timestamps: true,
   }
 );
+
+if (process.env.NODE_ENV !== 'production') {
+  delete mongoose.models.Review;
+}
 
 export const Review = mongoose.models.Review || mongoose.model<IReview>('Review', ReviewSchema);

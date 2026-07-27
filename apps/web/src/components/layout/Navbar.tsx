@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
 import { Button } from '../ui/button';
 import { useCartStore } from '@/store/cartStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PRODUCT_CATALOG } from '@/lib/catalog';
+import { getDeduplicatedCatalog } from '@/lib/catalog';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -25,7 +25,7 @@ export function Navbar() {
   const matchingProducts = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.trim().toLowerCase();
-    return PRODUCT_CATALOG.filter(p => 
+    return getDeduplicatedCatalog().filter(p => 
       p.title.toLowerCase().includes(query) || 
       p.subtitle.toLowerCase().includes(query) || 
       p.description.toLowerCase().includes(query) ||

@@ -83,13 +83,17 @@ const getDynamicSizeData = (rate: number) => {
 };
 
 export function ProductInfo({ product }: ProductInfoProps) {
-  // Determine exact price per sq.ft rate for this product
-  const rate = product.sqftPrice || Math.round((typeof product.price === 'number' ? product.price : (product.priceValue || 9828)) / 18) || 546;
+  const initialVariantIndex = product.thicknessVariants ? Math.max(0, product.thicknessVariants.findIndex((v: any) => v.slug === product.slug || v.thickness === product.thickness)) : 0;
+  const [activeVariantIndex, setActiveVariantIndex] = useState<number>(initialVariantIndex);
+  const activeVariant = product.thicknessVariants && product.thicknessVariants.length > 0 ? product.thicknessVariants[activeVariantIndex] : null;
+
+  // Determine exact price per sq.ft rate for this product or selected thickness variant
+  const rate = (activeVariant ? activeVariant.sqftPrice : product.sqftPrice) || Math.round((typeof product.price === 'number' ? product.price : (product.priceValue || 9828)) / 18) || 546;
   const SIZE_DATA = getDynamicSizeData(rate);
 
   const [selectedSize, setSelectedSize] = useState('Single');
   const [selectedDim, setSelectedDim] = useState('72" × 36"'); // default 72"×36"
-  const selectedThickness = product.thickness || '6 Inch';
+  const selectedThickness = activeVariant ? activeVariant.thickness : (product.thickness || '6 Inch');
   const [popupOpen, setPopupOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [customL, setCustomL] = useState('');
@@ -113,8 +117,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const selectedSubSize = sizeData.rows.find(r => r.dim === selectedDim) || sizeData.rows.find(r => r.dim === '72" × 36"') || sizeData.rows[0];
 
   // Derived price shown in the UI
-  const displayPrice = selectedSubSize ? selectedSubSize.price : (typeof product.price === 'number' ? product.price : (product.priceValue || 9828));
-  const baseOriginalPrice = product.originalPrice || Math.round(displayPrice * 1.3);
+  const basePriceVal = activeVariant ? activeVariant.priceValue : (typeof product.price === 'number' ? product.price : (product.priceValue || 9828));
+  const displayPrice = selectedSubSize ? selectedSubSize.price : basePriceVal;
+  const baseOriginalPrice = activeVariant ? activeVariant.originalPrice : (product.originalPrice || Math.round(displayPrice * 1.3));
   const discountRatio = baseOriginalPrice && displayPrice ? (baseOriginalPrice / (typeof product.price === 'number' ? product.price : (product.priceValue || displayPrice))) : 1.3;
 
   // Custom size price calculation
@@ -125,15 +130,15 @@ export function ProductInfo({ product }: ProductInfoProps) {
     ? Math.round(parseFloat(customSqft) * rate)
     : null;
   const displayOriginalPrice = selectedSubSize ? Math.round(selectedSubSize.price * discountRatio) : baseOriginalPrice;
-
+  const displayWarranty = activeVariant ? activeVariant.warranty : (product.warranty || 10);
 
   const handleAddToCart = () => {
     addItem({
-      id: product.id.toString(),
+      id: activeVariant ? activeVariant.slug : product.id.toString(),
       name: product.title,
       size: selectedSubSize ? `${selectedSize} (${selectedSubSize.dim}) - ${selectedThickness}` : `${selectedSize} - ${selectedThickness}`,
       price: displayPrice,
-      image: product.images[0],
+      image: activeVariant && activeVariant.image ? activeVariant.image : (product.images && product.images[0] ? product.images[0] : ''),
       qty: 1,
     });
     toggleCart();
@@ -182,7 +187,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 {product.title}
               </h1>
               <p className="text-[#5B6B7B] text-sm sm:text-base font-medium">
-                {product.subtitle}
+                {activeVariant ? activeVariant.subtitle : product.subtitle}
               </p>
             </div>
 
@@ -202,9 +207,15 @@ export function ProductInfo({ product }: ProductInfoProps) {
                   {' '}({selectedSubSize.sqft} sq.ft)
                 </p>
               )}
-              <p className="text-xs font-bold text-[#0B1A2A] bg-green-50 text-green-700 px-2 py-1 rounded inline-block">
-                You save ₹{(displayOriginalPrice - displayPrice).toLocaleString('en-IN', {maximumFractionDigits: 0})} ({(100 - (displayPrice / displayOriginalPrice) * 100).toFixed(0)}% OFF)
-              </p>
+              <div className="flex flex-wrap items-center gap-2.5 mt-1.5">
+                <span className="text-xs font-bold text-green-700 bg-green-50 px-2.5 py-1 rounded-lg border border-green-200/60 inline-flex items-center">
+                  You save ₹{(displayOriginalPrice - displayPrice).toLocaleString('en-IN', {maximumFractionDigits: 0})} ({(100 - (displayPrice / displayOriginalPrice) * 100).toFixed(0)}% OFF)
+                </span>
+                <span className="text-xs font-extrabold text-[#0682E4] bg-[#0682E4]/10 px-3 py-1 rounded-lg border border-[#0682E4]/20 inline-flex items-center gap-1.5 shadow-2xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#0682E4]" />
+                  Rate: ₹{rate}/Sq.Ft
+                </span>
+              </div>
             </div>
           </div>
 
@@ -214,7 +225,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
             <ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] mb-1 z-10" strokeWidth={2} />
             <div className="text-center z-10 relative">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 border-[2px] sm:border-[3px] border-[#7cb93e] border-b-transparent rounded-full opacity-80 pointer-events-none"></div>
-              <span className="block text-white font-black text-3xl sm:text-4xl leading-none tracking-tighter mt-1 drop-shadow-md">{product.warranty || 10}</span>
+              <span className="block text-white font-black text-3xl sm:text-4xl leading-none tracking-tighter mt-1 drop-shadow-md">{displayWarranty}</span>
               <span className="block text-white font-bold text-[9px] sm:text-[11px] tracking-[0.2em] uppercase mt-1 drop-shadow-sm">Year</span>
             </div>
             <div className="relative mt-2 z-10 w-[115%]">
@@ -259,60 +270,93 @@ export function ProductInfo({ product }: ProductInfoProps) {
             ))}
           </div>
 
-          {/* 3D Thickness Display */}
-          <div className="mt-4">
-            <div className="w-full relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-[#0B1A2A] via-[#112338] to-[#0B1A2A] text-white shadow-[0_10px_25px_-5px_rgba(6,130,228,0.3)] border border-[#0682E4]/30 flex items-center gap-4">
-              {/* Background Glow */}
-              <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#0682E4]/20 rounded-full blur-2xl" />
-              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-[#7cb93e]/15 rounded-full blur-2xl" />
+          {/* Interactive 3D Thickness Selector */}
+          <div className="mt-5">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-sm font-bold text-[#0B1A2A] flex items-center gap-2">
+                Select Thickness
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#7cb93e]/20 text-[#5a8b2a] border border-[#7cb93e]/30 text-[10px] font-extrabold uppercase tracking-wider">
+                  <Sparkles className="w-2.5 h-2.5" /> 3D Engineered Profile
+                </span>
+              </h3>
+            </div>
 
-              <div className="flex items-center gap-4 relative z-10 w-full">
-                {/* 3D Isometric Floating Mattress Profile Icon */}
-                <div className="w-14 h-14 shrink-0 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center relative overflow-hidden shadow-inner">
-                  <div className="relative w-8 h-8 flex items-center justify-center" style={{ perspective: '400px' }}>
-                    <motion.div
-                      animate={{ rotateZ: [0, 3, -3, 0], y: [0, -2, 0] }}
-                      transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
-                      className="relative w-full h-full flex flex-col justify-end items-center"
-                      style={{ transformStyle: 'preserve-3d', transform: 'rotateX(55deg) rotateZ(-35deg)' }}
-                    >
-                      {/* Top Comfort Layer */}
-                      <div
-                        className="w-8 h-6 rounded-sm bg-gradient-to-tr from-white via-blue-100 to-white shadow-md border border-white/80 absolute"
-                        style={{ transform: 'translateZ(10px)' }}
-                      />
-                      {/* Transition Layer */}
-                      <div
-                        className="w-8 h-6 rounded-sm bg-gradient-to-tr from-[#7cb93e] to-[#9ad15c] shadow-sm absolute opacity-90"
-                        style={{ transform: 'translateZ(5px)' }}
-                      />
-                      {/* Base Core Layer */}
-                      <div className="w-8 h-6 rounded-sm bg-gradient-to-tr from-[#0682E4] to-[#3a9ef5] shadow-lg absolute" />
-                    </motion.div>
-                  </div>
-                </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {(product.thicknessVariants && product.thicknessVariants.length > 0 ? product.thicknessVariants : [{ thickness: product.thickness || '6 Inch', priceValue: product.price, price: typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price }]).map((variant: any, idx: number) => {
+                const isSelected = product.thicknessVariants && product.thicknessVariants.length > 0 ? activeVariantIndex === idx : true;
+                const thickNum = variant.thickness.split(' ')[0];
+                const thickUnit = variant.thickness.split(' ').slice(1).join(' ') || 'Inch';
+                
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      if (product.thicknessVariants && product.thicknessVariants.length > 0) {
+                        setActiveVariantIndex(idx);
+                        if (variant.slug && typeof window !== 'undefined') {
+                          window.history.replaceState(null, '', `/product/${variant.slug}`);
+                        }
+                      }
+                    }}
+                    className={`relative overflow-hidden rounded-2xl p-3.5 transition-all duration-300 text-left flex flex-col justify-between border-2 group cursor-pointer ${
+                      isSelected
+                        ? 'bg-gradient-to-br from-[#0B1A2A] via-[#112338] to-[#0B1A2A] text-white border-[#0682E4] shadow-[0_10px_25px_-5px_rgba(6,130,228,0.35)] -translate-y-0.5'
+                        : 'bg-white text-[#0B1A2A] border-gray-100 hover:border-[#0682E4]/40 hover:bg-gray-50/50 shadow-sm'
+                    }`}
+                  >
+                    {isSelected && (
+                      <>
+                        <div className="absolute -right-6 -top-6 w-20 h-20 bg-[#0682E4]/20 rounded-full blur-xl pointer-events-none" />
+                        <div className="absolute -left-6 -bottom-6 w-20 h-20 bg-[#7cb93e]/15 rounded-full blur-xl pointer-events-none" />
+                      </>
+                    )}
 
-                {/* Text Details */}
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#7cb93e]/20 text-[#7cb93e] border border-[#7cb93e]/30 text-[10px] font-extrabold uppercase tracking-wider">
-                      <Sparkles className="w-2.5 h-2.5" /> 3D Engineered Profile
-                    </span>
-                  </div>
-                  <h4 className="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
-                    <span className="text-[#0682E4] text-2xl font-black tabular-nums">
-                      {selectedThickness.split(' ')[0]}
-                    </span>
-                    <span className="text-[#7cb93e] font-extrabold">
-                      {selectedThickness.split(' ').slice(1).join(' ')}
-                    </span>
-                    <span className="text-white/80 font-semibold text-sm">Orthopaedic Thickness</span>
-                  </h4>
-                  <p className="text-xs text-slate-300 font-medium line-clamp-1">
-                    Multi-layered foam calibration & spine alignment
-                  </p>
-                </div>
-              </div>
+                    <div className="flex justify-between items-start w-full mb-2 relative z-10">
+                      <div className="w-9 h-9 shrink-0 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center relative overflow-hidden shadow-inner">
+                        <div className="relative w-5 h-5 flex items-center justify-center" style={{ perspective: '400px' }}>
+                          <motion.div
+                            animate={isSelected ? { rotateZ: [0, 3, -3, 0], y: [0, -1, 0] } : {}}
+                            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+                            className="relative w-full h-full flex flex-col justify-end items-center"
+                            style={{ transformStyle: 'preserve-3d', transform: 'rotateX(55deg) rotateZ(-35deg)' }}
+                          >
+                            <div
+                              className="w-5 h-4 rounded-sm bg-gradient-to-tr from-white via-blue-100 to-white shadow-md border border-white/80 absolute"
+                              style={{ transform: 'translateZ(6px)' }}
+                            />
+                            <div
+                              className="w-5 h-4 rounded-sm bg-gradient-to-tr from-[#7cb93e] to-[#9ad15c] shadow-sm absolute opacity-90"
+                              style={{ transform: 'translateZ(3px)' }}
+                            />
+                            <div className="w-5 h-4 rounded-sm bg-gradient-to-tr from-[#0682E4] to-[#3a9ef5] shadow-lg absolute" />
+                          </motion.div>
+                        </div>
+                      </div>
+
+                      {isSelected && (
+                        <span className="w-5 h-5 rounded-full bg-[#7cb93e] flex items-center justify-center text-[#0B1A2A] shadow-md">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="relative z-10">
+                      <div className="flex items-baseline gap-1">
+                        <span className={`text-2xl font-black tabular-nums tracking-tight ${isSelected ? 'text-white' : 'text-[#0B1A2A]'}`}>
+                          {thickNum}
+                        </span>
+                        <span className={`text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-[#7cb93e]' : 'text-[#64748b]'}`}>
+                          {thickUnit}
+                        </span>
+                      </div>
+                      <div className={`text-[11px] font-semibold mt-1 ${isSelected ? 'text-slate-300' : 'text-[#64748b]'}`}>
+                        {variant.price || (variant.priceValue ? `₹${variant.priceValue.toLocaleString('en-IN')}` : '')}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -321,7 +365,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
             onClick={() => setCustomOpen(o => !o)}
             className="mt-3 w-full border border-dashed border-gray-300 rounded-xl p-3 text-sm font-medium text-[#64748b] hover:bg-gray-50 transition-colors flex items-center justify-between"
           >
-            <span>Need a Custom Size?</span>
+            <span>Need a Custom Size? <span className="text-xs font-bold text-[#0682E4] ml-1">(Calculated at ₹{rate}/Sq.Ft)</span></span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${customOpen ? 'rotate-180' : ''}`} />
           </button>
 

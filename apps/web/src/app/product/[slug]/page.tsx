@@ -4,7 +4,6 @@ import { Product as ProductModel } from '@/lib/models/Product';
 import { ImageGallery } from '@/components/ui/product/ImageGallery';
 import { ProductInfo } from '@/components/ui/product/ProductInfo';
 import { ProductDetails } from '@/components/ui/product/ProductDetails';
-import { PriceList } from '@/components/ui/product/PriceList';
 import { Heart, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -32,6 +31,7 @@ export default async function ProductPage({ params }: PageProps) {
 
   let product: any = null;
   if (dbProduct) {
+    const matchInCatalog = productCatalog.find(p => p.slug === dbProduct.slug || p.name.toLowerCase() === (dbProduct.name || '').toLowerCase());
     const firstVariant = dbProduct.variants && dbProduct.variants[0] ? dbProduct.variants[0] : null;
     const priceVal = dbProduct.sqftPrice ? dbProduct.sqftPrice * 18 : (firstVariant ? firstVariant.price : 12999);
     const mrpVal = Math.round(priceVal * 1.3);
@@ -50,15 +50,17 @@ export default async function ProductPage({ params }: PageProps) {
       sqftPrice: dbProduct.sqftPrice || 546,
       warranty: dbProduct.warranty_years || dbProduct.warranty || 10,
       features: dbProduct.benefits || ['Advanced spine support', 'Pressure relief', 'Eco-friendly materials'],
-      images: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images.map((i: any) => typeof i === 'string' ? i : i.url) : ["/images/products/ecolatex-6.jpeg", "/images/products/ecolatex-6.jpeg", "/images/products/ecolatex-6.jpeg"]
+      images: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images.map((i: any) => typeof i === 'string' ? i : i.url) : ["/images/products/ecolatex-6.jpeg", "/images/products/ecolatex-6.jpeg", "/images/products/ecolatex-6.jpeg"],
+      thicknessVariants: matchInCatalog ? matchInCatalog.thicknessVariants : undefined
     };
   } else {
-    const foundProduct = productCatalog.find(p => p.slug === slug);
+    const foundProduct = productCatalog.find(p => p.slug === slug || p.slug === `${slug}-6` || p.name.toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase());
     product = foundProduct ? Object.assign({}, foundProduct, {
       id: foundProduct.id || slug,
       originalPrice: foundProduct.originalPrice || Math.round((foundProduct.priceValue || 12999) * 1.3),
       price: foundProduct.priceValue || 12999,
-      warranty: foundProduct.warranty_years || foundProduct.warranty || 10
+      warranty: foundProduct.warranty_years || foundProduct.warranty || 10,
+      thicknessVariants: foundProduct.thicknessVariants
     }) : null;
   }
 
@@ -95,11 +97,7 @@ export default async function ProductPage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 lg:px-8">
-        <PriceList sqftPrice={product.sqftPrice || 546} />
-      </div>
-
-      <hr className="my-16 border-gray-100" />
+      <hr className="my-12 border-gray-100" />
 
       {/* Bottom Section: Product Details & Specs */}
       <div className="container mx-auto px-4 lg:px-8">
