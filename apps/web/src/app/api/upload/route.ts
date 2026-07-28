@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // If Cloudinary is configured, use unsigned upload
     if (process.env.CLOUDINARY_CLOUD_NAME) {
-      return new Promise((resolve, reject) => {
+      return new Promise<NextResponse>((resolve, reject) => {
         const uploadStream = cloudinary.uploader.unsigned_upload_stream(
           'ml_default',
           (error, result) => {

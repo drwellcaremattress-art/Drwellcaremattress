@@ -585,8 +585,6 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                             onChange={async (e) => {
                               const file = e.target.files?.[0];
                               if (!file) return;
-                              const formData = new FormData();
-                              formData.append('file', file);
                               const fd = new FormData();
                               fd.append('file', file);
                               
