@@ -308,6 +308,25 @@ export default function ContactPage() {
         </div>
       </section>
 
+      {/* Map Section */}
+      <section className="container mx-auto px-4 pb-16 sm:pb-20 max-w-6xl">
+        <div className="mb-8 text-center">
+          <h2 className="font-heading text-2xl sm:text-3xl font-black text-[#0B1A2A]">Visit Our Plant</h2>
+          <p className="text-slate-600 mt-2">No. 551, Sivapragasam Nagar, Surapet, Chennai</p>
+        </div>
+        <div className="w-full h-[450px] rounded-3xl overflow-hidden shadow-xl border border-slate-200">
+          <iframe 
+            src="https://maps.google.com/maps?q=Surapet,%20Chennai&t=&z=14&ie=UTF8&iwloc=&output=embed" 
+            width="100%" 
+            height="100%" 
+            style={{ border: 0 }} 
+            allowFullScreen={true} 
+            loading="lazy" 
+            referrerPolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </section>
+
     </div>
   );
 }
