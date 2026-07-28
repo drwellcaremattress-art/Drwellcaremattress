@@ -36,7 +36,53 @@ export default async function ProductPage({ params }: PageProps) {
     const firstVariant = dbProduct.variants && dbProduct.variants[0] ? dbProduct.variants[0] : null;
     const priceVal = dbProduct.sqftPrice ? dbProduct.sqftPrice * 18 : (firstVariant ? firstVariant.price : 12999);
     const mrpVal = Math.round(priceVal * 1.3);
+    // Map DB variants to thicknessVariants for the frontend
+    let dbThicknessVariants: any[] = [];
+    const thicknessMap = new Map();
+
+    // 1. First, seed with catalog variants if they exist so we don't lose them
+    if (matchInCatalog && matchInCatalog.thicknessVariants) {
+      matchInCatalog.thicknessVariants.forEach((cv: any) => {
+        thicknessMap.set(cv.thickness_cm, { ...cv });
+      });
+    }
+
+    // 2. Then override with actual DB variants
+    if (dbProduct.variants && dbProduct.variants.length > 0) {
+      dbProduct.variants.forEach((v: any) => {
+        const inch = Math.round(v.thickness_cm / 2.54);
+        
+        if (!thicknessMap.has(v.thickness_cm)) {
+          // Add new variant from DB
+          thicknessMap.set(v.thickness_cm, {
+            thickness: `${inch} Inch`,
+            thickness_cm: v.thickness_cm,
+            priceValue: v.price,
+            originalPrice: v.mrp,
+            image: v.image || undefined,
+            images: v.image ? [v.image] : undefined,
+            slug: dbProduct.slug,
+            warranty: dbProduct.warranty_years || 10,
+            warranty_years: dbProduct.warranty_years || 10
+          });
+        } else {
+          // Update existing variant with DB prices and images
+          const existing = thicknessMap.get(v.thickness_cm);
+          existing.priceValue = v.price;
+          existing.originalPrice = v.mrp;
+          if (v.image) {
+            existing.image = v.image;
+            existing.images = [v.image];
+          } else if (dbProduct.images && dbProduct.images.length > 0) {
+            delete existing.image;
+            delete existing.images;
+          }
+        }
+      });
+    }
     
+    dbThicknessVariants = Array.from(thicknessMap.values()).sort((a: any, b: any) => a.thickness_cm - b.thickness_cm);
+
     product = {
       id: dbProduct.slug,
       slug: dbProduct.slug,
@@ -52,7 +98,8 @@ export default async function ProductPage({ params }: PageProps) {
       warranty: dbProduct.warranty_years || dbProduct.warranty || 10,
       features: dbProduct.benefits || ['Advanced spine support', 'Pressure relief', 'Eco-friendly materials'],
       images: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images.map((i: any) => typeof i === 'string' ? i : i.url) : ["/images/products/ecolatex-6.jpeg", "/images/products/ecolatex-6.jpeg", "/images/products/ecolatex-6.jpeg"],
-      thicknessVariants: matchInCatalog ? matchInCatalog.thicknessVariants : undefined
+      layersImage: dbProduct.layersImage || null,
+      thicknessVariants: dbThicknessVariants.length > 0 ? dbThicknessVariants : undefined
     };
   } else {
     const foundProduct = productCatalog.find(p => p.slug === slug || p.slug === `${slug}-6` || p.name.toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase());

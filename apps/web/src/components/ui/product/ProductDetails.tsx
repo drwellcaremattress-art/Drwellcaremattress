@@ -142,7 +142,7 @@ export function ProductDetails({ product }: { product?: any }) {
           <div className="order-1 lg:order-2 bg-gray-50 rounded-[2rem] aspect-square relative p-8 flex items-center justify-center">
             <div className="absolute w-full h-full inset-0 bg-gradient-to-tr from-gray-100 to-transparent rounded-[2rem]"></div>
             <Image 
-              src="/images/layers.png" 
+              src={product.layersImage || "/images/layers.png"} 
               alt="Mattress Layers" 
               fill 
               className="object-contain p-8 drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-700" 

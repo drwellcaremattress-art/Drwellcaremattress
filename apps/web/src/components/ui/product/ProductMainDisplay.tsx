@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ImageGallery } from '@/components/ui/product/ImageGallery';
 import { ProductInfo } from '@/components/ui/product/ProductInfo';
 
@@ -9,6 +10,7 @@ interface ProductMainDisplayProps {
 }
 
 export function ProductMainDisplay({ product }: ProductMainDisplayProps) {
+  const router = useRouter();
   const initialVariantIndex = product.thicknessVariants 
     ? Math.max(0, product.thicknessVariants.findIndex((v: any) => v.slug === product.slug || v.thickness === product.thickness)) 
     : 0;
@@ -20,14 +22,24 @@ export function ProductMainDisplay({ product }: ProductMainDisplayProps) {
     : null;
 
   // Derive images for the currently selected thickness variant
-  const currentImages = activeVariant?.images && activeVariant.images.length > 0 
-    ? activeVariant.images 
-    : (activeVariant?.image ? [activeVariant.image, activeVariant.image, activeVariant.image] : product.images);
+  let currentImages = product.images;
+  if (activeVariant?.image) {
+    // If variant has an image, use it as the primary, and keep the rest of the product images
+    currentImages = [activeVariant.image, ...(product.images || []).slice(1)];
+  } else if (activeVariant?.images && activeVariant.images.length > 0) {
+    currentImages = activeVariant.images;
+  }
 
   const handleVariantChange = (idx: number, variantSlug?: string) => {
     setActiveVariantIndex(idx);
     if (variantSlug && typeof window !== 'undefined') {
-      window.history.replaceState(null, '', `/product/${variantSlug}`);
+      if (variantSlug !== product.slug) {
+        // If it's a completely separate product in the database, navigate to it!
+        router.push(`/product/${variantSlug}`);
+      } else {
+        // If it's just a variant on the same product, just update the URL cosmetically
+        window.history.replaceState(null, '', `/product/${variantSlug}`);
+      }
     }
   };
 

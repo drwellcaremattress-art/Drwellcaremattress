@@ -96,33 +96,33 @@ export default function QuizPage() {
         // Determine recommended model
         if (updated.pain === "severe" || updated.firmness === "firm") {
           setResult({
-            name: "Dr. Well Care Orthopaedic Dual Comfort Series",
-            tagline: "Doctor-Recommended Heavy Spinal & Lumbar Support",
-            desc: "Engineered with high-density orthopaedic core foam and responsive rebonded support layers. It actively prevents lower back sagging and provides the exact firmness recommended by orthopaedic specialists.",
-            price: "₹10,542",
-            image: "/images/wellcare.png",
-            features: ["High-Density Lumbar Core", "Zero Sagging Guarantee", "Breathable Jacquard Cover", "Reversible Dual Comfort"],
-            link: "/product/dr-well-care-orthopaedic-mattress"
+            name: "Lax-o-Bond",
+            tagline: "Heavy Duty Orthopaedic Support",
+            desc: "High-Density Bonded Foam specially designed with strong & durable support. Actively prevents lower back sagging and provides the exact firmness recommended by orthopaedic specialists.",
+            price: "₹14,580",
+            image: "/images/products/lax-o-bond-6.jpeg",
+            features: ["High-Density Lumbar Core", "Zero Sagging Guarantee", "Strong & Durable Support", "Firm Orthopaedic"],
+            link: "/product/lax-o-bond-6"
           });
         } else if (updated.firmness === "plush" || updated.pain === "sciatica") {
           setResult({
-            name: "Dr. Well Care Memory Foam Cloud Series",
+            name: "Memory Dump",
             tagline: "Zero-Gravity Pressure Relief & Body Contouring",
             desc: "Designed with open-cell gel memory foam that cushions pressure points on hips and shoulders. It absorbs partner motion completely and regulates sleeping temperature all night.",
-            price: "₹14,999",
-            image: "/images/hero2.png",
-            features: ["Open-Cell Memory Foam", "Zero Motion Transfer", "Cool-Gel Temperature Neutral", "Deep REM Sleep System"],
-            link: "/product/memory-foam-orthopaedic-mattress"
+            price: "₹15,840",
+            image: "/images/products/memory-dump-8.png",
+            features: ["Cooling Gel Memory Foam", "Zero Motion Transfer", "Deep Contour Cushioning", "Deep REM Sleep System"],
+            link: "/product/memory-dump-8"
           });
         } else {
           setResult({
-            name: "Dr. Well Care Orthopaedic Dual Comfort Series",
-            tagline: "The #1 Best-Selling All-Rounder Indian Sleep System",
-            desc: "Our most versatile mattress featuring one medium-firm side for everyday comfort and one firm orthopaedic side for spinal realignment. Perfect for couples and combination sleepers.",
-            price: "₹10,542",
-            image: "/images/wellcare.png",
-            features: ["Dual Sided Reversible Comfort", "Orthopaedic Doctor Approved", "Free Doorstep Delivery", "10-Year Warranty"],
-            link: "/product/dr-well-care-orthopaedic-mattress"
+            name: "Softy Bond",
+            tagline: "The Perfect All-Rounder Ortho Sleep System",
+            desc: "Our most versatile mattress featuring High-Density Bonded Foam for strong spine alignment and soft top feel for everyday comfort. Perfect for couples and combination sleepers.",
+            price: "₹10,440",
+            image: "/images/products/softy-bond-6.jpeg",
+            features: ["Orthopaedic alignment", "Plush comfort layer", "Free Doorstep Delivery", "10-Year Warranty"],
+            link: "/product/softy-bond"
           });
         }
       }, 1500);

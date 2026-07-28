@@ -16,6 +16,7 @@ export interface IProduct extends Document {
     mrp: number;
     sku: string;
     stock: number;
+    image?: string;
   }[];
   firmness: string;
   warranty_years: number;
@@ -23,6 +24,7 @@ export interface IProduct extends Document {
   sqftPrice?: number;
   thickness?: string;
   trialNights: number;
+  layersImage?: string;
   ratingAvg: number;
   ratingCount: number;
   seo: {
@@ -60,6 +62,7 @@ const ProductSchema: Schema = new Schema(
         mrp: { type: Number },
         sku: { type: String, required: true },
         stock: { type: Number, default: 0 },
+        image: { type: String },
       },
     ],
     firmness: {
@@ -71,6 +74,7 @@ const ProductSchema: Schema = new Schema(
     originalPrice: { type: Number },
     sqftPrice: { type: Number, default: 546 },
     thickness: { type: String, default: '6 Inch' },
+    layersImage: { type: String },
     trialNights: { type: Number, default: 100 },
     ratingAvg: { type: Number, default: 0 },
     ratingCount: { type: Number, default: 0 },

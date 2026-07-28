@@ -106,12 +106,28 @@ function ProductListingContent() {
         res.data.forEach((p: any, idx: number) => {
           const baseName = cleanName(p.name);
           const nameLower = baseName.toLowerCase();
-          if (seenNames.has(nameLower)) return;
-          seenNames.add(nameLower);
-
+          
           const firstVariant = p.variants && p.variants[0] ? p.variants[0] : null;
           const priceVal = p.sqftPrice ? p.sqftPrice * 18 : (firstVariant ? firstVariant.price : 12999);
           const thicknessVal = p.thickness || (firstVariant && firstVariant.thickness_cm ? `${Math.round(firstVariant.thickness_cm / 2.54)} Inch` : '6 Inch');
+          const dbImage = p.images && p.images[0] ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : null;
+
+          if (seenNames.has(nameLower)) {
+            const existingIndex = mapped.findIndex(m => m.title.toLowerCase().trim() === nameLower);
+            if (existingIndex !== -1) {
+              if (dbImage) mapped[existingIndex].image = dbImage;
+              mapped[existingIndex].priceValue = priceVal;
+              mapped[existingIndex].price = `₹${priceVal.toLocaleString('en-IN')}`;
+              if (p.originalPrice || firstVariant) {
+                mapped[existingIndex].originalPrice = p.originalPrice || (firstVariant ? firstVariant.mrp : Math.round(priceVal * 1.3));
+              }
+              // If the DB product is the "default" one they want to show, update the slug
+              // E.g., lax-o-bond-8 will replace lax-o-bond's link on the collections page, which is fine since they just updated it.
+              mapped[existingIndex].slug = p.slug;
+            }
+            return;
+          }
+          seenNames.add(nameLower);
 
           mapped.push({
             id: p._id || staticDedupe.length + idx + 1,
@@ -129,7 +145,7 @@ function ProductListingContent() {
             originalPrice: p.originalPrice || (firstVariant ? firstVariant.mrp : Math.round(priceVal * 1.3)),
             sqftPrice: p.sqftPrice || 546,
             warranty: p.warranty_years || p.warranty || 10,
-            image: p.images && p.images[0] ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : "/images/products/ecolatex-6.jpeg"
+            image: dbImage || "/images/products/ecolatex-6.jpeg"
           });
         });
 
@@ -187,18 +203,16 @@ function ProductListingContent() {
         const titleLower = (p.title || '').toLowerCase().trim();
         const slugLower = (p.slug || '').toLowerCase().trim();
         const typeLower = (p.type || '').toLowerCase().trim();
-        if (t === 'Latex') return typeLower === 'latex' || titleLower.includes('latex') || slugLower.includes('lax-o-bond') || slugLower.includes('ecolatex');
-        if (t === 'Memory Foam') return typeLower === 'memory foam' || titleLower.includes('memory') || slugLower.includes('memory');
-        if (t === 'Pocket Spring') return typeLower === 'pocket spring' || titleLower.includes('pocket') || slugLower.includes('luxoria');
-        if (t === 'Bonded Series' || t === 'Bonded') {
-          return slugLower.includes('softy-bond') || slugLower.includes('memory-bond') || slugLower.includes('lax-o-bond') || titleLower.includes('softy bond') || titleLower.includes('memory bond') || titleLower.includes('lax-o-bond');
-        }
-        if (t === 'Luxury HR Series' || t === 'HR Series' || t === 'HR series') {
-          return slugLower.includes('mona-lite') || slugLower.includes('mona-softy') || slugLower.includes('ecolatex') || slugLower === 'luxoria' || slugLower.includes('luxoria-latex') || slugLower.includes('memory-dump') || titleLower.includes('mona lite') || titleLower.includes('mona softy') || titleLower.includes('eco latex') || titleLower === 'luxoria' || titleLower.includes('luxoria latex') || titleLower.includes('memory dump');
-        }
-        if (t === 'Budget Mattress' || t === 'Budget') {
-          return slugLower.includes('mona-lite') || slugLower.includes('mona-softy') || titleLower.includes('mona lite') || titleLower.includes('mona softy');
-        }
+        
+        if (t === 'Latex') return typeLower === 'latex' || titleLower.includes('latex') || slugLower.includes('ecolatex');
+        if (t === 'Memory Foam') return typeLower === 'memory foam' || titleLower.includes('memory');
+        if (t === 'Pocket Spring') return typeLower === 'pocket spring' || titleLower.includes('pocket');
+        if (t === 'Hybrid') return typeLower === 'hybrid';
+        if (t === 'Orthopaedic') return typeLower === 'orthopaedic';
+        if (t === 'Bonded Series' || t === 'Bonded') return typeLower === 'bonded series' || slugLower.includes('bond');
+        if (t === 'Luxury HR Series' || t === 'HR Series' || t === 'HR series') return typeLower === 'luxury hr series';
+        if (t === 'Budget Mattress' || t === 'Budget') return typeLower === 'budget mattress' || slugLower.includes('mona-lite');
+
         return p.type === t;
       });
       let firmnessMatch = selectedFirmnesses.length === 0 || selectedFirmnesses.includes(p.firmness);
