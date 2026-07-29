@@ -43,7 +43,8 @@ export default async function ProductPage({ params }: PageProps) {
     // 1. First, seed with catalog variants if they exist so we don't lose them
     if (matchInCatalog && matchInCatalog.thicknessVariants) {
       matchInCatalog.thicknessVariants.forEach((cv: any) => {
-        thicknessMap.set(cv.thickness_cm, { ...cv });
+        const { image, images, ...restCv } = cv;
+        thicknessMap.set(cv.thickness_cm, { ...restCv });
       });
     }
 
@@ -73,7 +74,7 @@ export default async function ProductPage({ params }: PageProps) {
           if (v.image) {
             existing.image = v.image;
             existing.images = [v.image];
-          } else if (dbProduct.images && dbProduct.images.length > 0) {
+          } else {
             delete existing.image;
             delete existing.images;
           }
