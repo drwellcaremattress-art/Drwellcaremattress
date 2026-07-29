@@ -20,15 +20,29 @@ export default async function ProductPage({ params }: PageProps) {
   // Use params.slug directly in Next.js 14 App Router
   const { slug } = params;
   
-  const productCatalog = PRODUCT_CATALOG;
-
+  const productCatalog = [...PRODUCT_CATALOG];
   let dbProduct: any = null;
+  let allDbProducts: any[] = [];
+
   try {
     await connectDB();
     dbProduct = await ProductModel.findOne({ slug }).lean();
+    allDbProducts = await ProductModel.find({ status: 'active' }).select('slug images').lean();
   } catch (err) {
     console.error("Error fetching product from DB:", err);
   }
+
+  // Update productCatalog with latest images from DB so "You May Also Like" is accurate
+  const mergedCatalog = productCatalog.map(p => {
+    const dbMatch = allDbProducts.find(db => db.slug === p.slug);
+    if (dbMatch && dbMatch.images && dbMatch.images.length > 0) {
+      const dbImage = typeof dbMatch.images[0] === 'string' ? dbMatch.images[0] : dbMatch.images[0].url;
+      if (dbImage) {
+        return { ...p, images: [dbImage, ...p.images.slice(1)] };
+      }
+    }
+    return p;
+  });
 
   let product: any = null;
   if (dbProduct) {
@@ -152,7 +166,7 @@ export default async function ProductPage({ params }: PageProps) {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {productCatalog.filter(p => p.slug !== slug).slice(0, 4).map((relatedProduct, i) => {
+          {mergedCatalog.filter(p => p.slug !== slug).slice(0, 4).map((relatedProduct, i) => {
             return (
               <div key={i} className="bg-white rounded-3xl p-5 flex flex-col shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] group hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] transition-shadow duration-500 border border-gray-100">
                 {/* Image */}
