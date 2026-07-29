@@ -70,10 +70,16 @@ export function CartDrawer() {
                         <X className="h-4 w-4" />
                       </button>
                     </div>
-                    <p className="text-sm text-ink-muted">Size: {item.size}</p>
-                    {item.color && (
-                      <p className="text-sm text-ink-muted">Color: {item.color}</p>
-                    )}
+                    <p className="text-xs text-ink-muted mt-0.5">Size: {item.size}</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-xs text-slate-500 font-semibold">Color:</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0B1A2A] text-white text-[11px] font-bold shadow-xs">
+                        <span className={`w-2 h-2 rounded-full border border-white/20 ${
+                          (item.color || 'White') === 'Blue' ? 'bg-[#0682E4]' : (item.color || 'White') === 'Gray' ? 'bg-slate-400' : 'bg-white'
+                        }`} />
+                        {item.color || 'White'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex justify-between items-end mt-2">
                     <span className="font-mono font-bold text-primary-blue">₹{(item.price * item.qty).toLocaleString('en-IN')}</span>

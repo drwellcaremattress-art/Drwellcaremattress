@@ -214,7 +214,7 @@ export default function CheckoutPage() {
           productId: i.id,
           name: i.name,
           variantSku: i.size,
-          color: i.color,
+          color: i.color || 'White',
           qty: i.qty,
           price: i.price,
           image: i.image
@@ -354,7 +354,13 @@ export default function CheckoutPage() {
                       <tr key={idx} className="hover:bg-slate-50/50">
                         <td className="p-3">
                           <span className="font-bold text-[#0B1A2A] block">{item.name || item.productId}</span>
-                          <span className="text-[11px] text-slate-400">{item.variantSku || item.size} {item.color ? `- ${item.color}` : ''}</span>
+                          <span className="text-[11px] text-slate-400 block">{item.variantSku || item.size}</span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0B1A2A] text-white text-[10px] font-bold mt-1">
+                            <span className={`w-2 h-2 rounded-full border border-white/20 ${
+                              (item.color || 'White') === 'Blue' ? 'bg-[#0682E4]' : (item.color || 'White') === 'Gray' ? 'bg-slate-400' : 'bg-white'
+                            }`} />
+                            Color: {item.color || 'White'}
+                          </span>
                         </td>
                         <td className="p-3 text-center font-bold">{item.qty}</td>
                         <td className="p-3 text-right font-mono font-bold">₹{(item.price * item.qty).toLocaleString('en-IN')}</td>
@@ -574,8 +580,16 @@ export default function CheckoutPage() {
                   <div className="flex-grow">
                     <h4 className="font-bold text-xs text-[#0B1A2A] line-clamp-1">{item.name}</h4>
                     <p className="text-[11px] text-slate-400">{item.size}</p>
-                    {item.color && <p className="text-[11px] text-slate-500 font-medium">Color: {item.color}</p>}
-                    <p className="font-mono text-xs font-extrabold text-[#0682E4]">₹{(item.price * item.qty).toLocaleString('en-IN')}</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[11px] text-slate-500 font-semibold">Color:</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0B1A2A] text-white text-[10px] font-bold shadow-xs">
+                        <span className={`w-2 h-2 rounded-full border border-white/20 ${
+                          (item.color || 'White') === 'Blue' ? 'bg-[#0682E4]' : (item.color || 'White') === 'Gray' ? 'bg-slate-400' : 'bg-white'
+                        }`} />
+                        {item.color || 'White'}
+                      </span>
+                    </div>
+                    <p className="font-mono text-xs font-extrabold text-[#0682E4] mt-1">₹{(item.price * item.qty).toLocaleString('en-IN')}</p>
                   </div>
                 </div>
               ))}

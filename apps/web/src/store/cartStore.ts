@@ -29,15 +29,20 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
       
       addItem: (item) => set((state) => {
-        const existing = state.items.find((i) => i.id === item.id);
-        if (existing) {
-          return {
-            items: state.items.map((i) => 
-              i.id === item.id ? { ...i, qty: i.qty + item.qty } : i
-            )
+        const itemColor = item.color || 'White';
+        const newItem = { ...item, color: itemColor };
+        const existingIndex = state.items.findIndex(
+          (i) => i.id === item.id && (i.color || 'White') === itemColor
+        );
+        if (existingIndex > -1) {
+          const updatedItems = [...state.items];
+          updatedItems[existingIndex] = {
+            ...updatedItems[existingIndex],
+            qty: updatedItems[existingIndex].qty + item.qty,
           };
+          return { items: updatedItems, isOpen: true };
         }
-        return { items: [...state.items, item], isOpen: true }; // open cart on add
+        return { items: [...state.items, newItem], isOpen: true }; // open cart on add
       }),
       
       removeItem: (id) => set((state) => ({
