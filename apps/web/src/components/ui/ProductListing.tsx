@@ -162,7 +162,9 @@ function ProductListingContent() {
 
   useEffect(() => {
     if (typeParam) {
-      setSelectedTypes([typeParam]);
+      const formatted = typeParam.replace(/\+/g, ' ').trim();
+      const match = typesList.find(t => t.toLowerCase() === formatted.toLowerCase()) || formatted;
+      setSelectedTypes([match]);
       setTimeout(() => {
         const el = document.getElementById('product-listing-section') || document.querySelector('aside');
         if (el) {
@@ -200,22 +202,26 @@ function ProductListingContent() {
   const processedProducts = useMemo(() => {
     let filtered = products.filter(p => {
       let typeMatch = selectedTypes.length === 0 || selectedTypes.some(t => {
-        const titleLower = (p.title || '').toLowerCase().trim();
+        const normT = (t || '').replace(/\+/g, ' ').toLowerCase().trim();
+        const titleLower = (p.title || p.name || '').toLowerCase().trim();
         const slugLower = (p.slug || '').toLowerCase().trim();
         const typeLower = (p.type || '').toLowerCase().trim();
+        const categoryLower = (p.category || '').toLowerCase().trim();
         
-        if (t === 'Latex') return typeLower === 'latex' || titleLower.includes('latex') || slugLower.includes('ecolatex');
-        if (t === 'Memory Foam') return typeLower === 'memory foam' || titleLower.includes('memory');
-        if (t === 'Pocket Spring') return typeLower === 'pocket spring' || titleLower.includes('pocket');
-        if (t === 'Hybrid') return typeLower === 'hybrid';
-        if (t === 'Orthopaedic') return typeLower === 'orthopaedic';
-        if (t === 'Bonded Series' || t === 'Bonded') return typeLower === 'bonded series' || slugLower.includes('bond');
-        if (t === 'Luxury HR Series' || t === 'HR Series' || t === 'HR series') return typeLower === 'luxury hr series';
-        if (t === 'Budget Mattress' || t === 'Budget') return typeLower === 'budget mattress' || slugLower.includes('mona-lite');
+        if (normT === 'latex') return typeLower === 'latex' || categoryLower === 'latex' || titleLower.includes('latex') || slugLower.includes('latex') || slugLower.includes('ecolatex');
+        if (normT === 'memory foam') return typeLower === 'memory foam' || categoryLower === 'memory-foam' || titleLower.includes('memory') || slugLower.includes('memory');
+        if (normT === 'pocket spring') return typeLower === 'pocket spring' || categoryLower === 'pocket-spring' || titleLower.includes('pocket');
+        if (normT === 'hybrid') return typeLower === 'hybrid' || categoryLower === 'hybrid';
+        if (normT === 'orthopaedic' || normT === 'orthopedic') return typeLower === 'orthopaedic' || categoryLower === 'orthopaedic';
+        if (normT === 'bonded series' || normT === 'bonded') return typeLower === 'bonded series' || categoryLower === 'bonded' || slugLower.includes('bond');
+        if (normT === 'luxury hr series' || normT === 'luxury hr' || normT === 'hr series' || normT === 'luxury-hr') {
+          return typeLower === 'luxury hr series' || categoryLower === 'luxury-hr' || titleLower.includes('luxoria') || titleLower.includes('latex') || slugLower.includes('luxoria') || slugLower.includes('ecolatex') || typeLower.includes('luxury');
+        }
+        if (normT === 'budget mattress' || normT === 'budget') return typeLower === 'budget mattress' || categoryLower === 'budget' || slugLower.includes('mona-lite');
 
-        return p.type === t;
+        return typeLower === normT || categoryLower === normT;
       });
-      let firmnessMatch = selectedFirmnesses.length === 0 || selectedFirmnesses.includes(p.firmness);
+      let firmnessMatch = selectedFirmnesses.length === 0 || selectedFirmnesses.some(f => (p.firmness || '').toLowerCase().includes(f.toLowerCase()));
       let sizeMatch = true; 
       
       return typeMatch && firmnessMatch && sizeMatch;
