@@ -11,9 +11,7 @@ interface ProductMainDisplayProps {
 
 export function ProductMainDisplay({ product }: ProductMainDisplayProps) {
   const router = useRouter();
-  const initialVariantIndex = product.thicknessVariants 
-    ? Math.max(0, product.thicknessVariants.findIndex((v: any) => v.slug === product.slug || v.thickness === product.thickness)) 
-    : 0;
+  const initialVariantIndex = 0; // Always default to the least thick variant (variants are sorted ascending by thickness)
   
   const [activeVariantIndex, setActiveVariantIndex] = useState<number>(initialVariantIndex);
 

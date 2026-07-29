@@ -107,9 +107,10 @@ function ProductListingContent() {
           const baseName = cleanName(p.name);
           const nameLower = baseName.toLowerCase();
           
-          const firstVariant = p.variants && p.variants[0] ? p.variants[0] : null;
-          const priceVal = p.sqftPrice ? p.sqftPrice * 18 : (firstVariant ? firstVariant.price : 12999);
-          const thicknessVal = p.thickness || (firstVariant && firstVariant.thickness_cm ? `${Math.round(firstVariant.thickness_cm / 2.54)} Inch` : '6 Inch');
+          const sortedVariants = p.variants && p.variants.length > 0 ? [...p.variants].sort((a, b) => a.thickness_cm - b.thickness_cm) : [];
+          const leastVariant = sortedVariants[0] || null;
+          const priceVal = p.price || (leastVariant ? leastVariant.price : (p.sqftPrice ? p.sqftPrice * 18 : 12999));
+          const thicknessVal = leastVariant ? `${Math.round(leastVariant.thickness_cm / 2.54)} Inch` : (p.thickness || '5 Inch');
           const dbImage = p.images && p.images[0] ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : null;
 
           if (seenNames.has(nameLower)) {
@@ -118,8 +119,11 @@ function ProductListingContent() {
               if (dbImage) mapped[existingIndex].image = dbImage;
               mapped[existingIndex].priceValue = priceVal;
               mapped[existingIndex].price = `₹${priceVal.toLocaleString('en-IN')}`;
-              if (p.originalPrice || firstVariant) {
-                mapped[existingIndex].originalPrice = p.originalPrice || (firstVariant ? firstVariant.mrp : Math.round(priceVal * 1.3));
+              if (p.originalPrice || leastVariant) {
+                mapped[existingIndex].originalPrice = p.originalPrice || (leastVariant ? leastVariant.mrp : Math.round(priceVal * 1.3));
+              }
+              if (p.description) {
+                mapped[existingIndex].subtitle = p.description.split('.')[0];
               }
               // If the DB product is the "default" one they want to show, update the slug
               // E.g., lax-o-bond-8 will replace lax-o-bond's link on the collections page, which is fine since they just updated it.
@@ -142,7 +146,7 @@ function ProductListingContent() {
             thickness: thicknessVal,
             price: `₹${priceVal.toLocaleString('en-IN')}`,
             priceValue: priceVal,
-            originalPrice: p.originalPrice || (firstVariant ? firstVariant.mrp : Math.round(priceVal * 1.3)),
+            originalPrice: p.originalPrice || (leastVariant ? leastVariant.mrp : Math.round(priceVal * 1.3)),
             sqftPrice: p.sqftPrice || 546,
             warranty: p.warranty_years || p.warranty || 10,
             image: dbImage || "/images/products/ecolatex-6.jpeg"
