@@ -25,6 +25,88 @@ export function ProductDetails({ product }: { product?: any }) {
     }
   };
 
+  // Dynamic layers generator based on product slug/title
+  const getProductLayers = (p: any) => {
+    const slug = (p?.slug || '').toLowerCase();
+    const title = (p?.title || p?.name || '').toLowerCase();
+    
+    // Default layers
+    let layers = [
+      { title: 'Premium Quilted Cover', desc: 'Ultra-soft, highly breathable fabric treated with anti-microbial technology.' },
+      { title: 'Transition Memory Foam', desc: 'Adapts to your body shape instantly, relieving pressure points.' },
+      { title: 'High-Resilience Support Foam', desc: 'The dense foundation layer that ensures your spine stays aligned.' }
+    ];
+
+    if (slug.includes('memory-dump') || title.includes('memory dump')) {
+      layers = [
+        { title: 'Ice-Cool Breathable Cover', desc: 'Advanced cooling fabric that actively draws heat away from your body.' },
+        { title: 'Aero-Gel Memory Foam', desc: 'Plush, contouring memory foam infused with cooling gel for temperature regulation.' },
+        { title: 'Adaptive Transition Layer', desc: 'Provides progressive support and prevents the "sinking" feeling.' },
+        { title: 'Orthopaedic Core Base', desc: 'High-density foundation foam for lasting durability and zero partner disturbance.' }
+      ];
+    } else if (slug.includes('luxoria-latex') || title.includes('luxoria latex')) {
+      layers = [
+        { title: 'Luxury Cashmere Blend Cover', desc: 'Exquisitely soft, hypoallergenic cover for a true 5-star hotel feel.' },
+        { title: '100% Natural Pincore Latex', desc: 'Breathable, buoyant, and eco-friendly latex layer for responsive comfort.' },
+        { title: 'Plush HR Foam', desc: 'High-resilience foam that contours to your body\'s natural curves.' },
+        { title: 'Heavy-Duty Support Core', desc: 'Engineered base layer providing ultimate stability and edge support.' }
+      ];
+    } else if (slug.includes('luxoria') || title.includes('luxoria')) {
+      layers = [
+        { title: 'Luxury Cashmere Blend Cover', desc: 'Exquisitely soft, hypoallergenic cover for a true 5-star hotel feel.' },
+        { title: 'Cloud-Plush Memory Foam', desc: 'Deep contouring layer that gently cradles your pressure points.' },
+        { title: 'High-Resilience Transition', desc: 'Responsive foam that perfectly balances softness with spinal support.' },
+        { title: 'Heavy-Duty Support Core', desc: 'Engineered base layer providing ultimate stability and edge support.' }
+      ];
+    } else if (slug.includes('eco-latex') || slug.includes('ecolatex') || title.includes('eco latex')) {
+      layers = [
+        { title: 'Organic Cotton Cover', desc: 'GOTS-certified organic cotton that is naturally breathable and soft.' },
+        { title: '100% Natural Latex Core', desc: 'Sustainably sourced, naturally cooling latex with pincore technology.' },
+        { title: 'HR Support Base', desc: 'Durable foundation ensuring perfect posture alignment throughout the night.' }
+      ];
+    } else if (slug.includes('natural-latex') || title.includes('natural latex')) {
+      layers = [
+        { title: 'Premium Organic Cover', desc: 'Breathable organic fabric that wicks away moisture for a cool sleep.' },
+        { title: 'Pure Pincore Latex', desc: 'Hypoallergenic, dust-mite resistant natural latex offering buoyant support.' },
+        { title: 'Firm Orthopaedic Base', desc: 'High-density foam that provides long-lasting structural integrity.' }
+      ];
+    } else if (slug.includes('lax-o-bond') || title.includes('lax o bond')) {
+      layers = [
+        { title: 'Quilted Fabric Cover', desc: 'Soft-touch fabric quilted with hypersoft foam for immediate comfort.' },
+        { title: 'Latex-Feel Comfort Layer', desc: 'Bouncy, responsive foam that mimics the feel of natural latex.' },
+        { title: 'High-Density Rebonded Core', desc: 'Ultra-firm rebonded foam for exceptional orthopaedic back support.' }
+      ];
+    } else if (slug.includes('memory-bond') || title.includes('memory bond')) {
+      layers = [
+        { title: 'Premium Knitted Cover', desc: 'Breathable and stretchable knitted fabric for enhanced airflow.' },
+        { title: 'Contouring Memory Foam', desc: 'Pressure-relieving memory foam that molds perfectly to your body.' },
+        { title: 'High-Density Rebonded Core', desc: 'Ultra-firm rebonded foam for exceptional orthopaedic back support.' }
+      ];
+    } else if (slug.includes('softy-bond') || title.includes('softy bond')) {
+      layers = [
+        { title: 'Plush Quilted Cover', desc: 'Luxurious soft cover designed for a cozy and comforting feel.' },
+        { title: 'Ultra-Soft Comfort Foam', desc: 'A cloud-like layer that gently cushions your shoulders and hips.' },
+        { title: 'High-Density Rebonded Core', desc: 'Ultra-firm rebonded foam providing targeted support for your spine.' }
+      ];
+    } else if (slug.includes('mona-softy') || title.includes('mona softy')) {
+      layers = [
+        { title: 'Breathable Knitted Cover', desc: 'Soft and durable fabric that promotes optimal airflow.' },
+        { title: 'Plush Comfort Foam', desc: 'A responsive soft layer that provides instant relaxation.' },
+        { title: 'High-Resilience Base', desc: 'Firm foundation foam that prevents sagging and supports alignment.' }
+      ];
+    } else if (slug.includes('mona-lite') || title.includes('mona lite')) {
+      layers = [
+        { title: 'Durable Woven Cover', desc: 'Tough, long-lasting fabric that protects the mattress core.' },
+        { title: 'Firm Support Foam', desc: 'High-density foam engineered for maximum orthopaedic firmness.' },
+        { title: 'Stabilizing Base Layer', desc: 'Provides edge-to-edge support and ensures mattress longevity.' }
+      ];
+    }
+
+    return layers;
+  };
+
+  const layers = getProductLayers(product);
+
   return (
     <div className="flex flex-col gap-16 lg:gap-24">
       
@@ -97,56 +179,85 @@ export function ProductDetails({ product }: { product?: any }) {
 
         </motion.div>
       </section>
-      
       {/* 1. Inside the Mattress (Layer Breakdown) */}
-      <section>
-        <div className="text-center mb-12">
-          <h2 className="font-heading text-3xl sm:text-4xl font-bold text-[#0B1A2A] mb-3">
-            What&apos;s inside the mattress?
-          </h2>
-          <p className="text-[#5B6B7B] font-medium max-w-xl mx-auto">
-            Every layer is engineered with precision to provide the perfect balance of support, comfort, and breathability.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-          <div className="order-2 lg:order-1 flex flex-col gap-8 lg:pr-8">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#e8f4fa] text-[#3b82f6] flex items-center justify-center font-bold text-lg flex-shrink-0">1</div>
-              <div>
-                <h3 className="text-xl font-bold text-[#0B1A2A] mb-1">Premium Quilted Cover</h3>
-                <p className="text-[#5B6B7B] text-sm leading-relaxed">
-                  Ultra-soft, highly breathable fabric treated with anti-microbial technology to keep your mattress fresh and cool.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#f0ebf8] text-[#8b5cf6] flex items-center justify-center font-bold text-lg flex-shrink-0">2</div>
-              <div>
-                <h3 className="text-xl font-bold text-[#0B1A2A] mb-1">Transition Memory Foam</h3>
-                <p className="text-[#5B6B7B] text-sm leading-relaxed">
-                  Adapts to your body shape instantly, relieving pressure points and reducing tossing and turning.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#f5f9f0] text-[#7cb93e] flex items-center justify-center font-bold text-lg flex-shrink-0">3</div>
-              <div>
-                <h3 className="text-xl font-bold text-[#0B1A2A] mb-1">High-Resilience Support Foam</h3>
-                <p className="text-[#5B6B7B] text-sm leading-relaxed">
-                  The dense foundation layer that ensures your spine stays aligned while providing zero partner disturbance.
-                </p>
-              </div>
-            </div>
+      <section className="py-12 lg:py-24 relative overflow-hidden bg-[#FAFBFC] rounded-[3rem] mb-20 shadow-sm border border-gray-100">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#7cb93e]/5 rounded-full blur-3xl -z-0"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B1A2A]/5 rounded-full blur-3xl -z-0"></div>
+        
+        <div className="container mx-auto px-6 lg:px-12 relative z-10">
+          <div className="text-center mb-16 lg:mb-24">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="font-heading text-4xl sm:text-5xl font-extrabold text-[#0B1A2A] mb-4 tracking-tight"
+            >
+              What&apos;s inside the mattress?
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-[#5B6B7B] font-medium text-lg max-w-2xl mx-auto"
+            >
+              Every layer of the <span className="text-[#7cb93e] font-bold">{product?.title}</span> is engineered with precision to provide the perfect balance of support, comfort, and breathability.
+            </motion.p>
           </div>
-          <div className="order-1 lg:order-2 bg-gray-50 rounded-[2rem] aspect-square relative p-8 flex items-center justify-center">
-            <div className="absolute w-full h-full inset-0 bg-gradient-to-tr from-gray-100 to-transparent rounded-[2rem]"></div>
-            <Image 
-              src={product.layersImage || "/images/layers.png"} 
-              alt="Mattress Layers" 
-              fill 
-              className="object-contain p-8 drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-700" 
-            />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+            {/* Left side: Layers list */}
+            <div className="lg:col-span-5 order-2 lg:order-1 flex flex-col gap-6 relative">
+              {/* Connecting line */}
+              <div className="absolute left-6 top-10 bottom-10 w-0.5 bg-gradient-to-b from-[#7cb93e] to-[#0B1A2A] hidden md:block opacity-20"></div>
+              
+              {layers.map((layer: any, index: number) => (
+                <motion.div 
+                  key={index}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ delay: index * 0.15, duration: 0.5 }}
+                  className="relative flex gap-5 bg-white p-6 rounded-3xl shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] border border-gray-100 hover:shadow-[0_8px_30px_-15px_rgba(124,185,62,0.3)] hover:border-[#7cb93e]/30 transition-all duration-300 group"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0B1A2A] to-[#1a365d] text-white flex items-center justify-center font-bold text-xl flex-shrink-0 shadow-inner group-hover:scale-110 group-hover:from-[#7cb93e] group-hover:to-[#5a8b2a] transition-all duration-500 z-10 relative">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-[#0B1A2A] mb-2 group-hover:text-[#7cb93e] transition-colors">{layer.title}</h3>
+                    <p className="text-[#5B6B7B] text-sm leading-relaxed font-medium">
+                      {layer.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Right side: Image */}
+            <div className="lg:col-span-7 order-1 lg:order-2 flex items-center justify-center">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="relative w-full aspect-square max-w-[600px] bg-white rounded-[3rem] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] p-8 overflow-hidden group"
+              >
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-50 via-white to-gray-50 opacity-50"></div>
+                
+                {/* Decorative elements */}
+                <div className="absolute top-10 right-10 w-20 h-20 bg-[#7cb93e]/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-1000"></div>
+                <div className="absolute bottom-10 left-10 w-32 h-32 bg-[#0B1A2A]/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
+
+                <div className="relative w-full h-full">
+                  <Image 
+                    src={product?.layersImage || "/images/layers.png"} 
+                    alt={`${product?.title} Mattress Layers`}
+                    fill 
+                    className="object-contain drop-shadow-2xl z-10 transition-transform duration-700 ease-out group-hover:scale-105" 
+                  />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
