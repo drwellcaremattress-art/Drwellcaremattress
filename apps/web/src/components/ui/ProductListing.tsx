@@ -179,8 +179,8 @@ function ProductListingContent() {
   const [sortBy, setSortBy] = useState('Best Selling');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const typesList = ['Latex', 'Memory Foam', 'Pocket Spring', 'Luxury HR Series', 'Bonded Series', 'Budget Mattress', 'Orthopaedic', 'Hybrid'];
-  const firmnessList = ['Soft', 'Medium Soft', 'Medium', 'Medium Firm', 'Firm'];
+  const typesList = ['Latex', 'Memory Foam', 'Luxury HR Series', 'Bonded Series', 'Budget Mattress', 'Orthopaedic', 'Hybrid'];
+  const firmnessList = ['Soft', 'Medium Soft', 'Medium Firm', 'Firm'];
   const sizesList = ['Single (72 x 36 in)', 'Queen (60 x 72 in)', 'King (72 x 72 in)', 'Custom Size'];
 
   // Toggle filter helper
@@ -210,14 +210,13 @@ function ProductListingContent() {
         
         if (normT === 'latex') return typeLower === 'latex' || categoryLower === 'latex' || titleLower.includes('latex') || slugLower.includes('latex') || slugLower.includes('ecolatex');
         if (normT === 'memory foam') return typeLower === 'memory foam' || categoryLower === 'memory-foam' || titleLower.includes('memory') || slugLower.includes('memory');
-        if (normT === 'pocket spring') return typeLower === 'pocket spring' || categoryLower === 'pocket-spring' || titleLower.includes('pocket');
         if (normT === 'hybrid') return typeLower === 'hybrid' || categoryLower === 'hybrid';
         if (normT === 'orthopaedic' || normT === 'orthopedic') return typeLower === 'orthopaedic' || categoryLower === 'orthopaedic';
         if (normT === 'bonded series' || normT === 'bonded') return typeLower === 'bonded series' || categoryLower === 'bonded' || slugLower.includes('bond');
         if (normT === 'luxury hr series' || normT === 'luxury hr' || normT === 'hr series' || normT === 'luxury-hr') {
-          return typeLower === 'luxury hr series' || categoryLower === 'luxury-hr' || titleLower.includes('luxoria') || titleLower.includes('latex') || slugLower.includes('luxoria') || slugLower.includes('ecolatex') || typeLower.includes('luxury');
+          return typeLower === 'luxury hr series' || categoryLower === 'luxury-hr' || titleLower.includes('luxoria') || titleLower.includes('latex') || slugLower.includes('luxoria') || slugLower.includes('ecolatex') || typeLower.includes('luxury') || slugLower.includes('mona');
         }
-        if (normT === 'budget mattress' || normT === 'budget') return typeLower === 'budget mattress' || categoryLower === 'budget' || slugLower.includes('mona-lite');
+        if (normT === 'budget mattress' || normT === 'budget') return typeLower === 'budget mattress' || categoryLower === 'budget' || slugLower.includes('mona');
 
         return typeLower === normT || categoryLower === normT;
       });
@@ -239,16 +238,16 @@ function ProductListingContent() {
       const getMasterRank = (item: any) => {
         const t = (item.title || item.name || '').toLowerCase().trim();
         const s = (item.slug || '').toLowerCase().trim();
-        if (t === 'mona lite' || s.includes('mona-lite')) return 1;
-        if (t === 'mona softy' || s.includes('mona-softy')) return 2;
-        if (t === 'eco latex' || s.includes('ecolatex')) return 3;
-        if (t === 'luxoria' || s === 'luxoria') return 4;
-        if (t === 'luxoria latex' || s.includes('luxoria-latex')) return 5;
-        if (t === 'memory dump' || s.includes('memory-dump')) return 6;
-        if (t === 'softy bond' || s.includes('softy-bond')) return 7;
-        if (t === 'memory bond' || s.includes('memory-bond')) return 8;
-        if (t === 'lax-o-bond' || s.includes('lax-o-bond')) return 9;
-        if (t === 'natural latex' || s.includes('natural-latex')) return 10;
+        if (t === 'memory dump' || s.includes('memory-dump')) return 1;
+        if (t === 'luxoria' || s === 'luxoria') return 2;
+        if (t === 'luxoria latex' || s.includes('luxoria-latex')) return 3;
+        if (t === 'lax-o-bond' || s.includes('lax-o-bond')) return 4;
+        if (t === 'memory bond' || s.includes('memory-bond')) return 5;
+        if (t === 'natural latex' || s.includes('natural-latex')) return 6;
+        if (t === 'eco latex' || s.includes('ecolatex')) return 7;
+        if (t === 'softy bond' || s.includes('softy-bond')) return 8;
+        if (t === 'mona softy' || s.includes('mona-softy')) return 9;
+        if (t === 'mona lite' || s.includes('mona-lite')) return 10;
         return 99;
       };
       filtered.sort((a, b) => getMasterRank(a) - getMasterRank(b));

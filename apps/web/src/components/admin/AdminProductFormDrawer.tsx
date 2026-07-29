@@ -10,8 +10,8 @@ import {
 import { ProductType } from './AdminProductTable';
 
 const CATEGORIES = ['orthopaedic', 'bonded', 'latex', 'memory-foam', 'pocket-spring', 'hybrid', 'budget'];
-const TYPES = ['Orthopaedic', 'Bonded Series', 'Hybrid', 'Latex', 'Memory Foam', 'Pocket Spring', 'Budget Mattress', 'Luxury HR Series'];
-const FIRMNESS_OPTIONS = ['Soft', 'Medium Soft', 'Medium', 'Medium Firm', 'Firm', 'Orthopaedic Firm'];
+const TYPES = ['Orthopaedic', 'Bonded Series', 'Hybrid', 'Latex', 'Memory Foam', 'Budget Mattress', 'Luxury HR Series'];
+const FIRMNESS_OPTIONS = ['Soft', 'Medium Soft', 'Medium Firm', 'Firm', 'Orthopaedic Firm'];
 const STATUS_OPTIONS = ['active', 'draft'];
 
 const TABS = [
