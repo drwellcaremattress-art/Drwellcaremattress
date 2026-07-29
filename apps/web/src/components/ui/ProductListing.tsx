@@ -220,7 +220,7 @@ function ProductListingContent() {
           return slugLower.includes('softy-bond') || slugLower.includes('memory-bond') || slugLower.includes('lax-o-bond');
         }
         if (normT === 'luxury hr series' || normT === 'luxury hr' || normT === 'hr series' || normT === 'luxury-hr') {
-          return slugLower.includes('mona-lite') || slugLower.includes('mona-softy') || slugLower.includes('ecolatex') || slugLower === 'luxoria' || slugLower.includes('luxoria-latex') || slugLower.includes('memory-dump') || slugLower.includes('memory-bond');
+          return slugLower.includes('mona-lite') || slugLower.includes('mona-softy') || slugLower.includes('ecolatex') || slugLower === 'luxoria' || slugLower.includes('luxoria-latex') || slugLower.includes('memory-dump');
         }
         if (normT === 'budget mattress' || normT === 'budget') {
           return slugLower.includes('mona');
