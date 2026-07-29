@@ -57,8 +57,8 @@ export default async function ProductPage({ params }: PageProps) {
     // 1. First, seed with catalog variants if they exist so we don't lose them
     if (matchInCatalog && matchInCatalog.thicknessVariants) {
       matchInCatalog.thicknessVariants.forEach((cv: any) => {
-        const { image, images, ...restCv } = cv;
-        thicknessMap.set(cv.thickness_cm, { ...restCv });
+        // Retain the catalog image so the UI can switch to it, and force slug to current product to prevent navigation away!
+        thicknessMap.set(cv.thickness_cm, { ...cv, slug: dbProduct.slug });
       });
     }
 
@@ -85,13 +85,12 @@ export default async function ProductPage({ params }: PageProps) {
           const existing = thicknessMap.get(v.thickness_cm);
           existing.priceValue = v.price;
           existing.originalPrice = v.mrp;
+          existing.slug = dbProduct.slug;
           if (v.image) {
             existing.image = v.image;
             existing.images = [v.image];
-          } else {
-            delete existing.image;
-            delete existing.images;
           }
+          // Do NOT delete existing.image if v.image is missing, allowing fallback to catalog image
         }
       });
     }
