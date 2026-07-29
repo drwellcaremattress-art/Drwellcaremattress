@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { ImageGallery } from '@/components/ui/product/ImageGallery';
 import { ProductInfo } from '@/components/ui/product/ProductInfo';
 
+import { ProductDetails } from '@/components/ui/product/ProductDetails';
+
 interface ProductMainDisplayProps {
   product: any;
 }
@@ -21,11 +23,10 @@ export function ProductMainDisplay({ product }: ProductMainDisplayProps) {
 
   // Derive images for the currently selected thickness variant
   let currentImages = product.images;
-  if (activeVariant?.image) {
-    // If variant has an image, use it as the primary, and keep the rest of the product images
-    currentImages = [activeVariant.image, ...(product.images || []).slice(1)];
-  } else if (activeVariant?.images && activeVariant.images.length > 0) {
+  if (activeVariant?.images && activeVariant.images.length > 0) {
     currentImages = activeVariant.images;
+  } else if (activeVariant?.image) {
+    currentImages = [activeVariant.image, ...(product.images || []).slice(1)];
   }
 
   const handleVariantChange = (idx: number, variantSlug?: string) => {
@@ -42,20 +43,27 @@ export function ProductMainDisplay({ product }: ProductMainDisplayProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-      {/* Left: Gallery (7 cols) */}
-      <div className="lg:col-span-7">
-        <ImageGallery images={currentImages} title={product.title} badge="LUXURY" />
+    <div className="flex flex-col gap-16 lg:gap-20">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+        {/* Left: Gallery (7 cols) */}
+        <div className="lg:col-span-7">
+          <ImageGallery images={currentImages} title={product.title} badge="LUXURY" />
+        </div>
+
+        {/* Right: Info & Purchase (5 cols) */}
+        <div className="lg:col-span-5 sticky top-28 z-30">
+          <ProductInfo 
+            product={product} 
+            externalVariantIndex={activeVariantIndex}
+            onVariantChange={handleVariantChange}
+          />
+        </div>
       </div>
 
-      {/* Right: Info & Purchase (5 cols) */}
-      <div className="lg:col-span-5 sticky top-28 z-30">
-        <ProductInfo 
-          product={product} 
-          externalVariantIndex={activeVariantIndex}
-          onVariantChange={handleVariantChange}
-        />
-      </div>
+      <hr className="my-6 border-gray-100" />
+
+      {/* Bottom Section: Product Details & Specs, updating dynamically with selected thickness */}
+      <ProductDetails product={product} activeVariant={activeVariant} />
     </div>
   );
 }

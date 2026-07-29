@@ -103,52 +103,73 @@ function ProductListingContent() {
           });
         });
 
-        res.data.forEach((p: any, idx: number) => {
-          const baseName = cleanName(p.name);
-          const nameLower = baseName.toLowerCase();
-          
-          const sortedVariants = p.variants && p.variants.length > 0 ? [...p.variants].sort((a, b) => a.thickness_cm - b.thickness_cm) : [];
-          const leastVariant = sortedVariants[0] || null;
-          const priceVal = p.price || (leastVariant ? leastVariant.price : (p.sqftPrice ? p.sqftPrice * 18 : 12999));
-          const thicknessVal = leastVariant ? `${Math.round(leastVariant.thickness_cm / 2.54)} Inch` : (p.thickness || '5 Inch');
-          const dbImage = p.images && p.images[0] ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : null;
+        // Group DB products by cleaned base name
+        const dbGroups = new Map<string, any[]>();
+        res.data.forEach((p: any) => {
+          const bName = cleanName(p.name).toLowerCase().trim();
+          if (!dbGroups.has(bName)) {
+            dbGroups.set(bName, []);
+          }
+          dbGroups.get(bName)!.push(p);
+        });
 
-          if (seenNames.has(nameLower)) {
-            const existingIndex = mapped.findIndex(m => m.title.toLowerCase().trim() === nameLower);
+        // Helper to extract thickness in cm from DB product
+        const getThicknessCm = (p: any) => {
+          if (p.thickness) {
+            const match = p.thickness.match(/(\d+)\s*inch/i);
+            if (match) return parseInt(match[1]) * 2.54;
+          }
+          if (p.variants && p.variants[0] && p.variants[0].thickness_cm) {
+            return p.variants[0].thickness_cm;
+          }
+          return 15;
+        };
+
+        // For each DB product group, pick the LEAST THICKNESS product
+        dbGroups.forEach((groupProducts, baseNameLower) => {
+          // Sort ascending by thickness so index 0 is the least thickness
+          groupProducts.sort((a, b) => getThicknessCm(a) - getThicknessCm(b));
+          const leastP = groupProducts[0];
+          const displayName = cleanName(leastP.name);
+          const firstV = leastP.variants && leastP.variants[0] ? leastP.variants[0] : null;
+          const priceVal = leastP.price || (firstV ? firstV.price : (leastP.sqftPrice ? leastP.sqftPrice * 18 : 12999));
+          const origPrice = leastP.originalPrice || (firstV ? firstV.mrp : Math.round(priceVal * 1.3));
+          const dbImage = leastP.images && leastP.images[0] ? (typeof leastP.images[0] === 'string' ? leastP.images[0] : leastP.images[0].url) : null;
+          const allInchDisplay = Array.from(new Set(groupProducts.map(gp => `${Math.round(getThicknessCm(gp)/2.54)}"`))).join(' / ');
+
+          if (seenNames.has(baseNameLower)) {
+            const existingIndex = mapped.findIndex(m => m.title.toLowerCase().trim() === baseNameLower);
             if (existingIndex !== -1) {
               if (dbImage) mapped[existingIndex].image = dbImage;
               mapped[existingIndex].priceValue = priceVal;
               mapped[existingIndex].price = `₹${priceVal.toLocaleString('en-IN')}`;
-              if (p.originalPrice || leastVariant) {
-                mapped[existingIndex].originalPrice = p.originalPrice || (leastVariant ? leastVariant.mrp : Math.round(priceVal * 1.3));
+              mapped[existingIndex].originalPrice = origPrice;
+              if (leastP.description) {
+                mapped[existingIndex].subtitle = leastP.description.split('.')[0];
               }
-              if (p.description) {
-                mapped[existingIndex].subtitle = p.description.split('.')[0];
-              }
-              // If the DB product is the "default" one they want to show, update the slug
-              // E.g., lax-o-bond-8 will replace lax-o-bond's link on the collections page, which is fine since they just updated it.
-              mapped[existingIndex].slug = p.slug;
+              mapped[existingIndex].thickness = allInchDisplay || mapped[existingIndex].thickness;
+              mapped[existingIndex].slug = leastP.slug;
             }
             return;
           }
-          seenNames.add(nameLower);
+          seenNames.add(baseNameLower);
 
           mapped.push({
-            id: p._id || staticDedupe.length + idx + 1,
-            title: baseName,
-            slug: p.slug,
-            type: typeMap[p.category] || p.category || 'Orthopaedic',
-            firmness: p.firmness || 'Medium Firm',
-            subtitle: p.description ? p.description.split('.')[0] : 'Premium Mattress',
-            description: p.description || 'Advanced spine support and pressure relief.',
+            id: leastP._id || staticDedupe.length + 1,
+            title: displayName,
+            slug: leastP.slug,
+            type: typeMap[leastP.category] || leastP.category || 'Orthopaedic',
+            firmness: leastP.firmness || 'Medium Firm',
+            subtitle: leastP.description ? leastP.description.split('.')[0] : 'Premium Mattress',
+            description: leastP.description || 'Advanced spine support and pressure relief.',
             badge: 'NEW',
             badgeColor: 'bg-[#3b82f6] text-white',
-            thickness: thicknessVal,
+            thickness: allInchDisplay || `${Math.round(getThicknessCm(leastP)/2.54)} Inch`,
             price: `₹${priceVal.toLocaleString('en-IN')}`,
             priceValue: priceVal,
-            originalPrice: p.originalPrice || (leastVariant ? leastVariant.mrp : Math.round(priceVal * 1.3)),
-            sqftPrice: p.sqftPrice || 546,
-            warranty: p.warranty_years || p.warranty || 10,
+            originalPrice: origPrice,
+            sqftPrice: leastP.sqftPrice || 546,
+            warranty: leastP.warranty_years || leastP.warranty || 10,
             image: dbImage || "/images/products/ecolatex-6.jpeg"
           });
         });
@@ -480,7 +501,6 @@ function ProductListingContent() {
                       </div>
                     </div>
                     <p className="text-[#7cb93e] text-xs font-bold uppercase tracking-wider mb-3">{product.subtitle}</p>
-                    <p className="text-[#64748b] text-sm mb-5 line-clamp-2 leading-relaxed">{product.description}</p>
                     
                     <div className="flex items-center gap-5 mb-6 text-xs text-[#475569] font-bold mt-auto bg-gray-50/80 p-3 rounded-xl border border-gray-100 flex-wrap">
                       <div className="flex items-center gap-2 bg-[#7cb93e]/15 text-[#5a8b2a] px-3 py-1.5 rounded-lg border border-[#7cb93e]/30 shadow-sm">

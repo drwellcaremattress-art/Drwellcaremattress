@@ -27,7 +27,7 @@ export default async function ProductPage({ params }: PageProps) {
   try {
     await connectDB();
     dbProduct = await ProductModel.findOne({ slug }).lean();
-    allDbProducts = await ProductModel.find({ status: 'active' }).select('slug images').lean();
+    allDbProducts = await ProductModel.find({ status: 'active' }).lean();
   } catch (err) {
     console.error("Error fetching product from DB:", err);
   }
@@ -46,72 +46,83 @@ export default async function ProductPage({ params }: PageProps) {
 
   let product: any = null;
   if (dbProduct) {
-    const matchInCatalog = productCatalog.find(p => p.slug === dbProduct.slug || p.name.toLowerCase() === (dbProduct.name || '').toLowerCase());
-    const firstVariant = dbProduct.variants && dbProduct.variants[0] ? dbProduct.variants[0] : null;
-    const priceVal = dbProduct.sqftPrice ? dbProduct.sqftPrice * 18 : (firstVariant ? firstVariant.price : 12999);
-    const mrpVal = Math.round(priceVal * 1.3);
-    // Map DB variants to thicknessVariants for the frontend
-    let dbThicknessVariants: any[] = [];
-    const thicknessMap = new Map();
+    const cleanName = (n: string) => (n || '').replace(/\s*-\s*\d+\s*(inch|")?|\s+\d+\s*(inch|")?$/i, '').replace(/\s+plus$/i, '').trim().toLowerCase();
+    const targetBase = cleanName(dbProduct.name);
+    const siblingProducts = allDbProducts.filter(p => cleanName(p.name) === targetBase);
 
-    // 1. First, seed with catalog variants if they exist so we don't lose them
+    const getInchVal = (tCm?: number, tStr?: string) => {
+      if (tStr) {
+        const m = tStr.match(/(\d+)\s*inch/i);
+        if (m) return parseInt(m[1]);
+      }
+      if (tCm) return Math.round(tCm / 2.54);
+      return 6;
+    };
+
+    const thicknessMap = new Map<number, any>();
+
+    // 1. Seed from matching catalog product if available
+    const matchInCatalog = productCatalog.find(p => p.slug === dbProduct.slug || cleanName(p.name) === targetBase);
     if (matchInCatalog && matchInCatalog.thicknessVariants) {
       matchInCatalog.thicknessVariants.forEach((cv: any) => {
-        // Retain the catalog image so the UI can switch to it, and force slug to current product to prevent navigation away!
-        thicknessMap.set(cv.thickness_cm, { ...cv, slug: dbProduct.slug });
+        const inch = getInchVal(cv.thickness_cm, cv.thickness);
+        thicknessMap.set(inch, {
+          ...cv,
+          thickness: `${inch} Inch`,
+          thickness_cm: inch * 2.54,
+          slug: dbProduct.slug
+        });
       });
     }
 
-    // 2. Then override with actual DB variants
-    if (dbProduct.variants && dbProduct.variants.length > 0) {
-      dbProduct.variants.forEach((v: any) => {
-        const inch = Math.round(v.thickness_cm / 2.54);
-        
-        if (!thicknessMap.has(v.thickness_cm)) {
-          // Add new variant from DB
-          thicknessMap.set(v.thickness_cm, {
-            thickness: `${inch} Inch`,
-            thickness_cm: v.thickness_cm,
-            priceValue: v.price,
-            originalPrice: v.mrp,
-            image: v.image || undefined,
-            images: v.image ? [v.image] : undefined,
-            slug: dbProduct.slug,
-            warranty: dbProduct.warranty_years || 10,
-            warranty_years: dbProduct.warranty_years || 10
-          });
-        } else {
-          // Update existing variant with DB prices and images
-          const existing = thicknessMap.get(v.thickness_cm);
-          existing.priceValue = v.price;
-          existing.originalPrice = v.mrp;
-          existing.slug = dbProduct.slug;
-          if (v.image) {
-            existing.image = v.image;
-            existing.images = [v.image];
-          }
-          // Do NOT delete existing.image if v.image is missing, allowing fallback to catalog image
-        }
+    // 2. Add/override with actual sibling DB products (these contain the user's uploaded images per thickness!)
+    siblingProducts.forEach((sp: any) => {
+      const firstV = sp.variants && sp.variants[0] ? sp.variants[0] : null;
+      const inch = getInchVal(firstV?.thickness_cm, sp.thickness);
+      const thickness_cm = inch * 2.54;
+      const priceVal = sp.price || (firstV ? firstV.price : (sp.sqftPrice ? sp.sqftPrice * 18 : 12999));
+      const origPrice = sp.originalPrice || (firstV ? firstV.mrp : Math.round(priceVal * 1.3));
+      const spImages = sp.images && sp.images.length > 0 ? sp.images.map((i: any) => typeof i === 'string' ? i : i.url) : [];
+
+      thicknessMap.set(inch, {
+        thickness: `${inch} Inch`,
+        thickness_cm,
+        priceValue: priceVal,
+        price: `₹${priceVal.toLocaleString('en-IN')}`,
+        originalPrice: origPrice,
+        sqftPrice: sp.sqftPrice || Math.round(priceVal / 18),
+        image: spImages[0] || undefined,
+        images: spImages.length > 0 ? spImages : undefined,
+        layersImage: sp.layersImage || undefined,
+        slug: dbProduct.slug, // Keep slug consistent to prevent navigation resets
+        warranty: sp.warranty_years || sp.warranty || 10,
+        warranty_years: sp.warranty_years || sp.warranty || 10
       });
-    }
+    });
+
+    const dbThicknessVariants = Array.from(thicknessMap.values()).sort((a: any, b: any) => a.thickness_cm - b.thickness_cm);
     
-    dbThicknessVariants = Array.from(thicknessMap.values()).sort((a: any, b: any) => a.thickness_cm - b.thickness_cm);
+    // Primary display defaults to the LEAST THICKNESS variant (index 0)
+    const leastVariant = dbThicknessVariants[0] || null;
+    const defaultImages = leastVariant?.images || (dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images.map((i: any) => typeof i === 'string' ? i : i.url) : ["/images/products/ecolatex-6.jpeg"]);
+    const defaultPrice = leastVariant?.priceValue || dbProduct.price || 12999;
+    const defaultOriginalPrice = leastVariant?.originalPrice || dbProduct.originalPrice || Math.round(defaultPrice * 1.3);
 
     product = {
       id: dbProduct.slug,
       slug: dbProduct.slug,
-      title: dbProduct.name,
+      title: cleanName(dbProduct.name) ? dbProduct.name.replace(/\s*-\s*\d+\s*(inch|")?|\s+\d+\s*(inch|")?$/i, '').replace(/\s+plus$/i, '').trim() : dbProduct.name,
       subtitle: dbProduct.description ? dbProduct.description.split('.')[0] : 'Premium Mattress',
-      price: priceVal,
-      originalPrice: dbProduct.originalPrice || (firstVariant ? firstVariant.mrp : mrpVal),
+      price: defaultPrice,
+      originalPrice: defaultOriginalPrice,
       rating: dbProduct.ratingAvg || 4.8,
       reviews: dbProduct.ratingCount || 120,
       firmness: dbProduct.firmness || 'Medium Firm',
-      thickness: dbProduct.thickness || (firstVariant && firstVariant.thickness_cm ? `${Math.round(firstVariant.thickness_cm / 2.54)} Inch` : '6 Inch'),
-      sqftPrice: dbProduct.sqftPrice || 546,
+      thickness: leastVariant?.thickness || dbProduct.thickness || '6 Inch',
+      sqftPrice: leastVariant?.sqftPrice || dbProduct.sqftPrice || 546,
       warranty: dbProduct.warranty_years || dbProduct.warranty || 10,
       features: dbProduct.benefits || ['Advanced spine support', 'Pressure relief', 'Eco-friendly materials'],
-      images: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images.map((i: any) => typeof i === 'string' ? i : i.url) : ["/images/products/ecolatex-6.jpeg", "/images/products/ecolatex-6.jpeg", "/images/products/ecolatex-6.jpeg"],
+      images: defaultImages,
       layersImage: dbProduct.layersImage || null,
       thicknessVariants: dbThicknessVariants.length > 0 ? dbThicknessVariants : undefined
     };
@@ -148,12 +159,7 @@ export default async function ProductPage({ params }: PageProps) {
         <ProductMainDisplay product={product} />
       </div>
 
-      <hr className="my-12 border-gray-100" />
 
-      {/* Bottom Section: Product Details & Specs */}
-      <div className="container mx-auto px-4 lg:px-8">
-        <ProductDetails product={product} />
-      </div>
       
       {/* RELATED PRODUCTS SECTION */}
       <section className="container mx-auto px-4 lg:px-8 pt-20 pb-10 border-t border-gray-100">

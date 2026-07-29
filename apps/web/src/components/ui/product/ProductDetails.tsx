@@ -6,7 +6,7 @@ import { ShieldCheck, Activity, Moon, CircleDot, User, Wind, Leaf, Award } from 
 import { motion, type Variants } from 'framer-motion';
 import { ReviewSection } from './ReviewSection';
 
-export function ProductDetails({ product }: { product?: any }) {
+export function ProductDetails({ product, activeVariant }: { product?: any; activeVariant?: any }) {
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -249,12 +249,18 @@ export function ProductDetails({ product }: { product?: any }) {
                 <div className="absolute bottom-10 left-10 w-32 h-32 bg-[#0B1A2A]/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
 
                 <div className="relative w-full h-full">
-                  <Image 
-                    src={product?.layersImage || "/images/layers.png"} 
-                    alt={`${product?.title} Mattress Layers`}
-                    fill 
-                    className="object-contain drop-shadow-2xl z-10 transition-transform duration-700 ease-out group-hover:scale-105" 
-                  />
+                  {(() => {
+                    const layersImg = activeVariant?.layersImage || activeVariant?.image || (activeVariant?.images && activeVariant?.images[0]) || product?.layersImage || (product?.images && product?.images[0]) || "/images/layers.png";
+                    return (
+                      <Image 
+                        key={layersImg}
+                        src={layersImg} 
+                        alt={`${product?.title} Mattress Layers`}
+                        fill 
+                        className="object-contain drop-shadow-2xl z-10 transition-all duration-500 ease-out group-hover:scale-105" 
+                      />
+                    );
+                  })()}
                 </div>
               </motion.div>
             </div>

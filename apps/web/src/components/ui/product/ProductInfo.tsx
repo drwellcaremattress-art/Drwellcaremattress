@@ -85,7 +85,7 @@ const getDynamicSizeData = (rate: number) => {
 };
 
 export function ProductInfo({ product, externalVariantIndex, onVariantChange }: ProductInfoProps) {
-  const initialVariantIndex = product.thicknessVariants ? Math.max(0, product.thicknessVariants.findIndex((v: any) => v.slug === product.slug || v.thickness === product.thickness)) : 0;
+  const initialVariantIndex = 0;
   const [internalVariantIndex, setInternalVariantIndex] = useState<number>(initialVariantIndex);
   const activeVariantIndex = externalVariantIndex !== undefined ? externalVariantIndex : internalVariantIndex;
   const activeVariant = product.thicknessVariants && product.thicknessVariants.length > 0 ? product.thicknessVariants[activeVariantIndex] : null;
