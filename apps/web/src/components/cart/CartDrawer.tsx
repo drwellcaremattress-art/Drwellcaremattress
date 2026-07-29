@@ -71,6 +71,9 @@ export function CartDrawer() {
                       </button>
                     </div>
                     <p className="text-sm text-ink-muted">Size: {item.size}</p>
+                    {item.color && (
+                      <p className="text-sm text-ink-muted">Color: {item.color}</p>
+                    )}
                   </div>
                   <div className="flex justify-between items-end mt-2">
                     <span className="font-mono font-bold text-primary-blue">₹{(item.price * item.qty).toLocaleString('en-IN')}</span>

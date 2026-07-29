@@ -9,8 +9,10 @@ import { useCartStore } from '@/store/cartStore';
 
 export default function ProductPage() {
   const [selectedSize, setSelectedSize] = useState('Queen');
+  const [selectedColor, setSelectedColor] = useState('White');
   const [qty, setQty] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
+  const colors = ['White', 'Blue', 'Gray'];
   
   const basePrice = 14999;
   const sizeMultipliers: Record<string, number> = {
@@ -102,6 +104,31 @@ export default function ProductPage() {
               </div>
             </div>
 
+            {/* Color Selector */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-heading font-semibold text-ink">Select Color</h3>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {colors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`py-3 px-4 rounded-xl border text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
+                      selectedColor === color 
+                        ? 'border-primary-blue bg-primary-blue-light text-primary-blue ring-1 ring-primary-blue' 
+                        : 'border-surface-alt text-ink hover:border-primary-blue/50 hover:bg-surface-alt'
+                    }`}
+                  >
+                    <span className={`w-3 h-3 rounded-full border border-gray-300 block ${
+                      color === 'White' ? 'bg-white' : color === 'Blue' ? 'bg-blue-600' : 'bg-gray-500'
+                    }`} />
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Actions */}
             <div className="flex gap-4 mb-8">
               <div className="flex items-center border border-surface-alt rounded-full p-1 bg-surface-alt">
@@ -116,9 +143,10 @@ export default function ProductPage() {
               <Button 
                 size="lg" 
                 onClick={() => addItem({
-                  id: `dr-well-sig-${selectedSize.toLowerCase()}`,
+                  id: `dr-well-sig-${selectedSize.toLowerCase()}-${selectedColor.toLowerCase()}`,
                   name: 'The Dr Well Signature',
                   size: selectedSize,
+                  color: selectedColor,
                   price: currentPrice,
                   qty: qty,
                   image: '/images/layers.png'

@@ -5,6 +5,7 @@ export interface CartItem {
   id: string; // SKU or unique ID
   name: string;
   size: string;
+  color: string;
   price: number;
   qty: number;
   image: string;

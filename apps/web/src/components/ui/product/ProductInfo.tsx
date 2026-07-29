@@ -97,6 +97,8 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
   const [selectedSize, setSelectedSize] = useState('Single');
   const [selectedDim, setSelectedDim] = useState('72" × 36"'); // default 72"×36"
   const selectedThickness = activeVariant ? activeVariant.thickness : (product.thickness || '6 Inch');
+  const [selectedColor, setSelectedColor] = useState('White');
+  const colors = ['White', 'Blue', 'Gray'];
   const [popupOpen, setPopupOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [customL, setCustomL] = useState('');
@@ -143,6 +145,7 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
       price: displayPrice,
       image: activeVariant && activeVariant.image ? activeVariant.image : (product.images && product.images[0] ? product.images[0] : ''),
       qty: 1,
+      color: selectedColor,
     });
     toggleCart();
   };
@@ -367,6 +370,31 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
             </div>
           </div>
 
+          {/* Color Selection */}
+          <div className="mt-5">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-sm font-bold text-[#0B1A2A]">Select Color</h3>
+            </div>
+            <div className="flex gap-3">
+              {colors.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => setSelectedColor(color)}
+                  className={`flex-1 py-2.5 rounded-xl border-2 font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                    selectedColor === color
+                      ? 'border-[#0B1A2A] bg-[#0B1A2A] text-white shadow-md'
+                      : 'border-gray-200 bg-white text-[#64748b] hover:border-gray-300'
+                  }`}
+                >
+                  <span className={`w-3.5 h-3.5 rounded-full border border-gray-300/50 shadow-inner block ${
+                    color === 'White' ? 'bg-[#f8fafc]' : color === 'Blue' ? 'bg-[#0682E4]' : 'bg-[#64748b]'
+                  }`} />
+                  {color}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Custom Size Toggle */}
           <button
             onClick={() => setCustomOpen(o => !o)}
@@ -439,6 +467,7 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
                             price: customPrice,
                             image: product.images[0],
                             qty: 1,
+                            color: selectedColor,
                           });
                           toggleCart();
                         }}
@@ -455,6 +484,7 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
                             price: customPrice,
                             image: product.images[0],
                             qty: 1,
+                            color: selectedColor,
                           });
                           if (!session) {
                             alert('Please login or create an account first to complete your purchase!');

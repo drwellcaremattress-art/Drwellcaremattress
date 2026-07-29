@@ -250,7 +250,13 @@ export default function AdminDashboardClient({
                           </span>
                         </td>
                         <td className="p-4">
-                          <span className="text-xs text-slate-500">{ord.items?.length || 0} item(s)</span>
+                          <div className="max-h-16 overflow-y-auto space-y-1 pr-1">
+                            {ord.items?.length > 0 ? ord.items.map((it: any, i: number) => (
+                              <div key={i} className="text-xs text-slate-600 line-clamp-1" title={`${it.name} - ${it.variantSku} ${it.color ? `(${it.color})` : ''}`}>
+                                <span className="font-semibold text-slate-800">{it.qty}x</span> {it.name} {it.color ? <span className="font-medium text-[#0682E4]">({it.color})</span> : ''}
+                              </div>
+                            )) : <span className="text-xs text-slate-500">0 items</span>}
+                          </div>
                         </td>
                         <td className="p-4 text-right">
                           <span className="font-extrabold text-base text-slate-900">₹{ord.totalPrice?.toLocaleString('en-IN')}</span>

@@ -214,6 +214,7 @@ export default function CheckoutPage() {
           productId: i.id,
           name: i.name,
           variantSku: i.size,
+          color: i.color,
           qty: i.qty,
           price: i.price,
           image: i.image
@@ -353,7 +354,7 @@ export default function CheckoutPage() {
                       <tr key={idx} className="hover:bg-slate-50/50">
                         <td className="p-3">
                           <span className="font-bold text-[#0B1A2A] block">{item.name || item.productId}</span>
-                          <span className="text-[11px] text-slate-400">{item.variantSku || item.size}</span>
+                          <span className="text-[11px] text-slate-400">{item.variantSku || item.size} {item.color ? `- ${item.color}` : ''}</span>
                         </td>
                         <td className="p-3 text-center font-bold">{item.qty}</td>
                         <td className="p-3 text-right font-mono font-bold">₹{(item.price * item.qty).toLocaleString('en-IN')}</td>
@@ -573,6 +574,7 @@ export default function CheckoutPage() {
                   <div className="flex-grow">
                     <h4 className="font-bold text-xs text-[#0B1A2A] line-clamp-1">{item.name}</h4>
                     <p className="text-[11px] text-slate-400">{item.size}</p>
+                    {item.color && <p className="text-[11px] text-slate-500 font-medium">Color: {item.color}</p>}
                     <p className="font-mono text-xs font-extrabold text-[#0682E4]">₹{(item.price * item.qty).toLocaleString('en-IN')}</p>
                   </div>
                 </div>
