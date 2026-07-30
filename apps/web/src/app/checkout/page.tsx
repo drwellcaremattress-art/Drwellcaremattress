@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Script from 'next/script';
 
 export default function CheckoutPage() {
   const { data: session } = useSession();
@@ -203,89 +204,169 @@ export default function CheckoutPage() {
     }
 
     setLoading(true);
+    const orderNumber = `DRWELL-ORD-${Date.now().toString().slice(-6)}`;
+    const token = (session as any)?.accessToken;
 
-    try {
-      const orderNumber = `DRWELL-ORD-${Date.now().toString().slice(-6)}`;
-      const token = (session as any)?.accessToken;
+    const baseOrderPayload = {
+      orderNumber,
+      orderItems: items.map(i => ({
+        productId: i.id,
+        name: i.name,
+        variantSku: i.size,
+        color: i.color || 'White',
+        qty: i.qty,
+        price: i.price,
+        image: i.image
+      })),
+      customerName: `${formData.firstName} ${formData.lastName}`.trim(),
+      customerEmail: formData.email || session?.user?.email || 'guest@drwellcare.com',
+      customerPhone: formData.phone,
+      shippingAddress: {
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        postalCode: formData.pinCode,
+        country: 'India'
+      },
+      paymentMethod: formData.payment,
+      itemsPrice: subtotal,
+      taxPrice: Math.round(subtotal * 0.18),
+      shippingPrice: shipping,
+      totalPrice: total,
+    };
 
-      const orderData = {
-        orderNumber,
-        orderItems: items.map(i => ({
-          productId: i.id,
-          name: i.name,
-          variantSku: i.size,
-          color: i.color || 'White',
-          qty: i.qty,
-          price: i.price,
-          image: i.image
-        })),
-        customerName: `${formData.firstName} ${formData.lastName}`.trim(),
-        customerEmail: formData.email || 'guest@drwellcare.com',
-        customerPhone: formData.phone,
-        shippingAddress: {
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          postalCode: formData.pinCode,
-          country: 'India'
-        },
-        paymentMethod: formData.payment,
-        itemsPrice: subtotal,
-        taxPrice: Math.round(subtotal * 0.18), // 18% GST estimate
-        shippingPrice: shipping,
-        totalPrice: total,
-      };
+    const finalizeOrder = async (paidData?: any) => {
+      try {
+        const finalPayload = paidData ? { ...baseOrderPayload, ...paidData } : baseOrderPayload;
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify(finalPayload)
+        });
 
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify(orderData)
-      });
-
-      if (res.ok) {
-        const resultData = await res.json();
-        setConfirmedOrder(resultData._id ? resultData : { ...orderData, _id: orderNumber, createdAt: new Date().toISOString() });
+        const createdOrderObj = res.ok ? await res.json() : { ...finalPayload, _id: orderNumber, createdAt: new Date().toISOString() };
+        setConfirmedOrder(createdOrderObj);
         saveOrderToAccountHistory(orderNumber, items, total, formData);
         clearCart();
-      } else {
-        // Fallback for demo mode
-        setConfirmedOrder({ ...orderData, _id: orderNumber, createdAt: new Date().toISOString() });
+      } catch (err) {
+        console.error('Finalize order error:', err);
+        setConfirmedOrder({ ...baseOrderPayload, _id: orderNumber, createdAt: new Date().toISOString() });
         saveOrderToAccountHistory(orderNumber, items, total, formData);
         clearCart();
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      // Demo mode fallback
-      const orderNumber = `DRWELL-ORD-${Date.now().toString().slice(-6)}`;
-      setConfirmedOrder({
-        orderNumber,
-        orderItems: items,
-        customerName: `${formData.firstName} ${formData.lastName}`.trim(),
-        customerPhone: formData.phone,
-        customerEmail: formData.email || 'guest@drwellcare.com',
-        shippingAddress: {
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          postalCode: formData.pinCode,
-          country: 'India'
-        },
-        paymentMethod: formData.payment,
-        totalPrice: total,
-        createdAt: new Date().toISOString()
+    };
+
+    // --- RAZORPAY PAYMENT FLOW ---
+    if (formData.payment === 'razorpay') {
+      try {
+        const createRes = await fetch('/api/razorpay/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: total,
+            receipt: orderNumber,
+          })
+        });
+
+        const rzpData = await createRes.json();
+
+        if (!createRes.ok || !rzpData.id) {
+          alert('Failed to initiate Razorpay payment: ' + (rzpData.message || 'Server error'));
+          setLoading(false);
+          return;
+        }
+
+        const options = {
+          key: rzpData.key,
+          amount: rzpData.amount,
+          currency: rzpData.currency,
+          name: 'Dr. Well Care',
+          description: 'Orthopaedic & Wellness Mattress Order',
+          image: '/images/logo.png',
+          order_id: rzpData.id,
+          handler: async function (response: any) {
+            setLoading(true);
+            try {
+              const verifyRes = await fetch('/api/razorpay/verify-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                })
+              });
+              const verifyData = await verifyRes.json();
+
+              if (verifyData.success) {
+                await finalizeOrder({
+                  paymentStatus: 'paid',
+                  paymentRef: response.razorpay_payment_id,
+                  paymentGateway: 'razorpay',
+                });
+              } else {
+                alert('Payment verification failed: ' + (verifyData.message || 'Invalid signature'));
+                setLoading(false);
+              }
+            } catch (err) {
+              console.error('Payment verification request failed:', err);
+              alert('Error verifying payment. Please contact support.');
+              setLoading(false);
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              setLoading(false);
+            }
+          },
+          prefill: {
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email || session?.user?.email || '',
+            contact: formData.phone,
+          },
+          theme: {
+            color: '#0682E4',
+          }
+        };
+
+        if (typeof (window as any).Razorpay === 'undefined') {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = () => {
+            const rzp = new (window as any).Razorpay(options);
+            rzp.open();
+          };
+          script.onerror = () => {
+            alert('Failed to load Razorpay SDK. Please check your network connection.');
+            setLoading(false);
+          };
+          document.body.appendChild(script);
+        } else {
+          const rzp = new (window as any).Razorpay(options);
+          rzp.open();
+        }
+      } catch (err: any) {
+        console.error('Razorpay init error:', err);
+        alert('Could not start payment gateway: ' + err.message);
+        setLoading(false);
+      }
+    } else {
+      // --- CASH ON DELIVERY FLOW ---
+      await finalizeOrder({
+        paymentStatus: 'cod',
+        paymentMethod: 'cod',
       });
-      saveOrderToAccountHistory(orderNumber, items, total, formData);
-      clearCart();
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <div className="bg-slate-50 min-h-screen py-12 font-body relative">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       
       {/* ORDER CONFIRMATION & INVOICE MODAL */}
       {confirmedOrder && (

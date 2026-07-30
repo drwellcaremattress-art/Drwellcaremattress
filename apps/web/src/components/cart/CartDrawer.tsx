@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useCartStore } from '@/store/cartStore';
-import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, ShieldCheck, Truck, Lock, CheckCircle2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -33,18 +33,46 @@ export function CartDrawer() {
       <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-surface-alt">
-          <h2 className="font-heading text-xl font-bold flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5 text-primary-blue" />
-            Your Cart ({items.length})
-          </h2>
-          <button onClick={toggleCart} className="p-2 hover:bg-surface-alt rounded-full transition-colors text-ink-muted hover:text-ink">
+        <div className="flex items-center justify-between p-6 border-b border-surface-alt bg-slate-900 text-white">
+          <div>
+            <h2 className="font-heading text-xl font-bold flex items-center gap-2 text-white">
+              <ShoppingBag className="h-5 w-5 text-[#7cb93e]" />
+              Your Cart ({items.length})
+            </h2>
+            <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1 mt-0.5">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Items Added & Ready
+            </span>
+          </div>
+          <button onClick={toggleCart} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Cart Items */}
         <div className="flex-grow overflow-y-auto p-6 space-y-6">
+          {items.length > 0 && (
+            <div className="bg-gradient-to-r from-emerald-50 via-blue-50 to-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-xs">
+              <div className="flex items-center gap-2 mb-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="font-extrabold text-[11px] uppercase tracking-wider text-slate-800">Order Clarifications & Assurance</span>
+              </div>
+              <ul className="text-[11px] space-y-1.5 text-slate-700 font-medium">
+                <li className="flex items-center gap-2">
+                  <Truck className="w-3.5 h-3.5 text-[#0682E4] shrink-0" />
+                  <span><strong>Free Express Delivery:</strong> Direct factory dispatch in 3-5 days</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span><strong>10-Year Warranty:</strong> Full protection against sagging & defects</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Lock className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                  <span><strong>100% Secure Checkout:</strong> Razorpay (UPI/Cards) & COD</span>
+                </li>
+              </ul>
+            </div>
+          )}
+
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-ink-muted">
               <div className="w-48 h-48 sm:w-64 sm:h-64 mb-4">

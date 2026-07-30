@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
-import { Star, ShieldCheck, Truck, Check, ChevronDown, RotateCcw, X, BedDouble, Zap, Sparkles, Layers } from 'lucide-react';
+import { Star, ShieldCheck, Truck, Check, ChevronDown, RotateCcw, X, BedDouble, Zap, Sparkles, Layers, CheckCircle2, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '@/store/cartStore';
 import { useSession } from 'next-auth/react';
@@ -103,6 +103,7 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
   const [customOpen, setCustomOpen] = useState(false);
   const [customL, setCustomL] = useState('');
   const [customW, setCustomW] = useState('');
+  const [addedClarificationItem, setAddedClarificationItem] = useState<any | null>(null);
   const { addItem, toggleCart } = useCartStore();
   const { data: session } = useSession();
   const router = useRouter();
@@ -138,7 +139,7 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
   const displayWarranty = activeVariant ? activeVariant.warranty : (product.warranty || 10);
 
   const handleAddToCart = () => {
-    addItem({
+    const itemObj = {
       id: activeVariant ? activeVariant.slug : product.id.toString(),
       name: product.title,
       size: selectedSubSize ? `${selectedSize} (${selectedSubSize.dim}) - ${selectedThickness}` : `${selectedSize} - ${selectedThickness}`,
@@ -146,8 +147,9 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
       image: activeVariant && activeVariant.image ? activeVariant.image : (product.images && product.images[0] ? product.images[0] : ''),
       qty: 1,
       color: selectedColor,
-    });
-    toggleCart();
+    };
+    addItem(itemObj);
+    setAddedClarificationItem(itemObj);
   };
 
   const handleSizeClick = (sizeName: string) => {
@@ -646,6 +648,99 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
                 style={{ backgroundColor: sizeData.color }}
               >
                 Done
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ─── Add To Cart Clarification Modal ────────────────────────────────────── */}
+      {addedClarificationItem && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+          style={{ backgroundColor: 'rgba(11, 26, 42, 0.7)', backdropFilter: 'blur(8px)' }}
+          onClick={() => setAddedClarificationItem(null)}
+        >
+          <div
+            className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-200 relative overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setAddedClarificationItem(null)} 
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <CheckCircle2 className="w-8 h-8 animate-bounce" />
+            </div>
+
+            <h3 className="text-center font-heading font-extrabold text-2xl text-[#0B1A2A] mb-1">
+              Item Added to Cart!
+            </h3>
+            <p className="text-center text-xs font-semibold text-slate-500 mb-5">
+              Review your item specs & order clarifications below:
+            </p>
+
+            {/* Item Card */}
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex gap-4 items-center mb-5">
+              {addedClarificationItem.image && (
+                <img src={addedClarificationItem.image} alt={addedClarificationItem.name} className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <h4 className="font-extrabold text-base text-[#0B1A2A] truncate">{addedClarificationItem.name}</h4>
+                <p className="text-xs text-slate-600 font-semibold mt-0.5">Size: <span className="text-[#0682E4] font-bold">{addedClarificationItem.size}</span></p>
+                <p className="text-sm font-black text-[#7cb93e] mt-1">₹{addedClarificationItem.price?.toLocaleString('en-IN')}</p>
+              </div>
+            </div>
+
+            {/* Clarification List */}
+            <div className="bg-gradient-to-br from-blue-50/80 to-emerald-50/80 border border-blue-100 rounded-2xl p-4 mb-6 text-left space-y-3">
+              <div className="flex items-start gap-3">
+                <Truck className="w-4 h-4 text-[#0682E4] shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-extrabold text-[#0B1A2A]">Free Express Factory Delivery</p>
+                  <p className="text-[11px] text-slate-600 font-medium">Safe, sanitized direct shipment within 3-5 business days across India.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-extrabold text-[#0B1A2A]">{displayWarranty}-Year Full Warranty</p>
+                  <p className="text-[11px] text-slate-600 font-medium">100% replacement guarantee against sagging or foam structural defects.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Lock className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-extrabold text-[#0B1A2A]">100% Secure Checkout & Live Gateway</p>
+                  <p className="text-[11px] text-slate-600 font-medium">Instant payment via Razorpay (UPI, Google Pay, Cards, Net Banking) or COD.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setAddedClarificationItem(null)}
+                className="flex-1 py-3.5 px-4 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-colors text-center"
+              >
+                Continue Shopping
+              </button>
+              <button
+                onClick={() => {
+                  setAddedClarificationItem(null);
+                  if (!session) {
+                    router.push('/login?callbackUrl=/checkout');
+                  } else {
+                    router.push('/checkout');
+                  }
+                }}
+                className="flex-1 py-3.5 px-4 rounded-xl bg-[#0682E4] hover:bg-[#7cb93e] text-white font-extrabold text-xs shadow-md transition-all text-center flex items-center justify-center gap-1.5"
+              >
+                Proceed to Checkout →
               </button>
             </div>
           </div>
