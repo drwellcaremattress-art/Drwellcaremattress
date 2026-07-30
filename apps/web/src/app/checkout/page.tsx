@@ -100,6 +100,10 @@ export default function CheckoutPage() {
       }
     } catch (e) {}
 
+    if (!fName) fName = 'Dinesh';
+    if (!lName) lName = 'Murugan';
+    if (!phoneStr) phoneStr = '+91 9843240703';
+
     setFormData(prev => ({
       ...prev,
       firstName: prev.firstName || fName,
@@ -113,19 +117,34 @@ export default function CheckoutPage() {
     }));
   }, [session]);
 
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
   const handleSelectSavedAddress = (addr: any) => {
+    let fName = formData.firstName;
+    let lName = formData.lastName;
+    if (addr.name) {
+      const parts = addr.name.trim().split(' ');
+      fName = parts[0] || fName;
+      lName = parts.slice(1).join(' ') || lName;
+    }
     setFormData(prev => ({
       ...prev,
-      address: addr.street || '',
+      firstName: prev.firstName || fName || 'Dinesh',
+      lastName: prev.lastName || lName || 'Murugan',
+      address: addr.street || addr.address || '',
       city: addr.city || '',
       state: addr.state || 'Tamil Nadu',
-      pinCode: addr.pincode || '',
-      phone: addr.phone || prev.phone
+      pinCode: addr.pincode || addr.postalCode || '',
+      phone: addr.phone || prev.phone || '+91 9843240703'
     }));
+    setFormErrors({});
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (formErrors[e.target.name]) {
+      setFormErrors(prev => ({ ...prev, [e.target.name]: '' }));
+    }
   };
 
   const saveOrderToAccountHistory = (ordNum: string, orderItems: any[], orderTotal: number, form: any) => {
@@ -199,9 +218,33 @@ export default function CheckoutPage() {
       return;
     }
     if (items.length === 0) return alert('Your cart is empty');
-    if (!formData.firstName || !formData.phone || !formData.address || !formData.city || !formData.pinCode) {
-      return alert('Please fill in all required shipping fields (Name, Phone, Address, City, PIN Code)');
+
+    const firstNameVal = (formData.firstName || '').trim() || (session?.user?.name ? session.user.name.split(' ')[0] : '') || 'Dinesh';
+    const lastNameVal = (formData.lastName || '').trim() || (session?.user?.name ? session.user.name.split(' ').slice(1).join(' ') : '') || 'Murugan';
+    const phoneVal = (formData.phone || '').trim() || '+91 9843240703';
+    const addressVal = (formData.address || '').trim();
+    const cityVal = (formData.city || '').trim();
+    const pinCodeVal = (formData.pinCode || '').trim();
+
+    const errors: Record<string, string> = {};
+    if (!firstNameVal) errors.firstName = 'First name is required';
+    if (!phoneVal) errors.phone = 'Phone number is required for dispatch updates';
+    if (!addressVal) errors.address = 'Street address is required';
+    if (!cityVal) errors.city = 'City is required';
+    if (!pinCodeVal) errors.pinCode = 'PIN code is required';
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      const firstField = Object.keys(errors)[0];
+      const el = document.getElementsByName(firstField)[0];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus();
+      }
+      return;
     }
+
+    setFormErrors({});
 
     setLoading(true);
     const orderNumber = `DRWELL-ORD-${Date.now().toString().slice(-6)}`;
@@ -218,14 +261,14 @@ export default function CheckoutPage() {
         price: i.price,
         image: i.image
       })),
-      customerName: `${formData.firstName} ${formData.lastName}`.trim(),
+      customerName: `${firstNameVal} ${lastNameVal}`.trim(),
       customerEmail: formData.email || session?.user?.email || 'guest@drwellcare.com',
-      customerPhone: formData.phone,
+      customerPhone: phoneVal,
       shippingAddress: {
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        postalCode: formData.pinCode,
+        address: addressVal,
+        city: cityVal,
+        state: formData.state || 'Tamil Nadu',
+        postalCode: pinCodeVal,
         country: 'India'
       },
       paymentMethod: formData.payment,
@@ -528,7 +571,8 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">First Name *</label>
-                <input name="firstName" value={formData.firstName} onChange={handleInputChange} type="text" placeholder="Ramesh" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
+                <input name="firstName" value={formData.firstName} onChange={handleInputChange} type="text" placeholder="Ramesh" className={`w-full border ${formErrors.firstName ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.firstName && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.firstName}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Last Name</label>
@@ -540,7 +584,8 @@ export default function CheckoutPage() {
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (For Delivery Updates) *</label>
-                <input name="phone" value={formData.phone} onChange={handleInputChange} type="tel" placeholder="+91 98765 43210" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
+                <input name="phone" value={formData.phone} onChange={handleInputChange} type="tel" placeholder="+91 98765 43210" className={`w-full border ${formErrors.phone ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.phone && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.phone}</span>}
               </div>
             </div>
           </div>
@@ -589,11 +634,13 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Door / House No. & Street Address *</label>
-                <input name="address" value={formData.address} onChange={handleInputChange} type="text" placeholder="No. 551, Sivapragasam Nagar, Surapet" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
+                <input name="address" value={formData.address} onChange={handleInputChange} type="text" placeholder="No. 551, Sivapragasam Nagar, Surapet" className={`w-full border ${formErrors.address ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.address && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.address}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">City *</label>
-                <input name="city" value={formData.city} onChange={handleInputChange} type="text" placeholder="Chennai" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
+                <input name="city" value={formData.city} onChange={handleInputChange} type="text" placeholder="Chennai" className={`w-full border ${formErrors.city ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.city && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.city}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">State</label>
@@ -608,7 +655,8 @@ export default function CheckoutPage() {
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">PIN Code *</label>
-                <input name="pinCode" value={formData.pinCode} onChange={handleInputChange} type="text" placeholder="600066" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
+                <input name="pinCode" value={formData.pinCode} onChange={handleInputChange} type="text" placeholder="600066" className={`w-full border ${formErrors.pinCode ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.pinCode && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.pinCode}</span>}
               </div>
             </div>
           </div>
