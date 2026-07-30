@@ -359,28 +359,7 @@ function ProductListingContent() {
               </div>
             </div>
 
-            <div className="h-px bg-gray-100 w-full mb-6"></div>
 
-            {/* Size */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4 cursor-pointer">
-                <h3 className="font-semibold text-sm">Size</h3>
-                <ChevronUp className="w-4 h-4 text-[#64748b]" />
-              </div>
-              <div className="space-y-3">
-                {sizesList.map((size) => {
-                  const isActive = selectedSizes.includes(size);
-                  return (
-                    <label key={size} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleFilter(selectedSizes, setSelectedSizes, size)}>
-                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isActive ? 'bg-[#0B1A2A] border-[#0B1A2A]' : 'border-gray-200 group-hover:border-[#0B1A2A]'}`}>
-                        {isActive && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                      </div>
-                      <span className={`text-sm transition-colors ${isActive ? 'text-[#0B1A2A] font-semibold' : 'text-[#64748b] group-hover:text-[#0B1A2A]'}`}>{size}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
 
             <Button onClick={clearFilters} variant="outline" className="w-full flex items-center justify-center gap-2 border-gray-200 text-[#0B1A2A] hover:bg-gray-50 rounded-lg">
               <RotateCcw className="w-4 h-4 text-[#7cb93e]" />
@@ -471,9 +450,7 @@ function ProductListingContent() {
                   {/* Image & Badges */}
                   <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#f8fafc] mb-6 shadow-inner">
                     <Image src={product.image} alt={product.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
-                    <div className={`absolute top-4 left-4 px-3 py-1.5 text-[10px] font-bold tracking-wider rounded-lg shadow-md ${product.badgeColor}`}>
-                      {product.badge}
-                    </div>
+
                     <button 
                       onClick={(e) => toggleWishlist(product, e)}
                       className={`absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all transform active:scale-90 ${
