@@ -32,10 +32,9 @@ export default function CollectionsPage() {
         
         {/* Parallax Background Image */}
         <motion.div style={{ y }} className="absolute inset-0 w-full h-[120%] -top-[10%]">
-          <Image 
-            src="/images/collections_hero.png"
+          <Image src="/images/collections_hero.png"
             alt="Dr Well Care Mattress Showroom"
-            fill
+            fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover object-center"
             priority
             quality={100}

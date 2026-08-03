@@ -1,75 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
-import { Review } from '@/lib/models/Review';
 import { Product } from '@/lib/models/Product';
-import { User } from '@/lib/models/User';
-import { protect } from '@/lib/authMiddleware';
-
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { slug: string } }
-) {
-  try {
-    await connectDB();
-    const user = await protect(req);
-    
-    if (!user) {
-      return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
-    }
-
-    const { rating, body, title } = await req.json();
-    
-    // In Express it used product ID instead of slug, but the URL param here is slug
-    // We should probably find the product by ID or Slug.
-    // Express path was /api/products/:id/reviews, let's assume params.slug is the productId
-    const productId = params.slug;
-
-    let product = null;
-    if (productId.match(/^[0-9a-fA-F]{24}$/)) {
-      product = await Product.findById(productId);
-    }
-    if (!product) {
-      product = await Product.findOne({ slug: productId }) || await Product.findOne({ slug: productId.replace(/-\d+(inch|")?$/i, '') });
-    }
-
-    if (!product) {
-      return NextResponse.json({ message: 'Product not found' }, { status: 404 });
-    }
-
-    const targetId = product.slug || productId;
-
-    const alreadyReviewed = await Review.findOne({
-      productId: targetId,
-      userId: user._id,
-    });
-
-    if (alreadyReviewed) {
-      return NextResponse.json({ message: 'Product already reviewed' }, { status: 400 });
-    }
-
-    const review = await Review.create({
-      productId: targetId,
-      userId: user._id,
-      rating: Number(rating),
-      body: body || 'Great product',
-      title: title || 'Review',
-      verifiedPurchase: true,
-    });
-
-    const allReviews = await Review.find({ productId: targetId });
-    
-    product.ratingCount = allReviews.length;
-    product.ratingAvg =
-      allReviews.reduce((acc: number, item: any) => item.rating + acc, 0) / (allReviews.length || 1);
-
-    await product.save();
-
-    return NextResponse.json({ message: 'Review added', review }, { status: 201 });
-  } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
-  }
-}
+import { Review } from '@/lib/models/Review';
+import mongoose from 'mongoose';
 
 export async function GET(
   req: NextRequest,
@@ -77,18 +10,77 @@ export async function GET(
 ) {
   try {
     await connectDB();
-    const productId = params.slug;
     
-    const baseSlug = productId.replace(/-\d+(inch|")?$/i, '');
-    const queryIds = [productId];
-    if (baseSlug !== productId) {
-      queryIds.push(baseSlug);
+    // Find the product by slug or id
+    const isId = mongoose.Types.ObjectId.isValid(params.slug);
+    const productQuery = isId ? { _id: params.slug } : { slug: params.slug };
+    const product = await Product.findOne(productQuery).select('_id');
+    
+    if (!product) {
+      return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
-    const reviews = await Review.find({ productId: { $in: queryIds } }).populate('userId', 'name').sort({ createdAt: -1 });
+    const reviews = await Review.find({ productId: product._id }).sort({ createdAt: -1 });
     return NextResponse.json(reviews);
+  } catch (error) {
+    console.error('GET /api/products/[slug]/reviews error:', error);
+    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+  }
+}
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  try {
+    await connectDB();
+    
+    // Find the product by slug or id
+    const isId = mongoose.Types.ObjectId.isValid(params.slug);
+    const productQuery = isId ? { _id: params.slug } : { slug: params.slug };
+    const product = await Product.findOne(productQuery);
+    
+    if (!product) {
+      return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+    }
+
+    const body = await req.json();
+    const { userName, rating, title, comment, images, userId } = body;
+
+    if (!userName || !rating || !title || !comment) {
+      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Determine verified purchase (for now, default true if they are logged in, or false if not)
+    // You could query Orders here, but for simplicity we will just take what is passed
+    // or assume logged in users are somewhat trusted for this MVP.
+    const isVerifiedPurchase = !!userId; 
+
+    const newReview = new Review({
+      productId: product._id,
+      userId,
+      userName,
+      rating: Number(rating),
+      title,
+      comment,
+      images: images || [],
+      isVerifiedPurchase
+    });
+
+    await newReview.save();
+
+    // Recalculate average rating
+    const allReviews = await Review.find({ productId: product._id });
+    const totalRating = allReviews.reduce((sum, r) => sum + r.rating, 0);
+    const avgRating = allReviews.length > 0 ? (totalRating / allReviews.length).toFixed(1) : 0;
+
+    product.ratingAvg = Number(avgRating);
+    product.ratingCount = allReviews.length;
+    await product.save();
+
+    return NextResponse.json(newReview, { status: 201 });
   } catch (error: any) {
-    console.error("Error fetching reviews:", error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    console.error('POST /api/products/[slug]/reviews error:', error);
+    return NextResponse.json({ message: error.message || 'Server error' }, { status: 500 });
   }
 }

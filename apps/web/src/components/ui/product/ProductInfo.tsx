@@ -64,17 +64,21 @@ const BASE_SIZES: Record<string, {
   },
 };
 
-const getDynamicSizeData = (rate: number) => {
+const getDynamicSizeData = (rate: number, productVariants?: any[]) => {
   const result: Record<string, {
     color: string;
     bgLight: string;
     rows: { dim: string; sqft: number; price: number }[];
   }> = {};
   for (const [key, val] of Object.entries(BASE_SIZES)) {
+    // Use DB sub-dimensions if available (admin-customised), else fall back to hardcoded BASE_SIZES
+    const dbVariant = productVariants?.find((v: any) => v.size === key);
+    const sourceRows: { dim: string; sqft: number }[] =
+      dbVariant?.subDimensions?.length > 0 ? dbVariant.subDimensions : val.rows;
     result[key] = {
       color: val.color,
       bgLight: val.bgLight,
-      rows: val.rows.map(r => ({
+      rows: sourceRows.map(r => ({
         dim: r.dim,
         sqft: r.sqft,
         price: Math.round(r.sqft * rate),
@@ -92,7 +96,7 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
 
   // Determine exact price per sq.ft rate for this product or selected thickness variant
   const rate = (activeVariant ? activeVariant.sqftPrice : product.sqftPrice) || Math.round((typeof product.price === 'number' ? product.price : (product.priceValue || 9828)) / 18) || 546;
-  const SIZE_DATA = getDynamicSizeData(rate);
+  const SIZE_DATA = getDynamicSizeData(rate, product.variants);
 
   const [selectedSize, setSelectedSize] = useState('Single');
   const [selectedDim, setSelectedDim] = useState('72" × 36"'); // default 72"×36"

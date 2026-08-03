@@ -44,13 +44,13 @@ export default function ProductPage() {
             <div className="hidden lg:flex flex-col gap-4 w-24">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 ${i === 1 ? 'border-primary-blue' : 'border-transparent hover:border-surface-alt'}`}>
-                  <Image src="/images/layers.png" alt={`Thumbnail ${i}`} fill className="object-cover" />
+                  <Image src="/images/layers.png" alt={`Thumbnail ${i}`} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
                 </div>
               ))}
             </div>
             {/* Main Image */}
             <div className="relative aspect-[4/3] lg:aspect-square flex-grow rounded-2xl overflow-hidden bg-surface-alt group cursor-zoom-in">
-              <Image src="/images/layers.png" alt="Main product image" fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+              <Image src="/images/layers.png" alt="Main product image" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
           </div>
 

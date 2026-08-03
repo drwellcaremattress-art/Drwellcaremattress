@@ -194,7 +194,7 @@ export default function ReturnsPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Pickup Phone Number *</label>
-                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+91 98765 43210" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
+                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+91 81244 65404" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
                 </div>
               </div>
 

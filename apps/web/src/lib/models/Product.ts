@@ -63,6 +63,12 @@ const ProductSchema: Schema = new Schema(
         sku: { type: String, required: true },
         stock: { type: Number, default: 0 },
         image: { type: String },
+        subDimensions: [
+          {
+            dim: { type: String, required: true },
+            sqft: { type: Number, required: true },
+          },
+        ],
       },
     ],
     firmness: {
@@ -94,6 +100,7 @@ const ProductSchema: Schema = new Schema(
   }
 );
 if (process.env.NODE_ENV === 'development' && mongoose.models.Product) {
+  // Force reload of schema for subDimensions
   delete mongoose.models.Product;
 }
 export const Product = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);

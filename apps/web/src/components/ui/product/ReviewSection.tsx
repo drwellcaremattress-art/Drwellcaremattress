@@ -220,6 +220,7 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
   const [rating, setRating] = useState(5);
   const [title, setTitle] = useState('');
   const [comment, setComment] = useState('');
+  const [imageInput, setImageInput] = useState('');
   const [sizeBought, setSizeBought] = useState('King (78" × 72")');
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
@@ -323,6 +324,7 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
       sizeBought: `${sizeBought} — Verified Buyer`,
       likes: 1,
       isUserSubmitted: true,
+      images: imageInput ? [imageInput] : [],
     };
 
     const updatedReviews = [newRev, ...reviews];
@@ -346,13 +348,23 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
       console.error('Failed to save review to localStorage:', e);
     }
 
-    // Attempt to save to backend DB if slug exists
     if (productSlug) {
       try {
+        const userId = localStorage.getItem('drwell_user_id') || `user_${Date.now()}`;
+        const payload = {
+          userName: name,
+          rating,
+          title,
+          comment,
+          images: imageInput ? [imageInput] : [],
+          userId,
+          sizeBought
+        };
+
         await fetch(`/api/products/${productSlug}/reviews`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ rating, title, body: comment, author: name, sizeBought }),
+          body: JSON.stringify(payload),
         });
       } catch (err) {
         console.warn('Backend API post offline/unauth, persisted in localStorage');
@@ -623,6 +635,19 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
                     />
                   </div>
 
+                  <div>
+                    <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5 tracking-wider">
+                      6. Add a Photo (Image URL - Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. https://example.com/my-mattress.jpg"
+                      value={imageInput}
+                      onChange={(e) => setImageInput(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                    />
+                  </div>
+
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
                       <ShieldCheck className="w-4 h-4 text-emerald-600" /> All submissions receive our 100% Verified Buyer badge.
@@ -740,6 +765,15 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
               <p className="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed mb-5 font-normal">
                 {rev.comment}
               </p>
+              {/* @ts-ignore */}
+              {rev.images && rev.images.length > 0 && (
+                <div className="flex gap-2 mb-5 overflow-x-auto pb-2">
+                  {/* @ts-ignore */}
+                  {rev.images.map((imgUrl: string, idx: number) => (
+                    <img key={idx} src={imgUrl} alt="Review" className="w-24 h-24 object-cover rounded-xl border border-slate-200" />
+                  ))}
+                </div>
+              )}
 
               {/* Helpful Counter & Badge */}
               <div className="flex items-center justify-between pt-3.5 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 font-semibold">

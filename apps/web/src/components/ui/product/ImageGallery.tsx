@@ -20,10 +20,9 @@ export function ImageGallery({ images, title, badge }: ImageGalleryProps) {
     <div className="flex flex-col gap-4">
       {/* Main Image */}
       <div className="relative w-full aspect-[4/3] bg-gray-50 rounded-2xl overflow-hidden border border-gray-100">
-        <Image 
-          src={images[activeIndex] || '/images/layers.png'} 
+        <Image src={images[activeIndex] || '/images/layers.png'} 
           alt="Product Image" 
-          fill 
+          fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
           className="object-contain"
           priority
         />
@@ -44,10 +43,9 @@ export function ImageGallery({ images, title, badge }: ImageGalleryProps) {
               activeIndex === idx ? 'border-[#0B1A2A] opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
             } bg-gray-50`}
           >
-            <Image 
-              src={img} 
+            <Image src={img} 
               alt={`Thumbnail ${idx + 1}`} 
-              fill 
+              fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
               className="object-cover"
             />
           </button>

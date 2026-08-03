@@ -6,7 +6,7 @@ import AdminProductFormDrawer from './AdminProductFormDrawer';
 import AdminDeleteConfirmModal from './AdminDeleteConfirmModal';
 import {
   Package, ShoppingCart, Plus, RefreshCw, X, Check,
-  Truck, AlertCircle, BarChart3, TrendingUp, IndianRupee, Users
+  Truck, AlertCircle, BarChart3, TrendingUp, IndianRupee, Users, Trash2, MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -83,7 +83,7 @@ export default function AdminDashboardClient({
   };
 
   const handleOrderStatusChange = async (orderId: string, newStatus: string) => {
-    setOrders(orders.map((o) => (o._id === orderId ? { ...o, orderStatus: newStatus } : o)));
+    setOrders((prev) => prev.map((o) => (o._id === orderId ? { ...o, orderStatus: newStatus } : o)));
     try {
       await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
@@ -94,6 +94,32 @@ export default function AdminDashboardClient({
       console.error('Order status update failed:', err);
     }
   };
+
+  const handleDeleteOrder = async (orderId: string, orderNumber: string) => {
+    if (!window.confirm(`Are you sure you want to delete order ${orderNumber}?`)) {
+      return;
+    }
+    setOrders((prev) => prev.filter((o) => o._id !== orderId));
+    try {
+      await fetch(`/api/orders/${orderId}`, {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.error('Delete order failed:', err);
+    }
+  };
+
+  const formatAddress = (addr: any) => {
+    if (!addr) return 'N/A';
+    if (typeof addr === 'string') return addr;
+    const street = addr.streetAddress || addr.address || addr.street || addr.addressLine1 || '';
+    const city = addr.city || '';
+    const state = addr.state || '';
+    const pincode = addr.pincode || addr.zipCode || addr.postalCode || '';
+    const parts = [street, city, state, pincode].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : 'N/A';
+  };
+
 
   // ── Stats ──
   const activeProducts = products.filter((p) => p.status === 'active').length;
@@ -109,8 +135,8 @@ export default function AdminDashboardClient({
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-body">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="min-h-screen bg-slate-50 font-body pt-32 lg:pt-40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
 
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -221,10 +247,12 @@ export default function AdminDashboardClient({
                     <tr>
                       <th className="p-4">Order</th>
                       <th className="p-4">Customer</th>
+                      <th className="p-4">Shipping Address</th>
                       <th className="p-4">Payment</th>
                       <th className="p-4">Items</th>
                       <th className="p-4 text-right">Total</th>
                       <th className="p-4 text-center">Status</th>
+                      <th className="p-4 text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -240,8 +268,16 @@ export default function AdminDashboardClient({
                         </td>
                         <td className="p-4">
                           <span className="font-bold text-slate-800 block text-sm">{ord.customerName}</span>
-                          <span className="text-[11px] text-slate-400">{ord.customerPhone}</span>
-                          <span className="text-[11px] text-slate-400">{ord.customerEmail}</span>
+                          <span className="text-[11px] text-slate-400 block">{ord.customerPhone}</span>
+                          <span className="text-[11px] text-slate-400 block">{ord.customerEmail}</span>
+                        </td>
+                        <td className="p-4 max-w-[200px]">
+                          <div className="flex items-start gap-1 text-slate-600">
+                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                            <span className="text-xs font-medium leading-snug line-clamp-2" title={formatAddress(ord.shippingAddress)}>
+                              {formatAddress(ord.shippingAddress)}
+                            </span>
+                          </div>
                         </td>
                         <td className="p-4">
                           <span className="font-bold uppercase text-slate-700 block text-xs">{ord.paymentMethod}</span>
@@ -269,6 +305,7 @@ export default function AdminDashboardClient({
                               ord.orderStatus === 'Delivered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                               ord.orderStatus === 'Cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
                               ord.orderStatus === 'Shipped' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                              ord.orderStatus === 'Out for Delivery' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                               'bg-amber-50 text-amber-700 border-amber-200'
                             }`}
                           >
@@ -279,6 +316,15 @@ export default function AdminDashboardClient({
                             <option value="Delivered">Delivered</option>
                             <option value="Cancelled">Cancelled</option>
                           </select>
+                        </td>
+                        <td className="p-4 text-center">
+                          <button
+                            onClick={() => handleDeleteOrder(ord._id, ord.orderNumber)}
+                            title="Delete order"
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </td>
                       </tr>
                     ))}

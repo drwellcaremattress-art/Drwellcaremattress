@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
     if (query.firmness) filter.firmness = query.firmness;
 
     const products = await Product.find(filter);
+    // Force schema reload
     return NextResponse.json(products);
   } catch (error) {
     console.error(error);

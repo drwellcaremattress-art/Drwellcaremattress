@@ -145,10 +145,9 @@ export default function LoginPage() {
       <div className="hidden lg:flex w-1/2 relative bg-[#0B1A2A] text-white flex-col justify-between p-12 overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
-          <Image 
-            src="/images/luxury_mattress_hero.png" 
+          <Image src="/images/luxury_mattress_hero.png" 
             alt="Luxury Mattress" 
-            fill 
+            fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
             className="object-cover opacity-40 hover:scale-105 transition-transform duration-1000"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0B1A2A] via-[#0B1A2A]/80 to-transparent"></div>

@@ -44,6 +44,9 @@ export async function PUT(
     await connectDB();
     const body = await req.json();
     
+    console.log('--- INCOMING PUT API VARIANTS PAYLOAD ---');
+    console.log(JSON.stringify(body.variants, null, 2));
+    
     const query = buildQuery(params.slug);
 
     // If slug is being updated, check for conflicts
@@ -57,7 +60,7 @@ export async function PUT(
     const updatedProduct = await Product.findOneAndUpdate(
       query,
       { $set: body },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true } // SubDimensions are validated here
     );
     
     if (!updatedProduct) {

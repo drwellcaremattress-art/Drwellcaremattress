@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  X, Save, Plus, Trash2, ChevronRight, Package, Tag, FileText,
+  X, Save, Plus, Trash2, Package, Tag, FileText,
   Image as ImageIcon, Search, AlertCircle, CheckCircle2, Loader2,
-  LayoutGrid, DollarSign, List
+  DollarSign, RefreshCw, ChevronDown, ChevronUp, IndianRupee
 } from 'lucide-react';
 import { ProductType } from './AdminProductTable';
 
 const CATEGORIES = ['orthopaedic', 'bonded', 'latex', 'memory-foam', 'pocket-spring', 'hybrid', 'budget'];
 const TYPES = ['Orthopaedic', 'Bonded Series', 'Hybrid', 'Latex', 'Memory Foam', 'Budget Mattress', 'Luxury HR Series'];
-const FIRMNESS_OPTIONS = ['Soft', 'Medium Soft', 'Medium Firm', 'Firm', 'Orthopaedic Firm'];
+const FIRMNESS_OPTIONS = ['Soft', 'Medium Soft', 'Medium', 'Medium Firm', 'Firm', 'Orthopaedic Firm', 'Plush'];
 const STATUS_OPTIONS = ['active', 'draft'];
 
 const TABS = [
@@ -22,15 +22,94 @@ const TABS = [
   { id: 'seo', label: 'SEO', icon: Search },
 ];
 
-const emptyVariant = () => ({
-  size: '',
-  dimensions: '',
-  thickness_cm: 15,
-  price: 0,
-  mrp: 0,
-  sku: '',
-  stock: 0,
-});
+// ─── Exact same structure as ProductInfo.tsx on the website ─────────────────
+const BASE_SIZES: Record<string, {
+  label: string;
+  color: string;
+  bgLight: string;
+  accent: string;
+  defaultDim: string;   // The "standard" dimension shown on the size selector
+  defaultSqft: number;  // sqft of that default dimension
+  rows: { dim: string; sqft: number }[];
+}> = {
+  Single: {
+    label: 'Single',
+    color: '#055bc7',
+    bgLight: '#eff6ff',
+    accent: '#dbeafe',
+    defaultDim: '72" × 36"',
+    defaultSqft: 18,
+    rows: [
+      { dim: '72" × 30"', sqft: 15.00 },
+      { dim: '75" × 30"', sqft: 15.63 },
+      { dim: '72" × 36"', sqft: 18.00 },
+      { dim: '75" × 36"', sqft: 18.75 },
+      { dim: '78" × 36"', sqft: 19.50 },
+    ],
+  },
+  Double: {
+    label: 'Double',
+    color: '#599c15',
+    bgLight: '#f0fdf4',
+    accent: '#dcfce7',
+    defaultDim: '72" × 48"',
+    defaultSqft: 24,
+    rows: [
+      { dim: '72" × 48"', sqft: 24.00 },
+      { dim: '75" × 48"', sqft: 25.00 },
+      { dim: '78" × 48"', sqft: 26.00 },
+      { dim: '84" × 48"', sqft: 28.00 },
+    ],
+  },
+  Queen: {
+    label: 'Queen',
+    color: '#782c7a',
+    bgLight: '#fdf4ff',
+    accent: '#f3e8ff',
+    defaultDim: '72" × 60"',
+    defaultSqft: 30,
+    rows: [
+      { dim: '72" × 60"', sqft: 30.00 },
+      { dim: '75" × 60"', sqft: 31.25 },
+      { dim: '78" × 60"', sqft: 32.50 },
+      { dim: '84" × 60"', sqft: 35.00 },
+    ],
+  },
+  King: {
+    label: 'King',
+    color: '#eb7407',
+    bgLight: '#fff7ed',
+    accent: '#ffedd5',
+    defaultDim: '72" × 72"',
+    defaultSqft: 36,
+    rows: [
+      { dim: '72" × 72"', sqft: 36.00 },
+      { dim: '75" × 72"', sqft: 37.50 },
+      { dim: '78" × 72"', sqft: 39.00 },
+      { dim: '84" × 72"', sqft: 42.00 },
+    ],
+  },
+};
+
+const SIZE_KEYS = ['Single', 'Double', 'Queen', 'King'] as const;
+type SizeKey = typeof SIZE_KEYS[number];
+
+// Default variant per size category
+const defaultVariantForSize = (sizeKey: SizeKey, sqftPrice: number, slugBase: string) => {
+  const s = BASE_SIZES[sizeKey];
+  const price = Math.round(s.defaultSqft * sqftPrice);
+  const mrp = Math.round(price * 1.3);
+  return {
+    size: sizeKey,
+    dimensions: s.defaultDim,
+    price,
+    mrp,
+    sku: `${slugBase.toUpperCase()}-${sizeKey.toUpperCase()}-6IN`,
+    stock: 20,
+    image: '',
+    subDimensions: s.rows.map(r => ({ dim: r.dim, sqft: r.sqft })),
+  };
+};
 
 const emptyProduct = (): Partial<ProductType> => ({
   name: '',
@@ -40,10 +119,12 @@ const emptyProduct = (): Partial<ProductType> => ({
   description: '',
   benefits: [],
   images: [],
-  variants: [emptyVariant()],
+  variants: SIZE_KEYS.map(k => defaultVariantForSize(k, 546, 'product')),
   firmness: 'Medium Firm',
   warranty_years: 10,
   trialNights: 100,
+  sqftPrice: 546,
+  thickness: '6 Inch',
   ratingAvg: 0,
   ratingCount: 0,
   seo: { title: '', description: '', keywords: '' },
@@ -58,6 +139,9 @@ interface Props {
   onSaved: (product: ProductType) => void;
 }
 
+// Sub-dimension editing state
+type EditingDim = { sizeKey: SizeKey; rowIdx: number; dim: string; sqft: string };
+
 export default function AdminProductFormDrawer({ open, mode, product, onClose, onSaved }: Props) {
   const [activeTab, setActiveTab] = useState('basics');
   const [formData, setFormData] = useState<any>(emptyProduct());
@@ -66,6 +150,10 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({ Single: true, Double: false, Queen: false, King: false });
+  const [editingDim, setEditingDim] = useState<EditingDim | null>(null);
+  const [addingDimForSize, setAddingDimForSize] = useState<SizeKey | null>(null);
+  const [newDimForm, setNewDimForm] = useState({ dim: '', sqft: '' });
 
   useEffect(() => {
     if (open) {
@@ -73,14 +161,48 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
       setSlugManuallyEdited(false);
       setBenefitInput('');
       setImageInput('');
+      setExpandedCards({ Single: true, Double: false, Queen: false, King: false });
+      setEditingDim(null);
+      setAddingDimForSize(null);
+      setNewDimForm({ dim: '', sqft: '' });
+
       if (mode === 'edit' && product) {
+        // Build 4 canonical size variants, merging existing DB data
+        const existing = product.variants || [];
+        const mergedVariants = SIZE_KEYS.map(sizeKey => {
+          const dbVar = existing.find((v: any) =>
+            v.size?.toLowerCase() === sizeKey.toLowerCase() ||
+            (sizeKey === 'Single' && (v.size === 'Single' || v.size === 'Single XL')) ||
+            (sizeKey === 'Double' && (v.size === 'Double' || v.size === 'Diwan'))
+          );
+          const sqftP = Number(product.sqftPrice) || 546;
+          const s = BASE_SIZES[sizeKey];
+          const defaultPrice = Math.round(s.defaultSqft * sqftP);
+          // Use DB subDimensions if they exist (and have rows), else fall back to BASE_SIZES
+          const subDimensions =
+            (dbVar as any)?.subDimensions?.length > 0
+              ? (dbVar as any).subDimensions.map((d: any) => ({ dim: d.dim, sqft: Number(d.sqft) }))
+              : s.rows.map((r: { dim: string; sqft: number }) => ({ dim: r.dim, sqft: r.sqft }));
+          return {
+            size: sizeKey,
+            dimensions: dbVar?.dimensions || s.defaultDim,
+            price: dbVar?.price || defaultPrice,
+            mrp: dbVar?.mrp || Math.round(defaultPrice * 1.3),
+            sku: dbVar?.sku || `${(product.slug || 'prod').toUpperCase()}-${sizeKey.toUpperCase()}-6IN`,
+            stock: dbVar?.stock ?? 20,
+            image: dbVar?.image || '',
+            subDimensions,
+          };
+        });
+
         setFormData({
           ...emptyProduct(),
           ...product,
           images: product.images || [],
-          variants: product.variants && product.variants.length > 0 ? product.variants : [emptyVariant()],
+          variants: mergedVariants,
           benefits: product.benefits || [],
           seo: product.seo || { title: '', description: '', keywords: '' },
+          sqftPrice: Number(product.sqftPrice) || 546,
         });
       } else {
         setFormData(emptyProduct());
@@ -111,6 +233,148 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
     setFormData((prev: any) => ({ ...prev, seo: { ...prev.seo, [field]: value } }));
   };
 
+  // ── Recalculate all variant prices from sqftPrice ──
+  const recalcAllFromSqftPrice = (sqftP: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      sqftPrice: sqftP,
+      variants: SIZE_KEYS.map(sizeKey => {
+        const existing = (prev.variants || []).find((v: any) => v.size === sizeKey);
+        const s = BASE_SIZES[sizeKey];
+        const price = Math.round(s.defaultSqft * sqftP);
+        const mrp = Math.round(price * 1.3);
+        return {
+          size: sizeKey,
+          dimensions: existing?.dimensions || s.defaultDim,
+          price,
+          mrp,
+          sku: existing?.sku || `${(prev.slug || 'prod').toUpperCase()}-${sizeKey.toUpperCase()}-6IN`,
+          stock: existing?.stock ?? 20,
+          image: existing?.image || '',
+          subDimensions: existing?.subDimensions?.length > 0
+            ? existing.subDimensions
+            : s.rows.map((r: any) => ({ dim: r.dim, sqft: r.sqft })),
+        };
+      }),
+    }));
+    showToast('success', `Recalculated all 4 size prices from ₹${sqftP}/sq.ft`);
+  };
+
+  // ── Sub-dimension CRUD helpers ──
+
+  // Parse "80\"×38\"" / "80"*38" / "80x38" → sqft = (L×W)/144
+  const parseSqft = (dim: string): number | null => {
+    const cleaned = dim.replace(/"/g, '').replace(/\s+/g, '');
+    const match = cleaned.match(/^([\d.]+)[×xX*]([\d.]+)$/);
+    if (!match) return null;
+    const l = parseFloat(match[1]);
+    const w = parseFloat(match[2]);
+    if (isNaN(l) || isNaN(w) || l <= 0 || w <= 0) return null;
+    return parseFloat(((l * w) / 144).toFixed(2));
+  };
+
+  const getSubDims = (sizeKey: SizeKey): { dim: string; sqft: number }[] => {
+    const v = (formData.variants || []).find((v: any) => v.size === sizeKey);
+    return v?.subDimensions || BASE_SIZES[sizeKey].rows.map(r => ({ dim: r.dim, sqft: r.sqft }));
+  };
+
+  const setSubDims = (sizeKey: SizeKey, dims: { dim: string; sqft: number }[]) => {
+    setFormData((prev: any) => {
+      const existing = (prev.variants || []).find((v: any) => v.size === sizeKey);
+      if (existing) {
+        return {
+          ...prev,
+          variants: prev.variants.map((v: any) =>
+            v.size !== sizeKey ? v : { ...v, subDimensions: dims }
+          ),
+        };
+      } else {
+        return {
+          ...prev,
+          variants: [...(prev.variants || []), { size: sizeKey, subDimensions: dims }],
+        };
+      }
+    });
+  };
+
+  const addSubDim = (sizeKey: SizeKey) => {
+    const dim = newDimForm.dim.trim();
+    const sqft = parseFloat(newDimForm.sqft);
+    if (!dim || isNaN(sqft) || sqft <= 0) {
+      showToast('error', 'Enter a valid dimension and sqft value.');
+      return;
+    }
+    const current = getSubDims(sizeKey);
+    setSubDims(sizeKey, [...current, { dim, sqft }]);
+    setAddingDimForSize(null);
+    setNewDimForm({ dim: '', sqft: '' });
+  };
+
+  const removeSubDim = (sizeKey: SizeKey, rowIdx: number) => {
+    const current = getSubDims(sizeKey);
+    if (current.length <= 1) {
+      showToast('error', 'Each size must have at least one dimension.');
+      return;
+    }
+    setSubDims(sizeKey, current.filter((_, i) => i !== rowIdx));
+  };
+
+  const startEditSubDim = (sizeKey: SizeKey, rowIdx: number) => {
+    const row = getSubDims(sizeKey)[rowIdx];
+    setEditingDim({ sizeKey, rowIdx, dim: row.dim, sqft: String(row.sqft) });
+  };
+
+  const commitSubDimEdit = () => {
+    if (!editingDim) return;
+    const dim = editingDim.dim.trim();
+    const sqft = parseFloat(editingDim.sqft);
+    if (!dim || isNaN(sqft) || sqft <= 0) {
+      showToast('error', 'Enter a valid dimension and sqft value.');
+      return;
+    }
+    const current = getSubDims(editingDim.sizeKey);
+    const updated = current.map((r, i) =>
+      i === editingDim.rowIdx ? { dim, sqft } : r
+    );
+    setSubDims(editingDim.sizeKey, updated);
+    setEditingDim(null);
+  };
+
+  // ── Update a single variant field ──
+  const updateVariant = (sizeKey: SizeKey, field: string, value: any) => {
+    setFormData((prev: any) => {
+      const existing = (prev.variants || []).find((v: any) => v.size === sizeKey);
+      
+      let val = value;
+      if (field === 'price' || field === 'mrp' || field === 'stock') {
+        val = value === '' ? '' : Number(value);
+      }
+
+      if (existing) {
+        return {
+          ...prev,
+          variants: prev.variants.map((v: any) => {
+            if (v.size !== sizeKey) return v;
+            const updated = { ...v, [field]: val };
+            if (field === 'price' && typeof val === 'number' && val > 0 && (!v.mrp || v.mrp === 0)) {
+              updated.mrp = Math.round(val * 1.3);
+            }
+            return updated;
+          }),
+        };
+      } else {
+        const newVariant: any = { size: sizeKey, [field]: val };
+        if (field === 'price' && typeof val === 'number' && val > 0) {
+          newVariant.mrp = Math.round(val * 1.3);
+        }
+        return {
+          ...prev,
+          variants: [...(prev.variants || []), newVariant],
+        };
+      }
+    });
+  };
+
   const addBenefit = () => {
     if (!benefitInput.trim()) return;
     setFormData((prev: any) => ({ ...prev, benefits: [...(prev.benefits || []), benefitInput.trim()] }));
@@ -132,25 +396,6 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
     setFormData((prev: any) => ({ ...prev, images: prev.images.filter((_: any, i: number) => i !== idx) }));
   };
 
-  const addVariant = () => {
-    setFormData((prev: any) => ({ ...prev, variants: [...(prev.variants || []), emptyVariant()] }));
-  };
-
-  const removeVariant = (idx: number) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      variants: prev.variants.filter((_: any, i: number) => i !== idx),
-    }));
-  };
-
-  const updateVariant = (idx: number, field: string, value: any) => {
-    setFormData((prev: any) => {
-      const updated = [...prev.variants];
-      updated[idx] = { ...updated[idx], [field]: value };
-      return { ...prev, variants: updated };
-    });
-  };
-
   const handleSave = async () => {
     if (!formData.name || !formData.category || !formData.firmness || !formData.description) {
       showToast('error', 'Name, category, firmness, and description are required.');
@@ -158,29 +403,62 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
       return;
     }
     setSaving(true);
-    try {
-      const url = mode === 'edit' && product?._id
-        ? `/api/products/${product._id}`
-        : '/api/products';
-      const method = mode === 'edit' ? 'PUT' : 'POST';
 
+    const sqftP = Number(formData.sqftPrice) || 546;
+    const slugBase = (formData.slug || formData.name || 'product').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+    const sanitizedVariants = SIZE_KEYS.map(sizeKey => {
+      const v = (formData.variants || []).find((v: any) => v.size === sizeKey) || {};
+      const s = BASE_SIZES[sizeKey];
+      const price = Number(v.price) > 0 ? Number(v.price) : Math.round(s.defaultSqft * sqftP);
+      const mrp = Number(v.mrp) > 0 ? Number(v.mrp) : Math.round(price * 1.3);
+      const subDimensions = v.subDimensions?.length > 0
+        ? v.subDimensions.map((d: any) => ({ dim: d.dim, sqft: Number(d.sqft) }))
+        : s.rows.map(r => ({ dim: r.dim, sqft: r.sqft }));
+      return {
+        size: sizeKey,
+        dimensions: v.dimensions || s.defaultDim,
+        thickness_cm: 15,
+        price,
+        mrp,
+        sku: v.sku || `${slugBase.toUpperCase()}-${sizeKey.toUpperCase()}-6IN`,
+        stock: Number(v.stock) || 0,
+        image: v.image || '',
+        subDimensions,
+      };
+    });
+
+    const singleVariant = sanitizedVariants.find(v => v.size === 'Single');
+    const lowestPrice = singleVariant?.price || sanitizedVariants[0]?.price || 0;
+
+    const payload = {
+      ...formData,
+      variants: sanitizedVariants,
+      sqftPrice: sqftP,
+      priceValue: lowestPrice,
+      price: lowestPrice,
+      originalPrice: Number(formData.originalPrice) || Math.round(lowestPrice * 1.3),
+      warranty_years: Number(formData.warranty_years) || 10,
+      trialNights: Number(formData.trialNights) || 100,
+      ratingAvg: Number(formData.ratingAvg) || 4.9,
+      ratingCount: Number(formData.ratingCount) || 0,
+    };
+
+    try {
+      const url = mode === 'edit' && product?._id ? `/api/products/${product._id}` : '/api/products';
+      const method = mode === 'edit' ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
-
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.message || 'Save failed');
       }
-
       const saved = await res.json();
       showToast('success', `Product "${saved.name}" ${mode === 'edit' ? 'updated' : 'created'} successfully!`);
-      setTimeout(() => {
-        onSaved(saved);
-        onClose();
-      }, 1200);
+      setTimeout(() => { onSaved(saved); onClose(); }, 1200);
     } catch (err: any) {
       showToast('error', err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -190,6 +468,12 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
 
   const inputCls = 'w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0682E4]/30 focus:border-[#0682E4] transition-all placeholder:text-slate-400';
   const labelCls = 'block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5';
+
+  // ── Live price computation ──
+  const sqftP = Number(formData.sqftPrice) || 0;
+
+  const getVariant = (sizeKey: SizeKey) =>
+    (formData.variants || []).find((v: any) => v.size === sizeKey) || {};
 
   return (
     <AnimatePresence>
@@ -304,27 +588,47 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                     </div>
                     <div>
                       <label className={labelCls}>Warranty (Years)</label>
-                      <input type="number" className={inputCls} value={formData.warranty_years} onChange={e => handleChange('warranty_years', Number(e.target.value))} min={0} max={25} />
+                      <input
+                        type="number"
+                        className={inputCls}
+                        value={!formData.warranty_years ? '' : formData.warranty_years}
+                        onChange={e => handleChange('warranty_years', e.target.value === '' ? '' : Number(e.target.value))}
+                        min={0} max={25}
+                      />
                     </div>
                     <div>
                       <label className={labelCls}>Trial Nights</label>
-                      <input type="number" className={inputCls} value={formData.trialNights} onChange={e => handleChange('trialNights', Number(e.target.value))} min={0} />
+                      <input
+                        type="number"
+                        className={inputCls}
+                        value={!formData.trialNights ? '' : formData.trialNights}
+                        onChange={e => handleChange('trialNights', e.target.value === '' ? '' : Number(e.target.value))}
+                        min={0}
+                      />
                     </div>
                     <div>
                       <label className={labelCls}>Rating Avg</label>
-                      <input type="number" className={inputCls} value={formData.ratingAvg} onChange={e => handleChange('ratingAvg', Number(e.target.value))} min={0} max={5} step={0.1} />
+                      <input
+                        type="number"
+                        className={inputCls}
+                        value={!formData.ratingAvg ? '' : formData.ratingAvg}
+                        onChange={e => handleChange('ratingAvg', e.target.value === '' ? '' : Number(e.target.value))}
+                        min={0} max={5} step={0.1}
+                      />
                     </div>
                     <div>
                       <label className={labelCls}>Rating Count</label>
-                      <input type="number" className={inputCls} value={formData.ratingCount} onChange={e => handleChange('ratingCount', Number(e.target.value))} min={0} />
+                      <input
+                        type="number"
+                        className={inputCls}
+                        value={!formData.ratingCount ? '' : formData.ratingCount}
+                        onChange={e => handleChange('ratingCount', e.target.value === '' ? '' : Number(e.target.value))}
+                        min={0}
+                      />
                     </div>
                     <div>
                       <label className={labelCls}>Thickness</label>
                       <input className={inputCls} placeholder="e.g. 6 Inch" value={formData.thickness || ''} onChange={e => handleChange('thickness', e.target.value)} />
-                    </div>
-                    <div>
-                      <label className={labelCls}>Sqft Price (₹)</label>
-                      <input type="number" className={inputCls} value={formData.sqftPrice || ''} onChange={e => handleChange('sqftPrice', Number(e.target.value))} placeholder="e.g. 546" />
                     </div>
                     <div className="col-span-2">
                       <label className={labelCls}>Subtitle</label>
@@ -336,110 +640,495 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
 
               {/* ── TAB: VARIANTS ── */}
               {activeTab === 'variants' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-extrabold text-slate-800 text-sm">Size Variants</h3>
-                    <button onClick={addVariant} className="flex items-center gap-1.5 px-3 py-2 bg-[#0682E4] text-white rounded-xl text-xs font-bold hover:bg-[#0682E4]/90 transition-colors">
-                      <Plus size={13} /> Add Variant
-                    </button>
+                <div className="space-y-6">
+
+                  {/* ── MASTER: sqftPrice Control ── */}
+                  <div className="bg-gradient-to-br from-[#0B1A2A] to-[#0f253d] rounded-2xl p-5 text-white">
+                    <div className="flex items-center gap-2 mb-1">
+                      <IndianRupee size={16} className="text-[#7cb93e]" />
+                      <h3 className="font-extrabold text-sm uppercase tracking-wider">Base Rate (₹/sq.ft)</h3>
+                    </div>
+                    <p className="text-white/50 text-xs mb-4">
+                      This is the master price rate. All sub-dimension prices are auto-calculated from this value on the product page.
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex-1">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-base">₹</span>
+                        <input
+                          type="number"
+                          className="w-full pl-9 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-black text-xl placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#7cb93e]/50 focus:border-[#7cb93e]/50 transition-all"
+                          placeholder="e.g. 528"
+                          value={formData.sqftPrice === 0 || formData.sqftPrice === '' || formData.sqftPrice === null ? '' : formData.sqftPrice}
+                          onChange={e => handleChange('sqftPrice', e.target.value === '' ? '' : Number(e.target.value))}
+                        />
+                      </div>
+                      <button
+                        onClick={() => sqftP > 0 && recalcAllFromSqftPrice(sqftP)}
+                        disabled={!sqftP}
+                        className="flex items-center gap-2 px-4 py-3 bg-[#7cb93e] hover:bg-[#5a8b2a] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-green-900/30 whitespace-nowrap"
+                      >
+                        <RefreshCw size={14} />
+                        Recalculate All
+                      </button>
+                    </div>
+
+                    {/* Quick live summary bar */}
+                    {sqftP > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {SIZE_KEYS.map(sizeKey => {
+                          const s = BASE_SIZES[sizeKey];
+                          const price = Math.round(s.defaultSqft * sqftP);
+                          return (
+                            <div key={sizeKey} className="flex items-center gap-1.5 bg-white/10 border border-white/15 rounded-lg px-2.5 py-1.5">
+                              <span className="text-[10px] font-bold text-white/60 uppercase">{sizeKey}</span>
+                              <span className="text-xs font-black text-[#7cb93e]">₹{price.toLocaleString('en-IN')}</span>
+                              <span className="text-[9px] text-white/40">from</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
-                  {formData.variants?.map((v: any, idx: number) => (
-                    <div key={idx} className="border border-slate-200 rounded-2xl p-4 bg-slate-50/60 space-y-3 relative">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-extrabold text-[#0682E4] uppercase tracking-wider">Variant #{idx + 1}</span>
-                        {formData.variants.length > 1 && (
-                          <button onClick={() => removeVariant(idx)} className="text-red-400 hover:text-red-600 p-1">
-                            <Trash2 size={14} />
-                          </button>
-                        )}
+                  {/* ── LIVE PRICE PREVIEW TABLE (mirrors website popup) ── */}
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden">
+                    <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+                      <div>
+                        <h4 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Live Price Preview</h4>
+                        <p className="text-[11px] text-slate-400 mt-0.5">This is exactly what customers see in the size-selection popup on the product page</p>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className={labelCls}>Size Label</label>
-                          <input className={inputCls} placeholder='e.g. Single (72" × 36")' value={v.size} onChange={e => updateVariant(idx, 'size', e.target.value)} />
-                        </div>
-                        <div>
-                          <label className={labelCls}>Dimensions</label>
-                          <input className={inputCls} placeholder='e.g. 72" × 36"' value={v.dimensions} onChange={e => updateVariant(idx, 'dimensions', e.target.value)} />
-                        </div>
-                        <div>
-                          <label className={labelCls}>Price (₹)</label>
-                          <input type="number" className={inputCls} value={v.price} onChange={e => updateVariant(idx, 'price', Number(e.target.value))} />
-                        </div>
-                        <div>
-                          <label className={labelCls}>MRP (₹)</label>
-                          <input type="number" className={inputCls} value={v.mrp} onChange={e => updateVariant(idx, 'mrp', Number(e.target.value))} />
-                        </div>
-                        <div>
-                          <label className={labelCls}>Thickness (cm)</label>
-                          <input type="number" className={inputCls} value={v.thickness_cm} onChange={e => updateVariant(idx, 'thickness_cm', Number(e.target.value))} />
-                        </div>
-                        <div>
-                          <label className={labelCls}>Stock (units)</label>
-                          <input type="number" className={inputCls} value={v.stock} onChange={e => updateVariant(idx, 'stock', Number(e.target.value))} />
-                        </div>
-                        <div className="col-span-2">
-                          <label className={labelCls}>SKU</label>
-                          <input className={`${inputCls} font-mono text-xs`} placeholder="e.g. LAXB-6-SINGLE" value={v.sku} onChange={e => updateVariant(idx, 'sku', e.target.value)} />
-                        </div>
-                        <div className="col-span-2 border-t border-slate-100 pt-3 mt-1">
-                          <label className={labelCls}>Variant Specific Image (Optional)</label>
-                          <p className="text-[10px] text-slate-400 mb-2">Upload a specific image for this size/thickness (e.g. showing 8" thickness)</p>
-                          <div className="flex items-center gap-3">
-                            {v.image && (
-                              <div className="w-12 h-12 rounded bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={v.image} alt="Variant" className="max-w-full max-h-full object-cover" />
+                      {sqftP > 0 && (
+                        <span className="text-xs font-bold text-[#0682E4] bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg">
+                          @ ₹{sqftP}/sq.ft
+                        </span>
+                      )}
+                    </div>
+
+                    {sqftP <= 0 ? (
+                      <div className="py-8 text-center text-slate-400">
+                        <IndianRupee size={28} className="mx-auto mb-2 opacity-30" />
+                        <p className="text-sm font-semibold">Enter a sqft price above to see live prices</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-slate-100">
+                        {SIZE_KEYS.map(sizeKey => {
+                          const s = BASE_SIZES[sizeKey];
+                          return (
+                            <div key={sizeKey} className="p-0">
+                              {/* Category Header */}
+                              <div
+                                className="flex items-center gap-3 px-4 py-2.5"
+                                style={{ backgroundColor: s.accent }}
+                              >
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                                <span className="text-xs font-extrabold uppercase tracking-wider" style={{ color: s.color }}>
+                                  {s.label} Mattress
+                                </span>
                               </div>
-                            )}
-                            <div className="w-48 shrink-0 relative">
-                              <input 
-                                type="file" 
-                                accept="image/*"
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (!file) return;
-                                  const fd = new FormData();
-                                  fd.append('file', file);
-                                  
-                                  setSaving(true);
-                                  try {
-                                    const res = await fetch('/api/upload', {
-                                      method: 'POST',
-                                      body: fd,
-                                    });
-                                    if (!res.ok) throw new Error('Upload failed');
-                                    const data = await res.json();
-                                    updateVariant(idx, 'image', data.url);
-                                    showToast('success', 'Variant image uploaded!');
-                                  } catch (err: any) {
-                                    showToast('error', 'Failed to upload variant image.');
-                                  } finally {
-                                    setSaving(false);
-                                    e.target.value = '';
-                                  }
-                                }}
-                              />
-                              <div className="w-full px-3 py-2 rounded-lg bg-blue-50 text-[#0682E4] border border-blue-100 text-[11px] font-bold text-center flex items-center justify-center gap-1.5 hover:bg-blue-100 transition-colors">
-                                <ImageIcon size={14} /> {v.image ? 'Change Image' : 'Upload Image'}
-                              </div>
+                              {/* Sub-dimension rows */}
+                              <table className="w-full text-xs">
+                                <thead>
+                                  <tr className="border-b border-slate-100 bg-slate-50/60">
+                                    <th className="text-left px-4 py-2 font-bold text-slate-500 w-1/3">Dimensions (L × W)</th>
+                                    <th className="text-left px-4 py-2 font-bold text-slate-500 w-1/3">Surface Area</th>
+                                    <th className="text-right px-4 py-2 font-bold text-slate-500 w-1/3">Price</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {s.rows.map((row, rIdx) => {
+                                    const price = Math.round(row.sqft * sqftP);
+                                    const isDefault = row.dim === s.defaultDim;
+                                    return (
+                                      <tr
+                                        key={rIdx}
+                                        className={`border-b border-slate-50 transition-colors ${isDefault ? 'bg-blue-50/40' : 'hover:bg-slate-50'}`}
+                                      >
+                                        <td className="px-4 py-2.5 font-semibold text-slate-700">
+                                          {row.dim}
+                                          {isDefault && (
+                                            <span className="ml-2 text-[9px] font-bold bg-[#0682E4]/10 text-[#0682E4] px-1.5 py-0.5 rounded uppercase">default</span>
+                                          )}
+                                        </td>
+                                        <td className="px-4 py-2.5 text-slate-500">{row.sqft.toFixed(2)} sq.ft</td>
+                                        <td className="px-4 py-2.5 text-right font-black" style={{ color: s.color }}>
+                                          ₹{price.toLocaleString('en-IN')}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
                             </div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase shrink-0">OR</span>
-                            <div className="flex-grow">
-                               <input className={`${inputCls} py-2 text-[11px]`} placeholder="Paste URL directly" value={v.image || ''} onChange={e => updateVariant(idx, 'image', e.target.value)} />
-                            </div>
-                            {v.image && (
-                              <button onClick={() => updateVariant(idx, 'image', '')} className="text-red-400 hover:text-red-600 p-1.5 shrink-0 transition-colors bg-red-50 rounded-lg">
-                                <Trash2 size={14} />
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── PER-CATEGORY VARIANT CARDS (Stock, SKU, MRP, Image) ── */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="font-extrabold text-slate-800 text-sm">Size Category Details</h3>
+                        <p className="text-[11px] text-slate-400 mt-0.5">Set stock, SKU, MRP and optional image per size</p>
                       </div>
                     </div>
-                  ))}
+
+                    <div className="space-y-3">
+                      {SIZE_KEYS.map(sizeKey => {
+                        const s = BASE_SIZES[sizeKey];
+                        const v = getVariant(sizeKey);
+                        const isExpanded = expandedCards[sizeKey];
+                        const displayPrice = sqftP > 0 ? Math.round(s.defaultSqft * sqftP) : (Number(v.price) || 0);
+                        const displayMrp = Number(v.mrp) || Math.round(displayPrice * 1.3);
+
+                        return (
+                          <div
+                            key={sizeKey}
+                            className="border-2 rounded-2xl overflow-hidden transition-all"
+                            style={{ borderColor: isExpanded ? s.color : '#e2e8f0' }}
+                          >
+                            {/* Card Header */}
+                            <button
+                              type="button"
+                              onClick={() => setExpandedCards(prev => ({ ...prev, [sizeKey]: !prev[sizeKey] }))}
+                              className="w-full flex items-center justify-between px-4 py-3.5 transition-colors"
+                              style={{ backgroundColor: isExpanded ? s.bgLight : '#f8fafc' }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-xs" style={{ backgroundColor: s.color }}>
+                                  {sizeKey[0]}
+                                </div>
+                                <div className="text-left">
+                                  <div className="font-extrabold text-slate-800 text-sm">{sizeKey} Mattress</div>
+                                  <div className="text-[11px] text-slate-500">{s.defaultDim} · {s.defaultSqft} sq.ft</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                {displayPrice > 0 && (
+                                  <div className="text-right">
+                                    <div className="font-black text-sm" style={{ color: s.color }}>₹{displayPrice.toLocaleString('en-IN')}</div>
+                                    <div className="text-[10px] text-slate-400 line-through">₹{displayMrp.toLocaleString('en-IN')}</div>
+                                  </div>
+                                )}
+                                {isExpanded ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                              </div>
+                            </button>
+
+                            {/* Card Body */}
+                            {isExpanded && (
+                              <div className="px-4 pb-4 pt-3 bg-white space-y-3 border-t border-slate-100">
+
+                                {/* Dimensions field — full width, at top */}
+                                <div>
+                                  <label className={labelCls}>Default Dimension (L × W)</label>
+                                  <div className="flex gap-2">
+                                    <select
+                                      className={inputCls}
+                                      value={s.rows.some(r => r.dim === (v.dimensions || s.defaultDim)) ? (v.dimensions || s.defaultDim) : '__custom__'}
+                                      onChange={e => {
+                                        if (e.target.value === '__custom__') return;
+                                        const chosen = s.rows.find(r => r.dim === e.target.value);
+                                        updateVariant(sizeKey, 'dimensions', e.target.value);
+                                        if (chosen && sqftP > 0) {
+                                          updateVariant(sizeKey, 'price', Math.round(chosen.sqft * sqftP));
+                                        }
+                                      }}
+                                    >
+                                      {s.rows.map(r => (
+                                        <option key={r.dim} value={r.dim}>
+                                          {r.dim}  ({r.sqft} sq.ft){r.dim === s.defaultDim ? ' — standard' : ''}
+                                        </option>
+                                      ))}
+                                      {!s.rows.some(r => r.dim === (v.dimensions || s.defaultDim)) && (
+                                        <option value="__custom__">{v.dimensions} (custom)</option>
+                                      )}
+                                    </select>
+                                    <input
+                                      className={`${inputCls} max-w-[160px] font-mono text-xs`}
+                                      placeholder={`e.g. ${s.defaultDim}`}
+                                      value={v.dimensions || s.defaultDim}
+                                      onChange={e => updateVariant(sizeKey, 'dimensions', e.target.value)}
+                                    />
+                                  </div>
+                                  <p className="text-[10px] text-slate-400 mt-1">
+                                    Select a standard option (auto-updates price) or type a custom dimension in the right box.
+                                  </p>
+                                </div>
+
+                                {/* ── Sub-Dimensions CRUD Table ── */}
+                                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                                  <div className="flex items-center justify-between px-3 py-2.5 bg-slate-50 border-b border-slate-200">
+                                    <div>
+                                      <span className="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">Popup Size Options</span>
+                                      <span className="ml-2 text-[10px] text-slate-400">— what customers see when they click this size</span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setAddingDimForSize(sizeKey);
+                                        setEditingDim(null);
+                                        setNewDimForm({ dim: '', sqft: '' });
+                                      }}
+                                      className="flex items-center gap-1 px-2.5 py-1 bg-[#0682E4] text-white rounded-lg text-[11px] font-bold hover:bg-[#0682E4]/90 transition-colors"
+                                    >
+                                      <Plus size={11} />
+                                      Add
+                                    </button>
+                                  </div>
+
+                                  <table className="w-full text-xs">
+                                    <thead>
+                                      <tr className="bg-slate-50/60 border-b border-slate-100">
+                                        <th className="text-left px-3 py-2 font-bold text-slate-500 w-[40%]">Dimensions (L × W)</th>
+                                        <th className="text-left px-3 py-2 font-bold text-slate-500 w-[22%]">Sq.ft</th>
+                                        <th className="text-right px-3 py-2 font-bold text-slate-500 w-[25%]">Price</th>
+                                        <th className="w-[13%]" />
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {getSubDims(sizeKey).map((row, rIdx) => {
+                                        const isEditingThis = editingDim?.sizeKey === sizeKey && editingDim?.rowIdx === rIdx;
+                                        const rowPrice = sqftP > 0 ? Math.round(row.sqft * sqftP) : 0;
+                                        return (
+                                          <tr key={rIdx} className={`border-b border-slate-50 ${isEditingThis ? 'bg-blue-50/60' : 'hover:bg-slate-50'} transition-colors`}>
+                                            {isEditingThis ? (
+                                              <>
+                                                <td className="px-2 py-1.5">
+                                                  <input
+                                                    autoFocus
+                                                    className="w-full px-2 py-1 rounded-lg border border-[#0682E4] text-xs font-mono bg-white focus:outline-none focus:ring-1 focus:ring-[#0682E4]/40"
+                                                    value={editingDim.dim}
+                                                    placeholder='e.g. 75" × 36"'
+                                                    onChange={e => {
+                                                      const newDim = e.target.value;
+                                                      const auto = parseSqft(newDim);
+                                                      setEditingDim(prev => prev ? {
+                                                        ...prev,
+                                                        dim: newDim,
+                                                        ...(auto !== null ? { sqft: String(auto) } : {}),
+                                                      } : null);
+                                                    }}
+                                                    onKeyDown={e => { if (e.key === 'Enter') commitSubDimEdit(); if (e.key === 'Escape') setEditingDim(null); }}
+                                                  />
+                                                </td>
+                                                <td className="px-2 py-1.5">
+                                                  <input
+                                                    type="number"
+                                                    className="w-full px-2 py-1 rounded-lg border border-[#0682E4] text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#0682E4]/40"
+                                                    value={editingDim.sqft}
+                                                    placeholder="e.g. 18.75"
+                                                    step="0.01"
+                                                    onChange={e => setEditingDim(prev => prev ? { ...prev, sqft: e.target.value } : null)}
+                                                    onKeyDown={e => { if (e.key === 'Enter') commitSubDimEdit(); if (e.key === 'Escape') setEditingDim(null); }}
+                                                  />
+                                                </td>
+                                                <td className="px-2 py-1.5 text-right text-[10px] text-slate-400">
+                                                  {sqftP > 0 && editingDim.sqft ? `₹${Math.round(parseFloat(editingDim.sqft || '0') * sqftP).toLocaleString('en-IN')}` : '—'}
+                                                </td>
+                                                <td className="px-2 py-1.5">
+                                                  <div className="flex items-center gap-1 justify-end">
+                                                    <button type="button" onClick={commitSubDimEdit} className="p-1 rounded bg-[#0682E4] text-white hover:bg-[#0682E4]/90 transition-colors" title="Save">
+                                                      <CheckCircle2 size={12} />
+                                                    </button>
+                                                    <button type="button" onClick={() => setEditingDim(null)} className="p-1 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 transition-colors" title="Cancel">
+                                                      <X size={12} />
+                                                    </button>
+                                                  </div>
+                                                </td>
+                                              </>
+                                            ) : (
+                                              <>
+                                                <td className="px-3 py-2.5 font-semibold text-slate-700 font-mono">{row.dim}</td>
+                                                <td className="px-3 py-2.5 text-slate-500">{row.sqft} sq.ft</td>
+                                                <td className="px-3 py-2.5 text-right font-black" style={{ color: s.color }}>
+                                                  {rowPrice > 0 ? `₹${rowPrice.toLocaleString('en-IN')}` : '—'}
+                                                </td>
+                                                <td className="px-2 py-2.5">
+                                                  <div className="flex items-center gap-1 justify-end">
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => startEditSubDim(sizeKey, rIdx)}
+                                                      className="p-1 rounded text-slate-400 hover:text-[#0682E4] hover:bg-blue-50 transition-colors"
+                                                      title="Edit"
+                                                    >
+                                                      <Tag size={12} />
+                                                    </button>
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => removeSubDim(sizeKey, rIdx)}
+                                                      className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                      title="Delete"
+                                                    >
+                                                      <Trash2 size={12} />
+                                                    </button>
+                                                  </div>
+                                                </td>
+                                              </>
+                                            )}
+                                          </tr>
+                                        );
+                                      })}
+
+                                      {/* Add new dimension row */}
+                                      {addingDimForSize === sizeKey && (
+                                        <tr className="bg-green-50/50 border-b border-slate-100">
+                                          <td className="px-2 py-1.5">
+                                            <input
+                                              autoFocus
+                                              className="w-full px-2 py-1 rounded-lg border border-[#7cb93e] text-xs font-mono bg-white focus:outline-none focus:ring-1 focus:ring-[#7cb93e]/40"
+                                              value={newDimForm.dim}
+                                              placeholder='e.g. 80" × 36"'
+                                              onChange={e => {
+                                                const newDim = e.target.value;
+                                                const auto = parseSqft(newDim);
+                                                setNewDimForm(p => ({
+                                                  ...p,
+                                                  dim: newDim,
+                                                  ...(auto !== null ? { sqft: String(auto) } : {}),
+                                                }));
+                                              }}
+                                              onKeyDown={e => { if (e.key === 'Enter') addSubDim(sizeKey); if (e.key === 'Escape') setAddingDimForSize(null); }}
+                                            />
+                                          </td>
+                                          <td className="px-2 py-1.5">
+                                            <input
+                                              type="number"
+                                              step="0.01"
+                                              className="w-full px-2 py-1 rounded-lg border border-[#7cb93e] text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#7cb93e]/40"
+                                              value={newDimForm.sqft}
+                                              placeholder="e.g. 20"
+                                              onChange={e => setNewDimForm(p => ({ ...p, sqft: e.target.value }))}
+                                              onKeyDown={e => { if (e.key === 'Enter') addSubDim(sizeKey); if (e.key === 'Escape') setAddingDimForSize(null); }}
+                                            />
+                                          </td>
+                                          <td className="px-2 py-1.5 text-right text-[10px] text-slate-400">
+                                            {sqftP > 0 && newDimForm.sqft ? `₹${Math.round(parseFloat(newDimForm.sqft || '0') * sqftP).toLocaleString('en-IN')}` : '—'}
+                                          </td>
+                                          <td className="px-2 py-1.5">
+                                            <div className="flex items-center gap-1 justify-end">
+                                              <button type="button" onClick={() => addSubDim(sizeKey)} className="p-1 rounded bg-[#7cb93e] text-white hover:bg-[#5a8b2a] transition-colors" title="Add">
+                                                <CheckCircle2 size={12} />
+                                              </button>
+                                              <button type="button" onClick={() => setAddingDimForSize(null)} className="p-1 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 transition-colors" title="Cancel">
+                                                <X size={12} />
+                                              </button>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      )}
+                                    </tbody>
+                                  </table>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <label className={labelCls}>Price (₹)</label>
+                                    <input
+                                      type="number"
+                                      className={inputCls}
+                                      placeholder={`e.g. ${Math.round(s.defaultSqft * 528)}`}
+                                      value={v.price === 0 || v.price === '' || v.price === null || v.price === undefined ? '' : v.price}
+                                      onChange={e => updateVariant(sizeKey, 'price', e.target.value === '' ? '' : Number(e.target.value))}
+                                    />
+                                    <p className="text-[10px] text-slate-400 mt-1">Auto-set when you pick a dimension above. Override if needed.</p>
+                                  </div>
+                                  <div>
+                                    <label className={labelCls}>MRP (₹) — shown as strikethrough</label>
+                                    <input
+                                      type="number"
+                                      className={inputCls}
+                                      placeholder={`e.g. ${Math.round(Math.round(s.defaultSqft * 528) * 1.3)}`}
+                                      value={v.mrp === 0 || v.mrp === '' || v.mrp === null || v.mrp === undefined ? '' : v.mrp}
+                                      onChange={e => updateVariant(sizeKey, 'mrp', e.target.value === '' ? '' : Number(e.target.value))}
+                                    />
+                                    <p className="text-[10px] text-slate-400 mt-1">Default: price × 1.3</p>
+                                  </div>
+                                  <div>
+                                    <label className={labelCls}>Stock (units)</label>
+                                    <input
+                                      type="number"
+                                      className={inputCls}
+                                      placeholder="20"
+                                      value={v.stock === 0 || v.stock === '' || v.stock === null || v.stock === undefined ? '' : v.stock}
+                                      onChange={e => updateVariant(sizeKey, 'stock', e.target.value === '' ? '' : Number(e.target.value))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className={labelCls}>SKU</label>
+                                    <input
+                                      className={`${inputCls} font-mono text-xs`}
+                                      placeholder={`e.g. PROD-${sizeKey.toUpperCase()}-6IN`}
+                                      value={v.sku || ''}
+                                      onChange={e => updateVariant(sizeKey, 'sku', e.target.value)}
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Image upload for this size */}
+                                <div className="border-t border-slate-100 pt-3">
+                                  <label className={labelCls}>Size Image (Optional)</label>
+                                  <div className="flex items-center gap-3">
+                                    {v.image && (
+                                      <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img src={v.image} alt={sizeKey} className="max-w-full max-h-full object-cover" />
+                                      </div>
+                                    )}
+                                    <div className="relative shrink-0">
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        onChange={async (e) => {
+                                          const file = e.target.files?.[0];
+                                          if (!file) return;
+                                          const fd = new FormData();
+                                          fd.append('file', file);
+                                          setSaving(true);
+                                          try {
+                                            const res = await fetch('/api/upload', { method: 'POST', body: fd });
+                                            if (!res.ok) throw new Error('Upload failed');
+                                            const data = await res.json();
+                                            updateVariant(sizeKey, 'image', data.url);
+                                            showToast('success', `${sizeKey} image uploaded!`);
+                                          } catch {
+                                            showToast('error', 'Failed to upload image.');
+                                          } finally {
+                                            setSaving(false);
+                                            e.target.value = '';
+                                          }
+                                        }}
+                                      />
+                                      <div className="px-3 py-2 rounded-lg bg-blue-50 text-[#0682E4] border border-blue-100 text-[11px] font-bold flex items-center gap-1.5 hover:bg-blue-100 transition-colors">
+                                        <ImageIcon size={13} /> {v.image ? 'Change' : 'Upload'}
+                                      </div>
+                                    </div>
+                                    <div className="flex-grow">
+                                      <input
+                                        className={`${inputCls} py-2 text-[11px]`}
+                                        placeholder="Or paste image URL"
+                                        value={v.image || ''}
+                                        onChange={e => updateVariant(sizeKey, 'image', e.target.value)}
+                                      />
+                                    </div>
+                                    {v.image && (
+                                      <button
+                                        onClick={() => updateVariant(sizeKey, 'image', '')}
+                                        className="text-red-400 hover:text-red-600 p-1.5 bg-red-50 rounded-lg transition-colors shrink-0"
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -484,13 +1173,12 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Mattress Layers Image */}
                   <div className="pt-4 border-t border-slate-100">
                     <label className={labelCls}>Mattress Layers Image (Optional)</label>
-                    <p className="text-xs text-slate-400 mb-3">Upload a custom cross-section image for the "What's inside the mattress" section. Falls back to default if left empty.</p>
+                    <p className="text-xs text-slate-400 mb-3">Upload a custom cross-section image for the "What's inside the mattress" section.</p>
                     <div className="flex flex-col gap-4">
-                      {/* Current layers image preview */}
                       {formData.layersImage && (
                         <div className="flex items-center gap-4 p-3 border border-slate-200 rounded-xl bg-slate-50/50">
                           <div className="w-20 h-20 bg-white rounded-lg border border-slate-200 flex items-center justify-center p-2 shrink-0">
@@ -506,12 +1194,11 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                           </button>
                         </div>
                       )}
-
                       <div className="flex items-center gap-4">
                         <div className="flex-grow">
                           <div className="relative">
-                            <input 
-                              type="file" 
+                            <input
+                              type="file"
                               accept="image/*"
                               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                               onChange={async (e) => {
@@ -519,23 +1206,15 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                                 if (!file) return;
                                 const fd = new FormData();
                                 fd.append('file', file);
-                                
                                 setSaving(true);
                                 try {
-                                  const res = await fetch('/api/upload', {
-                                    method: 'POST',
-                                    body: fd,
-                                  });
-                                  if (!res.ok) {
-                                    const errData = await res.json();
-                                    throw new Error(errData.message || 'Upload failed');
-                                  }
+                                  const res = await fetch('/api/upload', { method: 'POST', body: fd });
+                                  if (!res.ok) throw new Error('Upload failed');
                                   const data = await res.json();
-                                  
                                   handleChange('layersImage', data.url);
                                   showToast('success', 'Layers image uploaded successfully!');
-                                } catch (err: any) {
-                                  showToast('error', err.message || 'Failed to upload layers image.');
+                                } catch {
+                                  showToast('error', 'Failed to upload layers image.');
                                 } finally {
                                   setSaving(false);
                                   e.target.value = '';
@@ -568,46 +1247,31 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                   <div>
                     <label className={labelCls}>Add Image</label>
                     <div className="flex flex-col gap-4">
-                      {/* File Upload Option */}
                       <div className="flex items-center gap-4 p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50">
                         <div className="flex-grow">
                           <label className="block text-sm font-semibold text-slate-700 mb-1">Upload from Computer</label>
-                          <input 
-                            type="file" 
+                          <input
+                            type="file"
                             accept="image/*"
-                            className="block w-full text-sm text-slate-500
-                              file:mr-4 file:py-2 file:px-4
-                              file:rounded-xl file:border-0
-                              file:text-xs file:font-bold
-                              file:bg-[#0682E4]/10 file:text-[#0682E4]
-                              hover:file:bg-[#0682E4]/20
-                              cursor-pointer"
+                            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#0682E4]/10 file:text-[#0682E4] hover:file:bg-[#0682E4]/20 cursor-pointer"
                             onChange={async (e) => {
                               const file = e.target.files?.[0];
                               if (!file) return;
                               const fd = new FormData();
                               fd.append('file', file);
-                              
                               setSaving(true);
                               try {
-                                const res = await fetch('/api/upload', {
-                                  method: 'POST',
-                                  body: fd,
-                                });
-                                if (!res.ok) {
-                                  const errData = await res.json();
-                                  throw new Error(errData.message || 'Upload failed');
-                                }
+                                const res = await fetch('/api/upload', { method: 'POST', body: fd });
+                                if (!res.ok) throw new Error('Upload failed');
                                 const data = await res.json();
-                                
                                 const newImg = { url: data.url, alt: formData.name || 'Product image', position: formData.images?.length || 0 };
                                 setFormData((prev: any) => ({ ...prev, images: [...(prev.images || []), newImg] }));
                                 showToast('success', 'Image uploaded successfully!');
-                              } catch (err: any) {
-                                showToast('error', err.message || 'Failed to upload image.');
+                              } catch {
+                                showToast('error', 'Failed to upload image.');
                               } finally {
                                 setSaving(false);
-                                e.target.value = ''; // Reset input
+                                e.target.value = '';
                               }
                             }}
                           />
@@ -615,16 +1279,15 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <div className="h-px bg-slate-200 flex-grow"></div>
+                        <div className="h-px bg-slate-200 flex-grow" />
                         <span className="text-xs font-bold text-slate-400 uppercase">OR</span>
-                        <div className="h-px bg-slate-200 flex-grow"></div>
+                        <div className="h-px bg-slate-200 flex-grow" />
                       </div>
 
-                      {/* URL Option */}
                       <div className="flex gap-2">
                         <input
                           className={inputCls}
-                          placeholder="Paste image URL (e.g. /images/products/my-mattress.jpeg)"
+                          placeholder="Paste image URL"
                           value={imageInput}
                           onChange={e => setImageInput(e.target.value)}
                           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addImage(); } }}
@@ -644,7 +1307,7 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                       </div>
                     )}
                     {formData.images?.map((img: any, idx: number) => (
-                      <div key={idx} className={`flex items-center gap-3 p-3 border rounded-xl transition-all ${idx === 0 ? 'bg-blue-50/50 border-[#0682E4]/30 shadow-[0_0_15px_-3px_rgba(6,130,228,0.1)]' : 'bg-slate-50/60 border-slate-200'}`}>
+                      <div key={idx} className={`flex items-center gap-3 p-3 border rounded-xl transition-all ${idx === 0 ? 'bg-blue-50/50 border-[#0682E4]/30' : 'bg-slate-50/60 border-slate-200'}`}>
                         <div className="w-16 h-14 bg-white border border-slate-200 rounded-lg overflow-hidden shrink-0 relative">
                           {idx === 0 && (
                             <div className="absolute inset-x-0 bottom-0 bg-[#0682E4] text-white text-[8px] font-bold text-center py-0.5 uppercase tracking-wider">
@@ -718,7 +1381,6 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                 Cancel
               </button>
               <div className="flex items-center gap-3">
-                {/* Tab navigation arrows */}
                 <div className="flex gap-1.5">
                   {TABS.map((t) => (
                     <button
@@ -747,9 +1409,7 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                   animate={{ opacity: 1, y: 0, x: '-50%' }}
                   exit={{ opacity: 0, y: 30, x: '-50%' }}
                   className={`fixed bottom-6 left-1/2 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-xl text-sm font-bold ${
-                    toast.type === 'success'
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-red-600 text-white'
+                    toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
                   }`}
                 >
                   {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}

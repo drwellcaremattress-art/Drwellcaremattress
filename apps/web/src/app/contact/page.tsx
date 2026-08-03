@@ -80,7 +80,7 @@ export default function ContactPage() {
     {
       icon: <Phone className="w-6 h-6 text-emerald-600" />,
       title: "Call / WhatsApp Support",
-      details: ["+91 93429 22044 / +91 81244 65404 ", "Mon - Sat: 9:00 AM – 8:00 PM IST"],
+      details: ["+91 81244 65404", "Mon - Sat: 9:00 AM – 8:00 PM IST"],
       color: "bg-emerald-50/80 border-emerald-100",
     },
     {
@@ -246,7 +246,7 @@ export default function ContactPage() {
                         name="phone"
                         value={formState.phone}
                         onChange={handleChange}
-                        placeholder="+91 93429 22044"
+                        placeholder="+91 81244 65404"
                         className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium"
                       />
                     </div>

@@ -38,7 +38,7 @@ interface Address {
 const DEFAULT_PROFILE: UserProfile = {
   fullName: 'VIP Customer',
   email: 'customer@drwellcare.com',
-  phone: '+91 98765 43210',
+  phone: '+91 81244 65404',
   dob: '1990-01-01',
   gender: 'Not Specified',
   firmnessPref: 'Medium Firm (7/10) — Recommended',
@@ -72,6 +72,30 @@ export default function AccountPage() {
     if (name && name.trim() && !name.includes('@')) return name;
     const prefix = lowerEmail.split('@')[0].replace(/[0-9]/g, '').replace(/[._-]/g, ' ').trim() || 'VIP Customer';
     return prefix.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  };
+
+  const handleDeleteUserOrder = async (order: any) => {
+    if (!confirm(`Are you sure you want to delete order #${order.id}?`)) return;
+
+    setOrders((prev) => prev.filter((o) => o.id !== order.id && o._id !== order._id));
+
+    const savedOrdersStr = localStorage.getItem('drwell_user_orders');
+    if (savedOrdersStr) {
+      try {
+        const localOrders = JSON.parse(savedOrdersStr);
+        const filtered = localOrders.filter((o: any) => o.id !== order.id && o._id !== order._id);
+        localStorage.setItem('drwell_user_orders', JSON.stringify(filtered));
+      } catch (e) {}
+    }
+
+    const dbId = order._id;
+    if (dbId) {
+      try {
+        await axios.delete(`/api/orders/${dbId}`);
+      } catch (e) {
+        console.error('Failed to delete order from server:', e);
+      }
+    }
   };
 
   // Synchronize profile & dynamic data with active session and storage
@@ -113,6 +137,21 @@ export default function AccountPage() {
       }
       setAddresses(currentAddresses);
 
+      // Attempt API sync for addresses if logged in
+      if (userEmail) {
+        axios.get('/api/users/profile').then((res) => {
+          if (res.data && res.data.addresses && res.data.addresses.length > 0) {
+            setAddresses(res.data.addresses);
+            try {
+              localStorage.setItem('drwell_user_addresses', JSON.stringify(res.data.addresses));
+            } catch (e) {}
+          } else if (currentAddresses.length > 0) {
+            // Push local addresses up to DB if DB is empty
+            axios.put('/api/users/profile', { addresses: currentAddresses }).catch(() => {});
+          }
+        }).catch(err => console.error('Failed to sync DB addresses', err));
+      }
+
       // 3. Orders Sync (100% Real from Storage & API)
       const savedOrdersStr = localStorage.getItem('drwell_user_orders');
       let localOrders: any[] = savedOrdersStr ? JSON.parse(savedOrdersStr) : [];
@@ -122,26 +161,56 @@ export default function AccountPage() {
       if (userEmail) {
         axios.get('/api/orders').then((res) => {
           if (res.data && Array.isArray(res.data) && res.data.length > 0) {
-            const apiOrders = res.data.map((o: any) => ({
-              id: o.orderNumber?.replace('DRWELL-ORD-', 'DW-') || `DW-${o._id?.toString().slice(-6)}`,
-              date: new Date(o.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
-              total: o.total || 0,
-              status: o.orderStatus || 'In Transit — Arriving Soon',
-              statusColor: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950 dark:text-blue-300',
-              itemTitle: o.items?.[0]?.name || 'Dr.Well Care Orthopaedic Series',
-              size: o.items?.[0]?.variantSku || 'King (78" × 72" × 8")',
-              qty: o.items?.reduce((s: number, i: any) => s + (i.qty || 1), 0) || 1,
-              payment: 'Online Paid (100% Secured)',
-              warrantyId: `WAR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-              steps: [
-                { label: 'Order Confirmed', time: 'Completed', done: true },
-                { label: 'Manufactured & QC Passed (Pune Plant)', time: 'Completed', done: true },
-                { label: 'Dispatched via BlueDart Express', time: 'In Transit', done: false },
-                { label: 'Out for Delivery (Local Hub)', time: 'Expected Soon', done: false },
-              ]
-            }));
-            
-            // Merge unique orders by id
+            const apiOrders = res.data.map((o: any) => {
+              const currentStatus = o.orderStatus || o.status || 'Processing';
+
+              let statusColor = 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300';
+              if (currentStatus === 'Delivered') {
+                statusColor = 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300';
+              } else if (currentStatus === 'Cancelled') {
+                statusColor = 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-300';
+              } else if (currentStatus === 'Out for Delivery') {
+                statusColor = 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950 dark:text-purple-300';
+              } else if (currentStatus === 'Shipped') {
+                statusColor = 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300';
+              } else if (currentStatus === 'Confirmed') {
+                statusColor = 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-950 dark:text-sky-300';
+              }
+
+              const isDelivered = currentStatus === 'Delivered';
+              const isOutForDelivery = isDelivered || currentStatus === 'Out for Delivery';
+              const isShipped = isOutForDelivery || currentStatus === 'Shipped';
+              const isConfirmed = isShipped || currentStatus === 'Confirmed' || currentStatus === 'Processing';
+
+              const steps = currentStatus === 'Cancelled' ? [
+                { label: 'Order Placed', time: 'Completed', done: true },
+                { label: 'Order Cancelled', time: 'Cancelled', done: true },
+              ] : [
+                { label: 'Order Confirmed', time: 'Completed', done: isConfirmed },
+                { label: 'Manufactured & QC Passed (Pune Plant)', time: isConfirmed ? 'Completed' : 'Pending', done: isConfirmed },
+                { label: 'Dispatched via BlueDart Express', time: isShipped ? 'In Transit' : 'Pending', done: isShipped },
+                { label: 'Out for Delivery (Local Hub)', time: isDelivered ? 'Delivered' : isOutForDelivery ? 'Out for Delivery' : 'Expected Soon', done: isOutForDelivery },
+              ];
+
+              return {
+                _id: o._id,
+                id: o.orderNumber?.replace('DRWELL-ORD-', 'DW-') || `DW-${o._id?.toString().slice(-6)}`,
+                rawNumber: o.orderNumber,
+                date: new Date(o.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
+                total: o.total || o.totalPrice || 0,
+                status: currentStatus,
+                statusColor,
+                itemTitle: o.items?.[0]?.name || 'Dr.Well Care Orthopaedic Series',
+                size: o.items?.[0]?.variantSku || 'Standard Size',
+                qty: o.items?.reduce((s: number, i: any) => s + (i.qty || 1), 0) || 1,
+                payment: o.paymentMethod || o.paymentGateway || 'Online Paid',
+                warrantyId: `WAR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+                steps,
+                items: o.items || o.orderItems || [],
+              };
+            });
+
+            // Merge unique orders by id, prioritizing DB (apiOrders) over cached local orders
             const mergedMap = new Map();
             apiOrders.forEach((o: any) => mergedMap.set(o.id, o));
             localOrders.forEach((o: any) => {
@@ -227,6 +296,10 @@ export default function AccountPage() {
       localStorage.setItem('drwell_user_addresses', JSON.stringify(updated));
     } catch (e) {}
 
+    if (session?.user?.email) {
+      axios.put('/api/users/profile', { addresses: updated }).catch(() => {});
+    }
+
     setShowAddModal(false);
     setNewAddr({ tag: 'Home', name: '', street: '', city: '', state: '', pincode: '', phone: '', isDefault: false });
   };
@@ -237,6 +310,10 @@ export default function AccountPage() {
     try {
       localStorage.setItem('drwell_user_addresses', JSON.stringify(updated));
     } catch (e) {}
+
+    if (session?.user?.email) {
+      axios.put('/api/users/profile', { addresses: updated }).catch(() => {});
+    }
   };
 
   const handleSetDefaultAddress = (id: string) => {
@@ -245,6 +322,10 @@ export default function AccountPage() {
     try {
       localStorage.setItem('drwell_user_addresses', JSON.stringify(updated));
     } catch (e) {}
+
+    if (session?.user?.email) {
+      axios.put('/api/users/profile', { addresses: updated }).catch(() => {});
+    }
   };
 
   const handleRemoveFromWishlist = (slug: string) => {
@@ -474,8 +555,8 @@ export default function AccountPage() {
               <p className="text-xs text-white/80 mt-1 mb-4 leading-relaxed">
                 Connect with our certified orthopaedic sleep experts for personalized mattress sizing and posture advice.
               </p>
-              <a href="tel:+919876543210" className="inline-flex items-center justify-center w-full bg-[#7cb93e] hover:bg-[#68a032] text-white py-2.5 rounded-xl font-bold text-xs transition-colors shadow-sm">
-                Call Support — +91 98765 43210
+              <a href="tel:+918124465404" className="inline-flex items-center justify-center w-full bg-[#7cb93e] hover:bg-[#68a032] text-white py-2.5 rounded-xl font-bold text-xs transition-colors shadow-sm">
+                Call Support — +91 81244 65404
               </a>
             </div>
           </aside>
@@ -681,18 +762,37 @@ export default function AccountPage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-2">
-                          <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[#0B1A2A] dark:text-white font-black text-2xl shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
-                              🛏️
-                            </div>
-                            <div>
-                              <h3 className="font-extrabold text-base text-[#0B1A2A] dark:text-white">{order.itemTitle}</h3>
-                              <p className="text-xs text-slate-500 font-semibold mt-0.5">Dimension: {order.size} | Qty: {order.qty}</p>
-                              <p className="text-xs text-emerald-600 font-bold mt-1 flex items-center gap-1">
-                                <ShieldCheck className="w-3.5 h-3.5" /> Warranty Code: {order.warrantyId}
-                              </p>
-                            </div>
+                        <div className="flex flex-col sm:flex-row justify-between gap-6 py-2">
+                          <div className="flex flex-col gap-4">
+                            {order.items && order.items.length > 0 ? (
+                              order.items.map((item: any, idx: number) => (
+                                <div key={idx} className="flex items-center gap-4">
+                                  <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[#0B1A2A] dark:text-white font-black text-2xl shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                    🛏️
+                                  </div>
+                                  <div>
+                                    <h3 className="font-extrabold text-base text-[#0B1A2A] dark:text-white">{item.name || item.productName || order.itemTitle}</h3>
+                                    <p className="text-xs text-slate-500 font-semibold mt-0.5">Dimension: {item.variantSku || item.size || order.size} | Qty: {item.qty || 1}</p>
+                                    {item.color && (
+                                      <p className="text-xs text-slate-500 font-semibold mt-0.5">Color: {item.color}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[#0B1A2A] dark:text-white font-black text-2xl shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                  🛏️
+                                </div>
+                                <div>
+                                  <h3 className="font-extrabold text-base text-[#0B1A2A] dark:text-white">{order.itemTitle}</h3>
+                                  <p className="text-xs text-slate-500 font-semibold mt-0.5">Dimension: {order.size} | Qty: {order.qty}</p>
+                                </div>
+                              </div>
+                            )}
+                            <p className="text-xs text-emerald-600 font-bold mt-1 flex items-center gap-1">
+                              <ShieldCheck className="w-3.5 h-3.5" /> Warranty Code: {order.warrantyId}
+                            </p>
                           </div>
 
                           <div className="flex items-center gap-3 self-end sm:self-center">
@@ -708,6 +808,14 @@ export default function AccountPage() {
                               className="bg-[#0B1A2A] hover:bg-[#162a42] text-white rounded-xl text-xs font-bold px-5 py-2.5 flex items-center gap-1.5 shadow-sm"
                             >
                               <Truck className="w-4 h-4 text-[#7cb93e]" /> Track Live
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => handleDeleteUserOrder(order)}
+                              className="rounded-xl text-xs font-bold border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900/50 dark:hover:bg-rose-950/50 flex items-center gap-1.5"
+                              title="Delete Order"
+                            >
+                              <Trash2 className="w-4 h-4 text-rose-500" /> Delete
                             </Button>
                           </div>
                         </div>

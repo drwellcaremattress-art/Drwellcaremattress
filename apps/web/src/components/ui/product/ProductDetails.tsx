@@ -252,11 +252,10 @@ export function ProductDetails({ product, activeVariant }: { product?: any; acti
                   {(() => {
                     const layersImg = activeVariant?.layersImage || activeVariant?.image || (activeVariant?.images && activeVariant?.images[0]) || product?.layersImage || (product?.images && product?.images[0]) || "/images/layers.png";
                     return (
-                      <Image 
-                        key={layersImg}
+                      <Image key={layersImg}
                         src={layersImg} 
                         alt={`${product?.title} Mattress Layers`}
-                        fill 
+                        fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
                         className="object-contain drop-shadow-2xl z-10 transition-all duration-500 ease-out group-hover:scale-105" 
                       />
                     );

@@ -21,3 +21,32 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
+export async function PUT(req: NextRequest) {
+  try {
+    const user = await protect(req);
+    
+    if (!user) {
+      return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    
+    // Update fields if provided
+    if (body.name) user.name = body.name;
+    if (body.phone) user.phone = body.phone;
+    if (body.addresses) user.addresses = body.addresses;
+    
+    await user.save();
+
+    return NextResponse.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      addresses: user.addresses,
+    });
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}

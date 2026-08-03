@@ -449,7 +449,7 @@ function ProductListingContent() {
                   
                   {/* Image & Badges */}
                   <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#f8fafc] mb-6 shadow-inner">
-                    <Image src={product.image} alt={product.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                    <Image src={product.image} alt={product.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
 
                     <button 
                       onClick={(e) => toggleWishlist(product, e)}

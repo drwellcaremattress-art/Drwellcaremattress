@@ -124,7 +124,10 @@ export default async function ProductPage({ params }: PageProps) {
       features: dbProduct.benefits || ['Advanced spine support', 'Pressure relief', 'Eco-friendly materials'],
       images: defaultImages,
       layersImage: dbProduct.layersImage || null,
-      thicknessVariants: dbThicknessVariants.length > 0 ? dbThicknessVariants : undefined
+      thicknessVariants: dbThicknessVariants.length > 0 ? dbThicknessVariants : undefined,
+      // Pass full variants so ProductInfo can read custom subDimensions from the admin
+      // Need to stringify/parse to strip out Mongoose ObjectIds and internal properties
+      variants: dbProduct.variants ? JSON.parse(JSON.stringify(dbProduct.variants)) : [],
     };
   } else {
     const foundProduct = productCatalog.find(p => p.slug === slug || p.slug === `${slug}-6` || p.name.toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase());
@@ -176,7 +179,7 @@ export default async function ProductPage({ params }: PageProps) {
               <div key={i} className="bg-white rounded-3xl p-5 flex flex-col shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] group hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] transition-shadow duration-500 border border-gray-100">
                 {/* Image */}
                 <div className="relative rounded-xl overflow-hidden aspect-[4/3] bg-gray-50 mb-4">
-                  <Image src={relatedProduct.images[0]} alt={relatedProduct.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <Image src={relatedProduct.images[0]} alt={relatedProduct.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   <button className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:text-red-500 transition-colors">
                     <Heart className="w-4 h-4 text-[#64748b]" />
                   </button>

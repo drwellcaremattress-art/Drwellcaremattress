@@ -80,10 +80,9 @@ export default function AboutPage() {
         {/* Parallax Background */}
         <motion.div style={{ y, opacity }} className="absolute inset-0 w-full h-[120%] -top-[10%] z-0">
           <div className="absolute inset-0 bg-[#0B1A2A] z-0"></div>
-          <Image 
-            src="/images/ChatGPT Image Jul 22, 2026, 12_25_42 PM.png"
+          <Image src="/images/ChatGPT Image Jul 22, 2026, 12_25_42 PM.png"
             alt="Dr Well Mattress Hero"
-            fill
+            fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover object-center opacity-90"
             priority
           />
@@ -211,10 +210,9 @@ export default function AboutPage() {
 
           {/* Image block (Moved to the right side) */}
           <motion.div variants={fadeUpVariants} className="relative w-full aspect-[4/3] group mt-12 lg:mt-0">
-            <Image 
-              src="/images/hero2.png"
+            <Image src="/images/hero2.png"
               alt="Dr. Well Mattress Clinical Research"
-              fill
+              fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-contain transition-transform duration-1000 group-hover:scale-105"
             />
             
@@ -308,10 +306,9 @@ export default function AboutPage() {
                       transition={{ duration: 0.8, ease: "easeOut" }}
                       className="absolute inset-0"
                     >
-                      <Image 
-                        src="/images/wellcare.png"
+                      <Image src="/images/wellcare.png"
                         alt="Dr. Wellcare Mattress"
-                        fill
+                        fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover object-center"
                       />
                     </motion.div>

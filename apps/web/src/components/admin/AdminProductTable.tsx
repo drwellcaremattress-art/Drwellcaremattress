@@ -20,11 +20,13 @@ export interface ProductType {
   variants: {
     size: string;
     dimensions: string;
-    thickness_cm: number;
+    thickness_cm?: number;
     price: number;
     mrp: number;
     sku: string;
     stock: number;
+    image?: string;
+    subDimensions?: { dim: string; sqft: number }[];
   }[];
   firmness: string;
   warranty_years: number;

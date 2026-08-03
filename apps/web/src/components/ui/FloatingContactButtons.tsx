@@ -11,7 +11,7 @@ export function FloatingContactButtons() {
       
       {/* 1. WhatsApp Button (Stacked Top) - Green Speech Bubble Icon */}
       <a 
-        href="https://wa.me/919342922044?text=Hi%20Dr%20Well%20Care%2C%20I%20have%20an%20inquiry%20about%20your%20mattresses." 
+        href="https://wa.me/918124465404?text=Hi%20Dr%20Well%20Care%2C%20I%20have%20an%20inquiry%20about%20your%20mattresses." 
         target="_blank" 
         rel="noreferrer"
         className="pointer-events-auto group relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white flex items-center justify-center shadow-[0_8px_25px_rgba(37,211,102,0.5)] hover:shadow-[0_12px_35px_rgba(37,211,102,0.8)] transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-[#25D366]"
@@ -29,9 +29,9 @@ export function FloatingContactButtons() {
 
       {/* 2. Call Button (Stacked Bottom) - Blue Gradient Box Matching Reference Image 2 */}
       <a 
-        href="tel:9342922044" 
+        href="tel:8124465404" 
         className="pointer-events-auto group relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-[#3a93ff] via-[#1a7ae6] to-[#0461ce] text-white flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(6,130,228,0.5)] hover:shadow-[0_12px_35px_rgba(6,130,228,0.8)] transition-all duration-300 hover:scale-110 active:scale-95 border border-white/40"
-        title="Call Directly (+91 93429 22044)"
+        title="Call Directly (+91 81244 65404)"
       >
         {/* Phone Handset Icon */}
         <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24">

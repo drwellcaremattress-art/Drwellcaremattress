@@ -82,7 +82,7 @@ export default function TermsPage() {
             </div>
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-[#0682E4]" />
-              <span>+91 93429 22044</span>
+              <span>+91 81244 65404</span>
             </div>
             <Link href="/privacy" className="text-[#0682E4] hover:underline font-extrabold">
               View Privacy Policy →

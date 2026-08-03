@@ -38,10 +38,9 @@ export default function Home() {
 
         {/* Parallax Background Image */}
         <motion.div style={{ y }} className="absolute inset-0 w-full h-[120%] -top-[10%]">
-          <Image
-            src="/images/luxury_mattress_hero.png"
+          <Image src="/images/luxury_mattress_hero.png"
             alt="Luxury Bedroom with Dr Well Care Mattress"
-            fill
+            fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover object-center"
             priority
             quality={100}
@@ -256,10 +255,9 @@ export default function Home() {
 
             {/* Image block (Moved to the right side) */}
             <motion.div variants={fadeUpVariants} className="relative w-full aspect-[4/3] group mt-12 lg:mt-0">
-              <Image
-                src="/images/hero2.png"
+              <Image src="/images/hero2.png"
                 alt="Dr. Well Mattress Clinical Research"
-                fill
+                fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-contain transition-transform duration-1000 group-hover:scale-105"
               />
 
@@ -379,12 +377,12 @@ export default function Home() {
               <div className="lg:col-span-7 relative min-h-[300px] lg:min-h-[420px]">
                 {/* Mattress image */}
                 <div className="absolute inset-0 z-10">
-                  <Image src="/images/luxury_hr_mattress.png" alt="Luxury HR Series Mattress" fill className="object-cover lg:object-contain object-center" />
+                  <Image src="/images/luxury_hr_mattress.png" alt="Luxury HR Series Mattress" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover lg:object-contain object-center" />
                 </div>
                 
                 {/* 10 Year Warranty Badge - top right */}
                 <div className="absolute top-6 right-6 lg:top-8 lg:right-8 z-20 w-20 h-20 sm:w-24 sm:h-24">
-                  <Image src="/images/warranty_badge.png" alt="10 Year Premium Build Warranty" fill className="object-contain drop-shadow-[0_4px_15px_rgba(245,158,11,0.4)]" />
+                  <Image src="/images/warranty_badge.png" alt="10 Year Premium Build Warranty" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-contain drop-shadow-[0_4px_15px_rgba(245,158,11,0.4)]" />
                 </div>
               </div>
             </div>
@@ -429,7 +427,7 @@ export default function Home() {
                     >
                       {/* Material texture image */}
                       <div className="relative h-32 sm:h-36 w-full overflow-hidden">
-                        <Image src={variant.image} alt={variant.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <Image src={variant.image} alt={variant.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
                         {/* Icon overlay */}
                         <div className="absolute top-3 left-3 w-9 h-9 rounded-xl bg-[#0a1f0a]/80 backdrop-blur-sm flex items-center justify-center text-[#6CB50E] border border-[#6CB50E]/30">
                           {variant.icon}
@@ -483,10 +481,9 @@ export default function Home() {
               <div className="lg:col-span-7 p-6 md:p-8 lg:p-10 relative flex flex-col justify-between overflow-hidden">
                 {/* Background Artwork - Exact User Image */}
                 <div className="absolute inset-0 z-0">
-                  <Image 
-                    src="/images/bonded_section_main.png" 
+                  <Image src="/images/bonded_section_main.png" 
                     alt="Bonded Series Orthopaedic Support" 
-                    fill 
+                    fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
                     className="object-cover object-left"
                     priority
                   />
@@ -583,7 +580,7 @@ export default function Home() {
                     <Link key={idx} href="/collections?type=Bonded+Series" className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.06] hover:border-[#0682E4]/30 transition-all cursor-pointer group">
                       {/* Product thumbnail */}
                       <div className="w-16 h-14 rounded-lg overflow-hidden bg-white/5 shrink-0 relative border border-white/10">
-                        <Image src={prod.image} alt={prod.name} fill className="object-cover" />
+                        <Image src={prod.image} alt={prod.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
                       </div>
                       {/* Product info */}
                       <div className="flex-grow min-w-0">
@@ -688,10 +685,9 @@ export default function Home() {
                       transition={{ duration: 0.8, ease: "easeOut" }}
                       className="absolute inset-0"
                     >
-                      <Image
-                        src="/images/wellcare.png"
+                      <Image src="/images/wellcare.png"
                         alt="Dr. Wellcare Mattress"
-                        fill
+                        fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover object-center"
                       />
                     </motion.div>

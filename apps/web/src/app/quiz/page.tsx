@@ -177,7 +177,7 @@ export default function QuizPage() {
 
             <div className="p-6 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-5 relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-md">
-                <Image src={result.image} alt={result.name} fill className="object-cover" />
+                <Image src={result.image} alt={result.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
               </div>
 
               <div className="lg:col-span-7 space-y-4">

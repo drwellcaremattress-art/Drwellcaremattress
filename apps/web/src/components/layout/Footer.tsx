@@ -62,8 +62,8 @@ export function Footer() {
                 <div className="w-7 h-7 rounded-full bg-[#174e51] flex items-center justify-center shrink-0 border border-white/10">
                   <PhoneCall className="w-3.5 h-3.5 text-[#7cb93e]" />
                 </div>
-                <a href="tel:9342922044" className="font-medium text-white hover:text-[#7cb93e] transition-colors">
-                  +91 93429 22044
+                <a href="tel:8124465404" className="font-medium text-white hover:text-[#7cb93e] transition-colors">
+                  +91 81244 65404
                 </a>
               </div>
 
@@ -204,20 +204,18 @@ export function Footer() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               {/* Card 1: Woman sleeping */}
               <div className="relative h-24 sm:h-28 rounded-xl overflow-hidden border border-white/15 shadow-sm group">
-                <Image 
-                  src="/images/footer_woman_sleep.png" 
+                <Image src="/images/footer_woman_sleep.png" 
                   alt="Peaceful Orthopaedic Sleep" 
-                  fill 
+                  fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
                   className="object-cover group-hover:scale-105 transition-transform duration-500" 
                 />
               </div>
 
               {/* Card 2: 3D Mattress Cutaway */}
               <div className="relative h-24 sm:h-28 rounded-xl overflow-hidden border border-white/15 shadow-sm group bg-[#16494c]">
-                <Image 
-                  src="/images/footer_mattress_cutaway.png" 
+                <Image src="/images/footer_mattress_cutaway.png" 
                   alt="Dr Well Care Mattress Construction" 
-                  fill 
+                  fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
                   className="object-cover group-hover:scale-105 transition-transform duration-500" 
                 />
               </div>

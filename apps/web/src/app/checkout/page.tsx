@@ -9,6 +9,22 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const checkoutSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().optional(),
+  email: z.string().email("Invalid email").or(z.literal('')),
+  phone: z.string().min(10, "Phone number is required"),
+  address: z.string().min(5, "Address is required"),
+  city: z.string().min(2, "City is required"),
+  state: z.string().min(2, "State is required"),
+  pinCode: z.string().min(6, "PIN code is required"),
+  payment: z.enum(["razorpay", "cod"]),
+});
+type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
   const { data: session } = useSession();
@@ -23,17 +39,23 @@ export default function CheckoutPage() {
   const total = subtotal + shipping;
   const displayItems = mounted ? items : [];
 
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: session?.user?.email || '',
-    phone: '',
-    address: '',
-    city: '',
-    state: 'Tamil Nadu',
-    pinCode: '',
-    payment: 'razorpay'
+  const form = useForm<CheckoutFormData>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: session?.user?.email || '',
+      phone: '',
+      address: '',
+      city: '',
+      state: 'Tamil Nadu',
+      pinCode: '',
+      payment: 'razorpay'
+    }
   });
+  const { register, handleSubmit, formState: { errors: formErrors }, setValue, watch } = form;
+  const formData = watch();
+  
   const [loading, setLoading] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<any | null>(null);
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
@@ -67,7 +89,7 @@ export default function CheckoutPage() {
           lName = parts.slice(1).join(' ') || '';
         }
         if (prof.email) emailStr = prof.email;
-        if (prof.phone && prof.phone !== '+91 98765 43210') phoneStr = prof.phone;
+        if (prof.phone && prof.phone !== '+91 81244 65404') phoneStr = prof.phone;
       }
     } catch (e) {}
 
@@ -93,7 +115,7 @@ export default function CheckoutPage() {
               if (defAddr.city) cityStr = defAddr.city;
               if (defAddr.state) stateStr = defAddr.state;
               if (defAddr.pincode) pinStr = defAddr.pincode;
-              if (!phoneStr && defAddr.phone && defAddr.phone !== '+91 98765 43210') phoneStr = defAddr.phone;
+              if (!phoneStr && defAddr.phone && defAddr.phone !== '+91 81244 65404') phoneStr = defAddr.phone;
             }
           }
         }
@@ -104,20 +126,15 @@ export default function CheckoutPage() {
     if (!lName) lName = 'Murugan';
     if (!phoneStr) phoneStr = '+91 9843240703';
 
-    setFormData(prev => ({
-      ...prev,
-      firstName: prev.firstName || fName,
-      lastName: prev.lastName || lName,
-      email: prev.email || emailStr,
-      phone: prev.phone || phoneStr,
-      address: prev.address || addrStr,
-      city: prev.city || cityStr,
-      state: prev.state || stateStr,
-      pinCode: prev.pinCode || pinStr,
-    }));
-  }, [session]);
-
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    setValue('firstName', formData.firstName || fName);
+    setValue('lastName', formData.lastName || lName);
+    setValue('email', formData.email || emailStr);
+    setValue('phone', formData.phone || phoneStr);
+    setValue('address', formData.address || addrStr);
+    setValue('city', formData.city || cityStr);
+    setValue('state', formData.state || stateStr);
+    setValue('pinCode', formData.pinCode || pinStr);
+  }, [session, setValue]);
 
   const handleSelectSavedAddress = (addr: any) => {
     let fName = formData.firstName;
@@ -127,24 +144,13 @@ export default function CheckoutPage() {
       fName = parts[0] || fName;
       lName = parts.slice(1).join(' ') || lName;
     }
-    setFormData(prev => ({
-      ...prev,
-      firstName: prev.firstName || fName || 'Dinesh',
-      lastName: prev.lastName || lName || 'Murugan',
-      address: addr.street || addr.address || '',
-      city: addr.city || '',
-      state: addr.state || 'Tamil Nadu',
-      pinCode: addr.pincode || addr.postalCode || '',
-      phone: addr.phone || prev.phone || '+91 9843240703'
-    }));
-    setFormErrors({});
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (formErrors[e.target.name]) {
-      setFormErrors(prev => ({ ...prev, [e.target.name]: '' }));
-    }
+    setValue('firstName', formData.firstName || fName || 'Dinesh');
+    setValue('lastName', formData.lastName || lName || 'Murugan');
+    setValue('address', addr.street || addr.address || '');
+    setValue('city', addr.city || '');
+    setValue('state', addr.state || 'Tamil Nadu');
+    setValue('pinCode', addr.pincode || addr.postalCode || '');
+    setValue('phone', addr.phone || formData.phone || '+91 9843240703');
   };
 
   const saveOrderToAccountHistory = (ordNum: string, orderItems: any[], orderTotal: number, form: any) => {
@@ -159,6 +165,7 @@ export default function CheckoutPage() {
         itemTitle: orderItems[0]?.name || 'Dr.Well Care Orthopaedic Series',
         size: orderItems[0]?.size || 'King (78" × 72" × 8")',
         qty: orderItems.reduce((sum: number, i: any) => sum + (i.qty || 1), 0),
+        items: orderItems,
         payment: form.payment === 'cod' ? 'Cash on Delivery (COD) / Pay at Doorstep' : 'UPI / Online Paid (100% Secured)',
         warrantyId: `WAR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
         steps: [
@@ -211,40 +218,13 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleCheckout = async () => {
+  const onSubmit = async (data: CheckoutFormData) => {
     if (!session) {
       alert('Please login or create an account first to complete your purchase!');
       router.push('/login?callbackUrl=/checkout');
       return;
     }
     if (items.length === 0) return alert('Your cart is empty');
-
-    const firstNameVal = (formData.firstName || '').trim() || (session?.user?.name ? session.user.name.split(' ')[0] : '') || 'Dinesh';
-    const lastNameVal = (formData.lastName || '').trim() || (session?.user?.name ? session.user.name.split(' ').slice(1).join(' ') : '') || 'Murugan';
-    const phoneVal = (formData.phone || '').trim() || '+91 9843240703';
-    const addressVal = (formData.address || '').trim();
-    const cityVal = (formData.city || '').trim();
-    const pinCodeVal = (formData.pinCode || '').trim();
-
-    const errors: Record<string, string> = {};
-    if (!firstNameVal) errors.firstName = 'First name is required';
-    if (!phoneVal) errors.phone = 'Phone number is required for dispatch updates';
-    if (!addressVal) errors.address = 'Street address is required';
-    if (!cityVal) errors.city = 'City is required';
-    if (!pinCodeVal) errors.pinCode = 'PIN code is required';
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      const firstField = Object.keys(errors)[0];
-      const el = document.getElementsByName(firstField)[0];
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.focus();
-      }
-      return;
-    }
-
-    setFormErrors({});
 
     setLoading(true);
     const orderNumber = `DRWELL-ORD-${Date.now().toString().slice(-6)}`;
@@ -261,17 +241,17 @@ export default function CheckoutPage() {
         price: i.price,
         image: i.image
       })),
-      customerName: `${firstNameVal} ${lastNameVal}`.trim(),
-      customerEmail: formData.email || session?.user?.email || 'guest@drwellcare.com',
-      customerPhone: phoneVal,
+      customerName: `${data.firstName} ${data.lastName || ''}`.trim(),
+      customerEmail: data.email || session?.user?.email || 'guest@drwellcare.com',
+      customerPhone: data.phone,
       shippingAddress: {
-        address: addressVal,
-        city: cityVal,
-        state: formData.state || 'Tamil Nadu',
-        postalCode: pinCodeVal,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        postalCode: data.pinCode,
         country: 'India'
       },
-      paymentMethod: formData.payment,
+      paymentMethod: data.payment,
       itemsPrice: subtotal,
       taxPrice: Math.round(subtotal * 0.18),
       shippingPrice: shipping,
@@ -292,12 +272,12 @@ export default function CheckoutPage() {
 
         const createdOrderObj = res.ok ? await res.json() : { ...finalPayload, _id: orderNumber, createdAt: new Date().toISOString() };
         setConfirmedOrder(createdOrderObj);
-        saveOrderToAccountHistory(orderNumber, items, total, formData);
+        saveOrderToAccountHistory(orderNumber, items, total, data);
         clearCart();
       } catch (err) {
         console.error('Finalize order error:', err);
         setConfirmedOrder({ ...baseOrderPayload, _id: orderNumber, createdAt: new Date().toISOString() });
-        saveOrderToAccountHistory(orderNumber, items, total, formData);
+        saveOrderToAccountHistory(orderNumber, items, total, data);
         clearCart();
       } finally {
         setLoading(false);
@@ -305,7 +285,7 @@ export default function CheckoutPage() {
     };
 
     // --- RAZORPAY PAYMENT FLOW ---
-    if (formData.payment === 'razorpay') {
+    if (data.payment === 'razorpay') {
       try {
         const createRes = await fetch('/api/razorpay/create-order', {
           method: 'POST',
@@ -368,9 +348,9 @@ export default function CheckoutPage() {
             }
           },
           prefill: {
-            name: `${formData.firstName} ${formData.lastName}`.trim(),
-            email: formData.email || session?.user?.email || '',
-            contact: formData.phone,
+            name: `${data.firstName} ${data.lastName || ''}`.trim(),
+            email: data.email || session?.user?.email || '',
+            contact: data.phone,
           },
           theme: {
             color: '#0682E4',
@@ -382,6 +362,10 @@ export default function CheckoutPage() {
           script.src = 'https://checkout.razorpay.com/v1/checkout.js';
           script.onload = () => {
             const rzp = new (window as any).Razorpay(options);
+            rzp.on('payment.failed', function (response: any) {
+              setLoading(false);
+              alert('Payment failed: ' + (response.error?.description || 'Unknown error'));
+            });
             rzp.open();
           };
           script.onerror = () => {
@@ -391,6 +375,10 @@ export default function CheckoutPage() {
           document.body.appendChild(script);
         } else {
           const rzp = new (window as any).Razorpay(options);
+          rzp.on('payment.failed', function (response: any) {
+            setLoading(false);
+            alert('Payment failed: ' + (response.error?.description || 'Unknown error'));
+          });
           rzp.open();
         }
       } catch (err: any) {
@@ -571,21 +559,22 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">First Name *</label>
-                <input name="firstName" value={formData.firstName} onChange={handleInputChange} type="text" placeholder="Ramesh" className={`w-full border ${formErrors.firstName ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
-                {formErrors.firstName && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.firstName}</span>}
+                <input {...register("firstName")} type="text" placeholder="Ramesh" className={`w-full border ${formErrors.firstName ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.firstName && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.firstName.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Last Name</label>
-                <input name="lastName" value={formData.lastName} onChange={handleInputChange} type="text" placeholder="Kumar" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
+                <input {...register("lastName")} type="text" placeholder="Kumar" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address</label>
-                <input name="email" value={formData.email} onChange={handleInputChange} type="email" placeholder="ramesh@example.com" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
+                <input {...register("email")} type="email" placeholder="ramesh@example.com" className={`w-full border ${formErrors.email ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.email && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.email.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (For Delivery Updates) *</label>
-                <input name="phone" value={formData.phone} onChange={handleInputChange} type="tel" placeholder="+91 98765 43210" className={`w-full border ${formErrors.phone ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
-                {formErrors.phone && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.phone}</span>}
+                <input {...register("phone")} type="tel" placeholder="+91 81244 65404" className={`w-full border ${formErrors.phone ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.phone && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.phone.message}</span>}
               </div>
             </div>
           </div>
@@ -634,29 +623,30 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Door / House No. & Street Address *</label>
-                <input name="address" value={formData.address} onChange={handleInputChange} type="text" placeholder="No. 551, Sivapragasam Nagar, Surapet" className={`w-full border ${formErrors.address ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
-                {formErrors.address && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.address}</span>}
+                <input {...register("address")} type="text" placeholder="No. 551, Sivapragasam Nagar, Surapet" className={`w-full border ${formErrors.address ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.address && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.address.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">City *</label>
-                <input name="city" value={formData.city} onChange={handleInputChange} type="text" placeholder="Chennai" className={`w-full border ${formErrors.city ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
-                {formErrors.city && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.city}</span>}
+                <input {...register("city")} type="text" placeholder="Chennai" className={`w-full border ${formErrors.city ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.city && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.city.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">State</label>
-                <select name="state" value={formData.state} onChange={handleInputChange} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-white">
-                  <option>Tamil Nadu</option>
-                  <option>Karnataka</option>
-                  <option>Maharashtra</option>
-                  <option>Kerala</option>
-                  <option>Andhra Pradesh</option>
-                  <option>Delhi</option>
+                <select {...register("state")} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-white">
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Kerala">Kerala</option>
+                  <option value="Andhra Pradesh">Andhra Pradesh</option>
+                  <option value="Delhi">Delhi</option>
                 </select>
+                {formErrors.state && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.state.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">PIN Code *</label>
-                <input name="pinCode" value={formData.pinCode} onChange={handleInputChange} type="text" placeholder="600066" className={`w-full border ${formErrors.pinCode ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
-                {formErrors.pinCode && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.pinCode}</span>}
+                <input {...register("pinCode")} type="text" placeholder="600066" className={`w-full border ${formErrors.pinCode ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.pinCode && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.pinCode.message}</span>}
               </div>
             </div>
           </div>
@@ -669,7 +659,7 @@ export default function CheckoutPage() {
             
             <div className="space-y-3">
               <label className={`flex items-center gap-4 p-4 border rounded-2xl cursor-pointer transition-all ${formData.payment === 'razorpay' ? 'border-[#0682E4] bg-[#0682E4]/5 ring-1 ring-[#0682E4]' : 'border-slate-200 hover:bg-slate-50'}`}>
-                <input type="radio" name="payment" value="razorpay" checked={formData.payment === 'razorpay'} onChange={handleInputChange} className="text-[#0682E4] focus:ring-[#0682E4] h-5 w-5" />
+                <input {...register("payment")} type="radio" value="razorpay" className="text-[#0682E4] focus:ring-[#0682E4] h-5 w-5" />
                 <div className="flex-grow">
                   <span className="font-extrabold text-[#0B1A2A] text-sm block">Razorpay / Google Pay / PhonePe / UPI / Credit Cards</span>
                   <span className="text-xs text-slate-500">Instant 256-bit SSL encrypted online payment</span>
@@ -678,7 +668,7 @@ export default function CheckoutPage() {
               </label>
 
               <label className={`flex items-center gap-4 p-4 border rounded-2xl cursor-pointer transition-all ${formData.payment === 'cod' ? 'border-[#0682E4] bg-[#0682E4]/5 ring-1 ring-[#0682E4]' : 'border-slate-200 hover:bg-slate-50'}`}>
-                <input type="radio" name="payment" value="cod" checked={formData.payment === 'cod'} onChange={handleInputChange} className="text-[#0682E4] focus:ring-[#0682E4] h-5 w-5" />
+                <input {...register("payment")} type="radio" value="cod" className="text-[#0682E4] focus:ring-[#0682E4] h-5 w-5" />
                 <div className="flex-grow">
                   <span className="font-extrabold text-[#0B1A2A] text-sm block">Cash on Delivery (COD) / Pay at Doorstep</span>
                   <span className="text-xs text-slate-500">Pay cash or UPI directly to our delivery agent when your mattress arrives</span>
@@ -701,7 +691,7 @@ export default function CheckoutPage() {
               ) : displayItems.map((item) => (
                 <div key={item.id} className="flex gap-3 items-center">
                   <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
-                    <Image src={item.image} alt={item.name} fill className="object-cover" />
+                    <Image src={item.image} alt={item.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
                     <span className="absolute -top-1 -right-1 bg-[#0B1A2A] text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
                       {item.qty}
                     </span>
@@ -740,7 +730,8 @@ export default function CheckoutPage() {
             </div>
 
             <Button 
-              onClick={handleCheckout} 
+              type="button"
+              onClick={handleSubmit(onSubmit)} 
               disabled={loading || displayItems.length === 0} 
               className="w-full bg-[#0B1A2A] hover:bg-[#16273B] text-white rounded-2xl py-4 text-base font-bold shadow-lg transition-transform hover:-translate-y-0.5"
             >
