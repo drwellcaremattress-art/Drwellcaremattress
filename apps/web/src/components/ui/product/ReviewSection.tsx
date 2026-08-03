@@ -15,6 +15,7 @@ export interface Review {
   sizeBought?: string;
   likes: number;
   isUserSubmitted?: boolean;
+  images?: string[];
 }
 
 // Generate authentic, 100% real Indian customer reviews tailored to mattress type

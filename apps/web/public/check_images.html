@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Check Images</title>
+  <style>
+    body { font-family: sans-serif; }
+    .grid { display: flex; flex-wrap: wrap; gap: 20px; }
+    .card { border: 1px solid #ccc; padding: 10px; width: 300px; }
+    img { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <h1>Image Mapping Verification</h1>
+  <div class="grid">
+    <script>
+      const CLOUDINARY_MAP = {
+        'mona-softy':           'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309266/file_sikimv.png',
+        'ecolatex-6':           'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309271/file_xik5mg.png',
+        'ecolatex-8':           'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309270/file_ljyz2d.png',
+        'luxoria':              'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309269/file_eyfbz8.png',
+        'memory-dump-6':        'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309268/file_dnzpbn.png',
+        'memory-dump-8':        'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309276/file_tzxmrk.png',
+        'memory-dump-10':       'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309267/file_wzfsp5.png',
+        'mona-lite':            'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309235/file_i8ln3k.png',
+        'mona-lite-6':          'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309237/file_uepcd2.png',
+        'luxoria-latex':        'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309240/file_vgs05p.png',
+        'natural-latex-4':      'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309261/file_inlqbf.png',
+        'natural-latex-5':      'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309247/file_yzpmdh.png',
+        'natural-latex':        'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309265/file_ivsmr0.png',
+        'natural-latex-8':      'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309244/file_sxb9rh.png',
+        'softy-bond':           'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309250/file_tiitcm.png',
+        'softy-bond-plus':      'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309251/file_haqtcw.png',
+        'memory-bond':          'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309254/file_p5umkd.png',
+        'memory-bond-plus':     'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309255/file_cz9lcn.png',
+        'lax-o-bond-6':         'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309262/file_nr0lxc.png',
+        'lax-o-bond-8':         'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309257/file_a6zpgy.png',
+      };
+
+      const LAYERS_MAP = {
+        'mona-softy':       'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309273/file_rj04in.png',
+        'softy-bond':       'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309252/file_pnnraq.png',
+        'softy-bond-plus':  'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309253/file_p9hy4p.png',
+        'ecolatex-8':       'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309264/file_vnttwq.png',
+        'natural-latex-4':  'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309260/file_etqgmv.png',
+        'lax-o-bond-6':     'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309340/file_dnn4rq.png',
+        'lax-o-bond-8':     'https://res.cloudinary.com/m1dy2af4/image/upload/v1785309274/file_gszxf1.png',
+      };
+
+      const grid = document.querySelector('.grid');
+      for (const [slug, url] of Object.entries(CLOUDINARY_MAP)) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<h3>${slug} (Primary)</h3><img src="${url}" alt="${slug}" />`;
+        grid.appendChild(card);
+      }
+      for (const [slug, url] of Object.entries(LAYERS_MAP)) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<h3>${slug} (Layers)</h3><img src="${url}" alt="${slug}" />`;
+        grid.appendChild(card);
+      }
+    </script>
+  </div>
+</body>
+</html>
