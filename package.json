@@ -4,6 +4,10 @@
   "private": true,
   "description": "Dr Well Care E-Commerce Platform",
   "packageManager": "npm@10.0.0",
+  "engines": {
+    "node": "20.x",
+    "npm": ">=10"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
