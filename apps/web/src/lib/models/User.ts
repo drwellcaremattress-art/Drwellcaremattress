@@ -8,6 +8,7 @@ export interface IUser extends Document {
   addresses: any[];
   wishlist: mongoose.Types.ObjectId[];
   authProvider: string;
+  role: string;
 }
 
 const UserSchema: Schema = new Schema(
@@ -22,6 +23,11 @@ const UserSchema: Schema = new Schema(
       type: String,
       enum: ['local', 'google'],
       default: 'local',
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
     },
   },
   {

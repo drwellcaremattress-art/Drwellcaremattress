@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
         _id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role || 'user',
         token: generateToken(user._id.toString()),
       });
     } else {
