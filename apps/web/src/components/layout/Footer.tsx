@@ -189,12 +189,12 @@ export function Footer() {
                     </a>
                   </li>
                   <li>
-                    <a href="http://localhost:5173" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 group">
+                    <Link href="/admin/login" className="hover:text-white transition-colors flex items-center gap-2.5 group">
                       <div className="w-6 h-6 rounded-md bg-amber-500/20 flex items-center justify-center text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-colors">
                         <Lock className="w-3.5 h-3.5" />
                       </div>
                       <span className="text-amber-300 font-bold">Admin Portal</span>
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>
