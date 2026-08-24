@@ -286,10 +286,34 @@ export default function AdminDashboardClient({
                           </span>
                         </td>
                         <td className="p-4">
-                          <div className="max-h-16 overflow-y-auto space-y-1 pr-1">
+                          <div className="max-h-32 overflow-y-auto space-y-3 pr-1">
                             {ord.items?.length > 0 ? ord.items.map((it: any, i: number) => (
-                              <div key={i} className="text-xs text-slate-600 line-clamp-1" title={`${it.name} - ${it.variantSku} ${it.color ? `(${it.color})` : ''}`}>
-                                <span className="font-semibold text-slate-800">{it.qty}x</span> {it.name} {it.color ? <span className="font-medium text-[#0682E4]">({it.color})</span> : ''}
+                              <div key={i} className="flex gap-2 items-start text-xs text-slate-600">
+                                {it.image ? (
+                                  <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-100 shrink-0 border border-slate-200 relative">
+                                    <img src={it.image} alt={it.name} className="absolute inset-0 w-full h-full object-cover" />
+                                  </div>
+                                ) : (
+                                  <div className="w-10 h-10 rounded-md bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
+                                    <Package className="w-5 h-5 text-slate-400" />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-slate-800 line-clamp-1" title={it.name}>
+                                    <span className="text-[#0682E4]">{it.qty}x</span> {it.name}
+                                  </div>
+                                  <div className="text-[10.5px] text-slate-500 line-clamp-1 mt-0.5" title={it.variantSku}>
+                                    {it.variantSku}
+                                  </div>
+                                  {it.color && (
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <span className={`w-2 h-2 rounded-full border border-black/10 shadow-sm ${
+                                        it.color === 'Blue' ? 'bg-[#0682E4]' : it.color === 'Gray' ? 'bg-slate-400' : 'bg-white'
+                                      }`} />
+                                      <span className="text-[10px] font-medium text-slate-600">Color: {it.color}</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )) : <span className="text-xs text-slate-500">0 items</span>}
                           </div>

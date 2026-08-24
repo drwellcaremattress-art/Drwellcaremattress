@@ -80,7 +80,10 @@ export function Footer() {
                 <div className="w-7 h-7 rounded-full bg-[#174e51] flex items-center justify-center shrink-0 border border-white/10 mt-0.5">
                   <MapPin className="w-3.5 h-3.5 text-[#7cb93e]" />
                 </div>
-                <span className="leading-relaxed">No. 551, Sivapragasam Nagar, Surapet, Chennai-600066.</span>
+                <span className="leading-relaxed">
+                  <strong className="block text-white mb-0.5 font-semibold">VKS ENTERPRISES</strong>
+                  No:551, sivapragasam nagar, surapet, Chennai-600066
+                </span>
               </div>
             </div>
           </div>
@@ -251,6 +254,7 @@ export function Footer() {
           <div className="flex items-center gap-6">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/refund" className="hover:text-white transition-colors">Refund Policy</Link>
           </div>
         </div>
       </div>
