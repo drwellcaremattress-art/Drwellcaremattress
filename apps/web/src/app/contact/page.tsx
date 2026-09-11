@@ -30,6 +30,7 @@ export default function ContactPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [ticketId, setTicketId] = useState("");
+  const [lastWaUrl, setLastWaUrl] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
@@ -60,14 +61,31 @@ export default function ContactPage() {
 
     setIsSubmitting(true);
 
-    // Simulate reliable network dispatch
+    const generatedId = `DW-SUP-${Math.floor(1000 + Math.random() * 9000)}`;
+    setTicketId(generatedId);
+
+    const whatsappNumber = "919342922044";
+    const waText = `*NEW WEBSITE SUPPORT TICKET (${generatedId})*\n` +
+      `----------------------------------------\n` +
+      `👤 *Customer Name:* ${formState.name.trim()}\n` +
+      `✉️ *Email Address:* ${formState.email.trim()}\n` +
+      `📞 *Phone / WhatsApp:* ${formState.phone.trim()}\n` +
+      `📋 *Inquiry Topic:* ${formState.subject}\n\n` +
+      `💬 *Message / Cot Measurements:*\n${formState.message.trim()}\n` +
+      `----------------------------------------\n` +
+      `_Sent from Dr. Well Care Mattress Website_`;
+
+    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`;
+    setLastWaUrl(waUrl);
+
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
-      const generatedId = `DW-SUP-${Math.floor(1000 + Math.random() * 9000)}`;
-      setTicketId(generatedId);
+      if (typeof window !== "undefined") {
+        window.open(waUrl, "_blank");
+      }
       setFormState({ name: "", email: "", phone: "", subject: "General Inquiry / Mattress Sizing", message: "" });
-    }, 1200);
+    }, 600);
   };
 
   const contactInfo = [
@@ -80,7 +98,7 @@ export default function ContactPage() {
     {
       icon: <Phone className="w-6 h-6 text-emerald-600" />,
       title: "Call / WhatsApp Support",
-      details: ["+91 81244 65404", "Mon - Sat: 9:00 AM – 8:00 PM IST"],
+      details: ["+91 93429 22044", "Mon - Sat: 9:00 AM – 8:00 PM IST"],
       color: "bg-emerald-50/80 border-emerald-100",
     },
     {
@@ -191,14 +209,24 @@ export default function ContactPage() {
                   <div className="w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
                     <CheckCircle2 className="w-10 h-10 animate-bounce" />
                   </div>
-                  <h3 className="font-heading text-2xl font-black text-emerald-950">Inquiry Received Successfully!</h3>
+                  <h3 className="font-heading text-2xl font-black text-emerald-950">Inquiry Received & Redirecting to WhatsApp!</h3>
                   <p className="text-slate-600 text-sm max-w-md mx-auto leading-relaxed">
-                    Thank you for reaching out to Dr. Well Care. We have generated support ticket <span className="font-mono font-bold text-[#0682E4] bg-white px-2 py-0.5 rounded border border-blue-200">{ticketId}</span> for your request.
+                    Thank you for reaching out to Dr. Well Care. Support ticket <span className="font-mono font-bold text-[#0682E4] bg-white px-2 py-0.5 rounded border border-blue-200">{ticketId}</span> has been generated. Opening WhatsApp with full details for fast response.
                   </p>
-                  <div className="pt-4">
+                  <div className="pt-4 flex flex-col sm:flex-row justify-center items-center gap-3">
+                    {lastWaUrl && (
+                      <a
+                        href={lastWaUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-all hover:scale-105"
+                      >
+                        <MessageSquare className="w-5 h-5" /> Open WhatsApp (+91 93429 22044)
+                      </a>
+                    )}
                     <Button
                       onClick={() => setIsSubmitted(false)}
-                      className="bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold px-8 py-3.5 rounded-xl shadow-md transition-colors"
+                      className="w-full sm:w-auto bg-[#0682E4] hover:bg-[#7cb93e] text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition-colors"
                     >
                       Send Another Message
                     </Button>
@@ -246,7 +274,7 @@ export default function ContactPage() {
                         name="phone"
                         value={formState.phone}
                         onChange={handleChange}
-                        placeholder="+91 81244 65404"
+                        placeholder="+91 93429 22044"
                         className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium"
                       />
                     </div>

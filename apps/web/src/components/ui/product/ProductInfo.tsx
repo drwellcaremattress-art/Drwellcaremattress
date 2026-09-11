@@ -366,9 +366,6 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
                           {thickUnit}
                         </span>
                       </div>
-                      <div className={`text-[11px] font-semibold mt-1 ${isSelected ? 'text-slate-300' : 'text-[#64748b]'}`}>
-                        {variant.price || (variant.priceValue ? `₹${variant.priceValue.toLocaleString('en-IN')}` : '')}
-                      </div>
                     </div>
                   </button>
                 );

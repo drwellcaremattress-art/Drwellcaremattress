@@ -50,9 +50,9 @@ export function Navbar() {
         
         {/* Contact Info (Hidden on very small screens) */}
         <div className="hidden md:flex items-center gap-6">
-          <a href="tel:8124465404" className="flex items-center gap-1.5 hover:text-white/80 transition-colors">
+          <a href="tel:9342922044" className="flex items-center gap-1.5 hover:text-white/80 transition-colors">
             <Phone className="w-3.5 h-3.5" />
-            <span>+91 81244 65404</span>
+            <span>+91 93429 22044</span>
           </a>
           <a href="mailto:drwellcaremattress@gmail.com" className="flex items-center gap-1.5 hover:text-white/80 transition-colors">
             <Mail className="w-3.5 h-3.5" />
@@ -282,9 +282,9 @@ export function Navbar() {
                 <Link href="/contact" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link>
               </nav>
               <div className="mt-auto p-6 border-t border-gray-100 text-sm text-gray-500">
-                <a href="tel:8124465404" className="flex items-center gap-3 mb-4">
+                <a href="tel:9342922044" className="flex items-center gap-3 mb-4">
                   <Phone className="w-4 h-4 text-[#0682E4]" />
-                  +91 81244 65404
+                  +91 93429 22044
                 </a>
                 <a href="mailto:drwellcaremattress@gmail.com" className="flex items-center gap-3">
                   <Mail className="w-4 h-4 text-[#0682E4]" />

@@ -38,7 +38,7 @@ interface Address {
 const DEFAULT_PROFILE: UserProfile = {
   fullName: 'VIP Customer',
   email: 'customer@drwellcare.com',
-  phone: '+91 81244 65404',
+  phone: '+91 93429 22044',
   dob: '1990-01-01',
   gender: 'Not Specified',
   firmnessPref: 'Medium Firm (7/10) — Recommended',
@@ -555,8 +555,8 @@ export default function AccountPage() {
               <p className="text-xs text-white/80 mt-1 mb-4 leading-relaxed">
                 Connect with our certified orthopaedic sleep experts for personalized mattress sizing and posture advice.
               </p>
-              <a href="tel:+918124465404" className="inline-flex items-center justify-center w-full bg-[#7cb93e] hover:bg-[#68a032] text-white py-2.5 rounded-xl font-bold text-xs transition-colors shadow-sm">
-                Call Support — +91 81244 65404
+              <a href="tel:+919342922044" className="inline-flex items-center justify-center w-full bg-[#7cb93e] hover:bg-[#68a032] text-white py-2.5 rounded-xl font-bold text-xs transition-colors shadow-sm">
+                Call Support — +91 93429 22044
               </a>
             </div>
           </aside>

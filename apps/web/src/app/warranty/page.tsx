@@ -73,22 +73,42 @@ export default function WarrantyPage() {
     }
 
     setIsSubmitting(true);
+    const generatedWarId = `WAR-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+    setRegSuccessId(generatedWarId);
+    
+    // Save to localStorage so user can see it in account if logged in
+    try {
+      const existingProfStr = localStorage.getItem("drwell_user_profile");
+      if (existingProfStr) {
+        const prof = JSON.parse(existingProfStr);
+        prof.warrantyId = generatedWarId;
+        prof.registeredModel = regForm.model;
+        localStorage.setItem("drwell_user_profile", JSON.stringify(prof));
+      }
+    } catch (err) {}
+
+    const whatsappNumber = "919342922044";
+    const waText = `*NEW WARRANTY REGISTRATION (${generatedWarId})*\n` +
+      `----------------------------------------\n` +
+      `👤 *Customer Name:* ${regForm.name.trim()}\n` +
+      `✉️ *Email Address:* ${regForm.email.trim()}\n` +
+      `📞 *Phone Number:* ${regForm.phone.trim()}\n` +
+      `🧾 *Invoice / Order ID:* ${regForm.invoiceNo.trim()}\n` +
+      `🛏️ *Mattress Model:* ${regForm.model}\n` +
+      `📐 *Size:* ${regForm.size}\n` +
+      `📅 *Purchase Date:* ${regForm.purchaseDate}\n` +
+      (regForm.serialNo ? `🔢 *Serial / Tag No:* ${regForm.serialNo}\n` : '') +
+      `----------------------------------------\n` +
+      `_Registered via Dr. Well Care Mattress Website_`;
+
+    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`;
+
     setTimeout(() => {
       setIsSubmitting(false);
-      const generatedWarId = `WAR-2026-${Math.floor(10000 + Math.random() * 90000)}`;
-      setRegSuccessId(generatedWarId);
-      
-      // Save to localStorage so user can see it in account if logged in
-      try {
-        const existingProfStr = localStorage.getItem("drwell_user_profile");
-        if (existingProfStr) {
-          const prof = JSON.parse(existingProfStr);
-          prof.warrantyId = generatedWarId;
-          prof.registeredModel = regForm.model;
-          localStorage.setItem("drwell_user_profile", JSON.stringify(prof));
-        }
-      } catch (err) {}
-    }, 1200);
+      if (typeof window !== "undefined") {
+        window.open(waUrl, "_blank");
+      }
+    }, 600);
   };
 
   const handleClaimSubmit = (e: React.FormEvent) => {
@@ -105,11 +125,28 @@ export default function WarrantyPage() {
     }
 
     setIsSubmitting(true);
+    const generatedClaimId = `CLM-${Math.floor(1000 + Math.random() * 9000)}`;
+    setClaimSuccessId(generatedClaimId);
+
+    const whatsappNumber = "919342922044";
+    const waText = `*NEW WARRANTY CLAIM TICKET (${generatedClaimId})*\n` +
+      `----------------------------------------\n` +
+      `🛡️ *Warranty ID:* ${claimForm.warrantyId.trim() || 'N/A'}\n` +
+      `✉️ *Email:* ${claimForm.email.trim() || 'N/A'}\n` +
+      `📞 *Inspection Phone:* ${claimForm.phone.trim() || 'N/A'}\n` +
+      `⚠️ *Issue Type:* ${claimForm.issueType}\n\n` +
+      `📋 *Description of Issue:*\n${claimForm.description.trim()}\n` +
+      `----------------------------------------\n` +
+      `_Submitted via Dr. Well Care Warranty Portal_`;
+
+    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`;
+
     setTimeout(() => {
       setIsSubmitting(false);
-      const generatedClaimId = `CLM-${Math.floor(1000 + Math.random() * 9000)}`;
-      setClaimSuccessId(generatedClaimId);
-    }, 1200);
+      if (typeof window !== "undefined") {
+        window.open(waUrl, "_blank");
+      }
+    }, 600);
   };
 
   const coverageDetails = [
@@ -262,7 +299,7 @@ export default function WarrantyPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Phone Number *</label>
-                      <input type="tel" name="phone" value={regForm.phone} onChange={handleRegChange} placeholder="+91 81244 65404" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
+                      <input type="tel" name="phone" value={regForm.phone} onChange={handleRegChange} placeholder="+91 93429 22044" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
                     </div>
                   </div>
 
@@ -354,7 +391,7 @@ export default function WarrantyPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Phone Number for Inspection *</label>
-                      <input type="tel" name="phone" value={claimForm.phone} onChange={handleClaimChange} placeholder="+91 81244 65404" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
+                      <input type="tel" name="phone" value={claimForm.phone} onChange={handleClaimChange} placeholder="+91 93429 22044" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Issue Classification *</label>

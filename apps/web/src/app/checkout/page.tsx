@@ -89,7 +89,7 @@ export default function CheckoutPage() {
           lName = parts.slice(1).join(' ') || '';
         }
         if (prof.email) emailStr = prof.email;
-        if (prof.phone && prof.phone !== '+91 81244 65404') phoneStr = prof.phone;
+        if (prof.phone && prof.phone !== '+91 93429 22044') phoneStr = prof.phone;
       }
     } catch (e) {}
 
@@ -115,7 +115,7 @@ export default function CheckoutPage() {
               if (defAddr.city) cityStr = defAddr.city;
               if (defAddr.state) stateStr = defAddr.state;
               if (defAddr.pincode) pinStr = defAddr.pincode;
-              if (!phoneStr && defAddr.phone && defAddr.phone !== '+91 81244 65404') phoneStr = defAddr.phone;
+              if (!phoneStr && defAddr.phone && defAddr.phone !== '+91 93429 22044') phoneStr = defAddr.phone;
             }
           }
         }
@@ -573,7 +573,7 @@ export default function CheckoutPage() {
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (For Delivery Updates) *</label>
-                <input {...register("phone")} type="tel" placeholder="+91 81244 65404" className={`w-full border ${formErrors.phone ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                <input {...register("phone")} type="tel" placeholder="+91 93429 22044" className={`w-full border ${formErrors.phone ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
                 {formErrors.phone && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.phone.message}</span>}
               </div>
             </div>

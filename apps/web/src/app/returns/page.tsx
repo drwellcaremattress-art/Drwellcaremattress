@@ -53,11 +53,29 @@ export default function ReturnsPage() {
     }
 
     setIsSubmitting(true);
+    const generatedId = `RET-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    setTicketId(generatedId);
+
+    const whatsappNumber = "919342922044";
+    const waText = `*NEW RETURN / WARRANTY TICKET (${generatedId})*\n` +
+      `----------------------------------------\n` +
+      `📦 *Order ID:* ${form.orderId.trim()}\n` +
+      `✉️ *Email:* ${form.email.trim()}\n` +
+      `📞 *Pickup Phone:* ${form.phone.trim()}\n` +
+      `🔄 *Requested Action:* ${form.actionType}\n` +
+      `📌 *Reason:* ${form.reason}\n\n` +
+      `📝 *Notes / Experience:*\n${form.notes.trim()}\n` +
+      `----------------------------------------\n` +
+      `_Sent from Dr. Well Care Mattress Returns Portal_`;
+
+    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`;
+
     setTimeout(() => {
       setIsSubmitting(false);
-      const generatedId = `RET-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-      setTicketId(generatedId);
-    }, 1200);
+      if (typeof window !== "undefined") {
+        window.open(waUrl, "_blank");
+      }
+    }, 600);
   };
 
   const steps = [
@@ -194,7 +212,7 @@ export default function ReturnsPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Pickup Phone Number *</label>
-                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+91 81244 65404" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
+                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+91 93429 22044" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
                 </div>
               </div>
 
