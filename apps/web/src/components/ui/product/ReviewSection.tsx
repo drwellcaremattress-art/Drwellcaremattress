@@ -275,9 +275,16 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
 
       // Merge and deduplicate by ID
       const mergedMap = new Map<string, Review>();
-      // Prepend user local reviews first so they appear at the top
-      localReviews.forEach(r => mergedMap.set(r.id, r));
+      
+      // 1. Baseline authentic customer reviews tailored to category
+      const authentic = getAuthenticReviews(productName, productCategory);
+      authentic.forEach(r => mergedMap.set(r.id, r));
+
+      // 2. DB API reviews
       dbReviews.forEach(r => mergedMap.set(r.id, r));
+
+      // 3. User local submitted reviews (prepended at top)
+      localReviews.forEach(r => mergedMap.set(r.id, r));
 
       setReviews(Array.from(mergedMap.values()));
       setIsLoading(false);

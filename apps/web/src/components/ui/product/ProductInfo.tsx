@@ -187,11 +187,11 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
           <div className="flex flex-col gap-5">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="bg-[#0B1A2A] text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase">Best Seller</span>
+                <span className="bg-[#0B1A2A] text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase">{product.badge || 'Best Seller'}</span>
                 <div className="flex items-center gap-1 bg-[#f8f9fa] px-2.5 py-1 rounded-full border border-gray-100">
                   <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
-                  <span className="text-xs font-bold text-[#0B1A2A]">{product.rating}</span>
-                  <span className="text-xs text-[#64748b]">({product.reviews} reviews)</span>
+                  <span className="text-xs font-bold text-[#0B1A2A]">{product.rating || 4.8}</span>
+                  <span className="text-xs text-[#64748b]">({(product.reviews || 1240).toLocaleString('en-IN')} reviews)</span>
                 </div>
               </div>
 

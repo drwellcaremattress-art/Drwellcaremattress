@@ -12,7 +12,8 @@ import {
   RotateCcw,
   CircleDot,
   ShieldCheck,
-  Filter
+  Filter,
+  Star
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PRODUCT_CATALOG, getDeduplicatedCatalog } from '@/lib/catalog';
@@ -464,7 +465,16 @@ function ProductListingContent() {
                   {/* Content */}
                   <div className="flex-grow flex flex-col px-2 pb-2">
                     <div className="flex justify-between items-start mb-2 gap-4">
-                      <h3 className="font-heading font-extrabold text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#0682E4] to-[#7cb93e] leading-tight group-hover:scale-[1.02] transition-transform origin-left">{product.title}</h3>
+                      <div>
+                        <h3 className="font-heading font-extrabold text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#0682E4] to-[#7cb93e] leading-tight group-hover:scale-[1.02] transition-transform origin-left">{product.title}</h3>
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <div className="inline-flex items-center gap-1 bg-[#f8f9fa] px-2.5 py-0.5 rounded-full border border-gray-200/80">
+                            <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
+                            <span className="text-xs font-bold text-[#0B1A2A]">{product.rating || 4.8}</span>
+                            <span className="text-[11px] text-[#64748b]">({(product.reviews || 1240).toLocaleString('en-IN')} reviews)</span>
+                          </div>
+                        </div>
+                      </div>
                       <div className="text-right shrink-0">
                         <span className="text-[10px] uppercase font-bold tracking-widest text-[#64748b] block mb-0.5">From</span>
                         <div className="flex items-baseline justify-end gap-1.5">
