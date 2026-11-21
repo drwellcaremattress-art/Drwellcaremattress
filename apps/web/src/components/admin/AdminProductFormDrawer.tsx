@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, Save, Plus, Trash2, Package, Tag, FileText,
   Image as ImageIcon, Search, AlertCircle, CheckCircle2, Loader2,
-  DollarSign, RefreshCw, ChevronDown, ChevronUp, IndianRupee
+  DollarSign, RefreshCw, ChevronDown, ChevronUp, IndianRupee,
+  Video, Play, Film, Palette, UploadCloud
 } from 'lucide-react';
 import { ProductType } from './AdminProductTable';
 
@@ -18,7 +19,7 @@ const TABS = [
   { id: 'basics', label: 'Basics', icon: Package },
   { id: 'variants', label: 'Pricing & Variants', icon: DollarSign },
   { id: 'content', label: 'Content', icon: FileText },
-  { id: 'images', label: 'Images', icon: ImageIcon },
+  { id: 'images', label: 'Images, Colors & Video', icon: ImageIcon },
   { id: 'seo', label: 'SEO', icon: Search },
 ];
 
@@ -111,6 +112,48 @@ const defaultVariantForSize = (sizeKey: SizeKey, sqftPrice: number, slugBase: st
   };
 };
 
+const getVideoEmbedInfo = (url: string) => {
+  if (!url || typeof url !== 'string') return { type: null, embedUrl: null };
+  const trimmed = url.trim();
+
+  // YouTube (standard watch, youtu.be, embed, shorts)
+  const ytMatch = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/i);
+  if (ytMatch && ytMatch[1]) {
+    return {
+      type: 'youtube' as const,
+      embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}`,
+      videoId: ytMatch[1],
+    };
+  }
+
+  // Vimeo
+  const vimeoMatch = trimmed.match(/(?:vimeo\.com\/)(\d+)/i);
+  if (vimeoMatch && vimeoMatch[1]) {
+    return {
+      type: 'vimeo' as const,
+      embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}`,
+      videoId: vimeoMatch[1],
+    };
+  }
+
+  // Google Drive
+  const gdriveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([\w-]+)/i);
+  if (gdriveMatch && gdriveMatch[1]) {
+    return {
+      type: 'iframe' as const,
+      embedUrl: `https://drive.google.com/file/d/${gdriveMatch[1]}/preview`,
+      videoId: gdriveMatch[1],
+    };
+  }
+
+  // Direct video file (Cloudinary, local uploads, or MP4/WebM)
+  return {
+    type: 'video' as const,
+    embedUrl: trimmed,
+    videoId: null,
+  };
+};
+
 const emptyProduct = (): Partial<ProductType> => ({
   name: '',
   slug: '',
@@ -119,6 +162,13 @@ const emptyProduct = (): Partial<ProductType> => ({
   description: '',
   benefits: [],
   images: [],
+  videoUrl: '',
+  layersImage: '',
+  colors: [
+    { name: 'Pure White', hex: '#FFFFFF', image: '' },
+    { name: 'Royal Blue', hex: '#0682E4', image: '' },
+    { name: 'Slate Gray', hex: '#64748B', image: '' },
+  ],
   variants: SIZE_KEYS.map(k => defaultVariantForSize(k, 546, 'product')),
   firmness: 'Medium Firm',
   warranty_years: 10,
@@ -147,6 +197,8 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
   const [formData, setFormData] = useState<any>(emptyProduct());
   const [benefitInput, setBenefitInput] = useState('');
   const [imageInput, setImageInput] = useState('');
+  const [videoInput, setVideoInput] = useState('');
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
@@ -161,6 +213,8 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
       setSlugManuallyEdited(false);
       setBenefitInput('');
       setImageInput('');
+      setVideoInput('');
+      setUploadingVideo(false);
       setExpandedCards({ Single: true, Double: false, Queen: false, King: false });
       setEditingDim(null);
       setAddingDimForSize(null);
@@ -199,6 +253,13 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
           ...emptyProduct(),
           ...product,
           images: product.images || [],
+          videoUrl: product.videoUrl || '',
+          layersImage: product.layersImage || '',
+          colors: product.colors && product.colors.length > 0 ? product.colors : [
+            { name: 'Pure White', hex: '#FFFFFF', image: '' },
+            { name: 'Royal Blue', hex: '#0682E4', image: '' },
+            { name: 'Slate Gray', hex: '#64748B', image: '' },
+          ],
           variants: mergedVariants,
           benefits: product.benefits || [],
           seo: product.seo || { title: '', description: '', keywords: '' },
@@ -396,6 +457,45 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
     setFormData((prev: any) => ({ ...prev, images: prev.images.filter((_: any, i: number) => i !== idx) }));
   };
 
+  // ── Color Variants & Swatch Images Management ──
+  const [uploadingColorIdx, setUploadingColorIdx] = useState<number | null>(null);
+
+  const addColor = (name = 'New Color', hex = '#0682E4', image = '') => {
+    const currentColors = formData.colors || [];
+    handleChange('colors', [...currentColors, { name, hex, image }]);
+  };
+
+  const updateColor = (idx: number, patch: Partial<{ name: string; hex: string; image: string }>) => {
+    const currentColors = [...(formData.colors || [])];
+    if (!currentColors[idx]) return;
+    currentColors[idx] = { ...currentColors[idx], ...patch };
+    handleChange('colors', currentColors);
+  };
+
+  const removeColor = (idx: number) => {
+    const currentColors = [...(formData.colors || [])];
+    currentColors.splice(idx, 1);
+    handleChange('colors', currentColors);
+  };
+
+  const handleUploadColorImage = async (idx: number, file: File) => {
+    if (!file) return;
+    setUploadingColorIdx(idx);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      updateColor(idx, { image: data.url });
+      showToast('success', `Image uploaded for color "${formData.colors[idx]?.name || 'Color'}"!`);
+    } catch {
+      showToast('error', 'Failed to upload color image.');
+    } finally {
+      setUploadingColorIdx(null);
+    }
+  };
+
   const handleSave = async () => {
     if (!formData.name || !formData.category || !formData.firmness || !formData.description) {
       showToast('error', 'Name, category, firmness, and description are required.');
@@ -431,8 +531,11 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
     const singleVariant = sanitizedVariants.find(v => v.size === 'Single');
     const lowestPrice = singleVariant?.price || sanitizedVariants[0]?.price || 0;
 
+    const finalVideoUrl = (videoInput.trim() || formData.videoUrl || '').trim();
+
     const payload = {
       ...formData,
+      videoUrl: finalVideoUrl,
       variants: sanitizedVariants,
       sqftPrice: sqftP,
       priceValue: lowestPrice,
@@ -1350,6 +1453,363 @@ export default function AdminProductFormDrawer({ open, mode, product, onClose, o
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  {/* ── PRODUCT COLORS & COLOR-SPECIFIC IMAGES ── */}
+                  <div className="pt-6 border-t border-slate-200 mt-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <Palette className="w-4 h-4 text-[#0682E4]" />
+                            Product Colors &amp; Swatch Images
+                          </label>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">
+                            {formData.colors?.length || 0} Colors
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Set fabric/mattress colors and upload a specific image for each color. When a customer clicks that color on the website, its image will immediately display!
+                        </p>
+                      </div>
+
+                      {/* Add Color Button */}
+                      <button
+                        type="button"
+                        onClick={() => addColor('New Color', '#0682E4', '')}
+                        className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 bg-[#0682E4] hover:bg-[#056ec1] text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
+                      >
+                        <Plus size={14} /> Add Color
+                      </button>
+                    </div>
+
+                    {/* Quick Preset Colors Bar */}
+                    <div className="flex items-center gap-1.5 flex-wrap mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-200/70 text-xs">
+                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">
+                        Quick Add:
+                      </span>
+                      {[
+                        { name: 'Pure White', hex: '#FFFFFF' },
+                        { name: 'Royal Blue', hex: '#0682E4' },
+                        { name: 'Navy Blue', hex: '#0B1A2A' },
+                        { name: 'Slate Gray', hex: '#64748B' },
+                        { name: 'Beige Cream', hex: '#E5D9C5' },
+                        { name: 'Olive Green', hex: '#599C15' },
+                        { name: 'Maroon Red', hex: '#782C7A' },
+                        { name: 'Charcoal Black', hex: '#1E293B' },
+                      ].map((preset) => (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => {
+                            const exists = (formData.colors || []).some(
+                              (c: any) => c.name?.toLowerCase() === preset.name.toLowerCase()
+                            );
+                            if (exists) {
+                              showToast('error', `Color "${preset.name}" is already added.`);
+                              return;
+                            }
+                            addColor(preset.name, preset.hex, '');
+                            showToast('success', `Added color preset "${preset.name}"!`);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#0682E4] text-slate-700 font-semibold text-[11px] hover:bg-blue-50/50 transition-colors"
+                        >
+                          <span
+                            className="w-3 h-3 rounded-full border border-black/15 shrink-0"
+                            style={{ backgroundColor: preset.hex }}
+                          />
+                          {preset.name}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Colors List */}
+                    <div className="space-y-3">
+                      {(!formData.colors || formData.colors.length === 0) ? (
+                        <div className="py-6 border-2 border-dashed border-slate-200 rounded-2xl text-center text-slate-400">
+                          <Palette size={24} className="mx-auto mb-1.5 opacity-30" />
+                          <p className="text-xs">No color variants added yet. Click &ldquo;Add Color&rdquo; or pick a preset above.</p>
+                        </div>
+                      ) : (
+                        formData.colors.map((c: any, cIdx: number) => (
+                          <div
+                            key={cIdx}
+                            className="p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl flex flex-col md:flex-row md:items-center gap-3 transition-all hover:border-slate-300"
+                          >
+                            {/* Color Swatch & Color Picker */}
+                            <div className="flex items-center gap-2 shrink-0">
+                              <label
+                                className="relative w-9 h-9 rounded-xl border border-black/15 cursor-pointer shadow-sm flex items-center justify-center shrink-0 overflow-hidden"
+                                style={{ backgroundColor: c.hex || '#FFFFFF' }}
+                                title="Click to choose color"
+                              >
+                                <input
+                                  type="color"
+                                  value={c.hex || '#FFFFFF'}
+                                  onChange={(e) => updateColor(cIdx, { hex: e.target.value })}
+                                  className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                                />
+                              </label>
+
+                              {/* Color Name Input */}
+                              <div className="w-36">
+                                <label className="block text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                  Color Name
+                                </label>
+                                <input
+                                  type="text"
+                                  value={c.name}
+                                  placeholder="e.g. Royal Blue"
+                                  onChange={(e) => updateColor(cIdx, { name: e.target.value })}
+                                  className="w-full px-2.5 py-1 text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#0682E4]"
+                                />
+                              </div>
+
+                              {/* Hex Input */}
+                              <div className="w-24">
+                                <label className="block text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                  Hex Code
+                                </label>
+                                <input
+                                  type="text"
+                                  value={c.hex}
+                                  placeholder="#000000"
+                                  onChange={(e) => updateColor(cIdx, { hex: e.target.value })}
+                                  className="w-full px-2 py-1 text-xs font-mono font-bold text-slate-700 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#0682E4]"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Color-specific Image Preview & Upload */}
+                            <div className="flex-1 flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200/80 min-w-0">
+                              {c.image ? (
+                                <div className="relative w-12 h-10 rounded-lg border border-slate-200 overflow-hidden shrink-0 bg-slate-100">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={c.image}
+                                    alt={c.name}
+                                    className="w-full h-full object-cover"
+                                    onError={(e: any) => { e.target.src = '/images/placeholder.png'; }}
+                                  />
+                                </div>
+                              ) : (
+                                <div className="w-12 h-10 rounded-lg border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-[9px] text-slate-400 text-center font-semibold shrink-0">
+                                  No Img
+                                </div>
+                              )}
+
+                              {/* Image URL Input */}
+                              <div className="flex-1 min-w-0">
+                                <input
+                                  type="text"
+                                  value={c.image || ''}
+                                  placeholder="Paste specific image URL for this color..."
+                                  onChange={(e) => updateColor(cIdx, { image: e.target.value })}
+                                  className="w-full px-2.5 py-1 text-xs font-medium text-slate-700 bg-transparent border-none outline-none truncate"
+                                />
+                              </div>
+
+                              {/* Upload Image Button */}
+                              <label className="shrink-0 flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-[#0682E4] hover:text-white text-slate-700 rounded-lg text-[11px] font-bold cursor-pointer transition-colors border border-slate-200">
+                                {uploadingColorIdx === cIdx ? (
+                                  <>
+                                    <RefreshCw size={11} className="animate-spin" /> Uploading...
+                                  </>
+                                ) : (
+                                  <>
+                                    <UploadCloud size={12} /> Upload Image
+                                  </>
+                                )}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  disabled={uploadingColorIdx === cIdx}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleUploadColorImage(cIdx, file);
+                                    e.target.value = '';
+                                  }}
+                                />
+                              </label>
+
+                              {c.image && (
+                                <button
+                                  type="button"
+                                  onClick={() => updateColor(cIdx, { image: '' })}
+                                  className="p-1 text-slate-400 hover:text-red-500 rounded transition-colors"
+                                  title="Clear Image"
+                                >
+                                  <X size={14} />
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Delete Color Button */}
+                            <button
+                              type="button"
+                              onClick={() => removeColor(cIdx)}
+                              className="self-end md:self-center p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                              title="Delete Color"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ── PRODUCT VIDEO ── */}
+                  <div className="pt-6 border-t border-slate-200 mt-8">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <Video className="w-4 h-4 text-[#0682E4]" />
+                            Product Video
+                          </label>
+                          {formData.videoUrl && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Upload an MP4 / WebM video from your computer or paste a video URL / YouTube link.
+                        </p>
+                      </div>
+                      {formData.videoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleChange('videoUrl', '');
+                            showToast('success', 'Video removed.');
+                          }}
+                          className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors flex items-center gap-1.5"
+                        >
+                          <Trash2 size={13} />
+                          Remove Video
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Preview active video */}
+                    {formData.videoUrl ? (
+                      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-white space-y-3">
+                        <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black flex items-center justify-center">
+                          {(() => {
+                            const videoInfo = getVideoEmbedInfo(formData.videoUrl);
+                            if (videoInfo.type === 'youtube' || videoInfo.type === 'vimeo' || videoInfo.type === 'iframe') {
+                              return (
+                                <iframe
+                                  src={videoInfo.embedUrl!}
+                                  title="Product Video Preview"
+                                  className="w-full h-full border-0"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                  allowFullScreen
+                                />
+                              );
+                            }
+                            return (
+                              <video
+                                src={formData.videoUrl}
+                                controls
+                                className="w-full h-full object-contain"
+                              />
+                            );
+                          })()}
+                        </div>
+                        <div className="flex items-center justify-between gap-3 text-xs bg-white/5 p-2.5 rounded-xl">
+                          <span className="font-mono text-slate-300 truncate">{formData.videoUrl}</span>
+                          <span className="shrink-0 text-emerald-400 font-semibold flex items-center gap-1">
+                            <CheckCircle2 size={13} /> Saved to Product
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Upload or Paste */
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-4 p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50">
+                          <div className="flex-grow">
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                              Upload Video from Computer
+                            </label>
+                            <input
+                              type="file"
+                              accept="video/*"
+                              disabled={uploadingVideo}
+                              className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#0682E4]/10 file:text-[#0682E4] hover:file:bg-[#0682E4]/20 cursor-pointer disabled:opacity-50"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const fd = new FormData();
+                                fd.append('file', file);
+                                setUploadingVideo(true);
+                                try {
+                                  const res = await fetch('/api/upload', { method: 'POST', body: fd });
+                                  if (!res.ok) throw new Error('Video upload failed');
+                                  const data = await res.json();
+                                  handleChange('videoUrl', data.url);
+                                  showToast('success', 'Video uploaded successfully!');
+                                } catch (err: any) {
+                                  showToast('error', err.message || 'Failed to upload video.');
+                                } finally {
+                                  setUploadingVideo(false);
+                                  e.target.value = '';
+                                }
+                              }}
+                            />
+                            {uploadingVideo && (
+                              <div className="flex items-center gap-2 mt-2 text-xs font-semibold text-[#0682E4]">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Uploading video file... Please wait a moment.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <div className="h-px bg-slate-200 flex-grow" />
+                          <span className="text-xs font-bold text-slate-400 uppercase">OR PASTE VIDEO URL</span>
+                          <div className="h-px bg-slate-200 flex-grow" />
+                        </div>
+
+                        <div className="flex gap-2">
+                          <input
+                            className={inputCls}
+                            placeholder="Paste direct video URL or YouTube / Vimeo link"
+                            value={videoInput}
+                            onChange={e => setVideoInput(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (videoInput.trim()) {
+                                  handleChange('videoUrl', videoInput.trim());
+                                  setVideoInput('');
+                                  showToast('success', 'Video URL set!');
+                                }
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!videoInput.trim()) {
+                                showToast('error', 'Please enter a valid video URL.');
+                                return;
+                              }
+                              handleChange('videoUrl', videoInput.trim());
+                              setVideoInput('');
+                              showToast('success', 'Video URL set!');
+                            }}
+                            className="px-4 py-2 bg-[#0682E4] text-white rounded-xl text-xs font-bold whitespace-nowrap hover:bg-[#0682E4]/90 transition-colors"
+                          >
+                            + Set Video
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

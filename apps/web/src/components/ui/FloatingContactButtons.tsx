@@ -8,18 +8,18 @@ export function FloatingContactButtons() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3.5 items-center pointer-events-none">
-      
+
       {/* 1. WhatsApp Button (Stacked Top) - Green Speech Bubble Icon */}
-      <a 
-        href="https://wa.me/919342922044?text=Hi%20Dr%20Well%20Care%2C%20I%20have%20an%20inquiry%20about%20your%20mattresses." 
-        target="_blank" 
+      <a
+        href="https://wa.me/919342922044?text=Hi%20Dr%20Well%20Care%2C%20I%20have%20an%20inquiry%20about%20your%20mattresses."
+        target="_blank"
         rel="noreferrer"
         className="pointer-events-auto group relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white flex items-center justify-center shadow-[0_8px_25px_rgba(37,211,102,0.5)] hover:shadow-[0_12px_35px_rgba(37,211,102,0.8)] transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-[#25D366]"
         title="Chat on WhatsApp"
       >
         {/* Pulsing ripple effect */}
         <span className="absolute inset-0 rounded-full bg-[#25D366]/30 animate-ping pointer-events-none" />
-        
+
         {/* Official WhatsApp Green Logo SVG */}
         <svg className="w-9 h-9 sm:w-10 sm:h-10 text-[#25D366] fill-current group-hover:rotate-6 transition-transform" viewBox="0 0 24 24">
           <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-1.137 4.155 4.316-1.134z" />
@@ -28,8 +28,8 @@ export function FloatingContactButtons() {
       </a>
 
       {/* 2. Call Button (Stacked Bottom) - Blue Gradient Box Matching Reference Image 2 */}
-      <a 
-        href="tel:9342922044" 
+      <a
+        href="tel:9342922044"
         className="pointer-events-auto group relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-b from-[#3a93ff] via-[#1a7ae6] to-[#0461ce] text-white flex flex-col items-center justify-center shadow-[0_8px_25px_rgba(6,130,228,0.5)] hover:shadow-[0_12px_35px_rgba(6,130,228,0.8)] transition-all duration-300 hover:scale-110 active:scale-95 border border-white/40"
         title="Call Directly (+91 93429 22044)"
       >
@@ -42,7 +42,7 @@ export function FloatingContactButtons() {
           Call
         </span>
       </a>
-      
+
     </div>
   );
 }

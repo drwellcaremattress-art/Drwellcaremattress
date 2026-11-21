@@ -4,6 +4,8 @@ import { Product } from '@/lib/models/Product';
 import { Review } from '@/lib/models/Review';
 import mongoose from 'mongoose';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { slug: string } }

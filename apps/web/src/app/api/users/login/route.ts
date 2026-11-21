@@ -14,8 +14,15 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const { email, password } = await req.json();
+    const cleanIdentifier = (email || '').trim();
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      $or: [
+        { email: cleanIdentifier.toLowerCase() },
+        { email: new RegExp(`^${cleanIdentifier}$`, 'i') },
+        { phone: cleanIdentifier },
+      ],
+    });
 
     if (user && user.passwordHash && (await bcrypt.compare(password, user.passwordHash))) {
       return NextResponse.json({

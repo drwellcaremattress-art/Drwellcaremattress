@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import {
   ChevronDown, ChevronUp, Package, Star, ShieldCheck, Moon,
-  Edit, Trash2, Eye, EyeOff, AlertCircle
+  Edit, Trash2, Eye, EyeOff, AlertCircle, Video
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,6 +17,8 @@ export interface ProductType {
   description: string;
   benefits: string[];
   images: { url: string; alt: string; position: number }[];
+  videoUrl?: string;
+  layersImage?: string;
   variants: {
     size: string;
     dimensions: string;
@@ -35,8 +37,14 @@ export interface ProductType {
   thickness?: string;
   subtitle?: string;
   trialNights: number;
+  colors?: {
+    name: string;
+    hex?: string;
+    image?: string;
+  }[];
   ratingAvg: number;
   ratingCount: number;
+  viewCount?: number;
   seo: {
     title: string;
     description: string;
@@ -112,6 +120,7 @@ export default function AdminProductTable({ products, onEdit, onDelete, onStatus
               <th className="px-4 py-4">Category</th>
               <th className="px-4 py-4">Price</th>
               <th className="px-4 py-4">Stock</th>
+              <th className="px-4 py-4 text-center">Views</th>
               <th className="px-4 py-4 text-center">Status</th>
               <th className="px-6 py-4 text-right">Actions</th>
             </tr>
@@ -145,7 +154,14 @@ export default function AdminProductTable({ products, onEdit, onDelete, onStatus
                           )}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 text-sm">{product.name}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-900 text-sm">{product.name}</span>
+                            {product.videoUrl && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-100 text-[#0682E4] text-[10px] font-bold" title="Product has video">
+                                <Video size={10} /> Video
+                              </span>
+                            )}
+                          </div>
                           <div className="text-[11px] text-slate-400 font-mono">{product.slug}</div>
                           <div className="text-[11px] text-slate-500 font-semibold">{product.firmness}</div>
                         </div>
@@ -182,6 +198,14 @@ export default function AdminProductTable({ products, onEdit, onDelete, onStatus
                       }`}>
                         {isOutOfStock && <AlertCircle size={10} />}
                         {isOutOfStock ? 'Out of Stock' : isLowStock ? `Low: ${stock}` : `${stock} units`}
+                      </span>
+                    </td>
+
+                    {/* Views */}
+                    <td className="px-4 py-4 text-center">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-50 text-[#0682E4] border border-blue-100 shadow-2xs">
+                        <Eye size={11} className="text-[#0682E4]" />
+                        {(product.viewCount || 0).toLocaleString('en-IN')}
                       </span>
                     </td>
 
@@ -233,7 +257,7 @@ export default function AdminProductTable({ products, onEdit, onDelete, onStatus
                   <AnimatePresence>
                     {expandedRow === product._id && (
                       <tr>
-                        <td colSpan={6} className="p-0 border-b border-gray-100">
+                        <td colSpan={7} className="p-0 border-b border-gray-100">
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}

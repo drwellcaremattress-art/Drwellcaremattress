@@ -24,14 +24,14 @@ export function CartDrawer() {
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-ink/50 backdrop-blur-sm z-50 transition-opacity"
         onClick={toggleCart}
       />
-      
+
       {/* Drawer */}
       <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-surface-alt bg-slate-900 text-white">
           <div>
@@ -102,16 +102,15 @@ export function CartDrawer() {
                     <div className="flex items-center gap-1.5 mt-1">
                       <span className="text-xs text-slate-500 font-semibold">Color:</span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0B1A2A] text-white text-[11px] font-bold shadow-xs">
-                        <span className={`w-2 h-2 rounded-full border border-white/20 ${
-                          (item.color || 'White') === 'Blue' ? 'bg-[#0682E4]' : (item.color || 'White') === 'Gray' ? 'bg-slate-400' : 'bg-white'
-                        }`} />
+                        <span className={`w-2 h-2 rounded-full border border-white/20 ${(item.color || 'White') === 'Blue' ? 'bg-[#0682E4]' : (item.color || 'White') === 'Gray' ? 'bg-slate-400' : 'bg-white'
+                          }`} />
                         {item.color || 'White'}
                       </span>
                     </div>
                   </div>
                   <div className="flex justify-between items-end mt-2">
                     <span className="font-mono font-bold text-primary-blue">₹{(item.price * item.qty).toLocaleString('en-IN')}</span>
-                    
+
                     {/* Qty Stepper */}
                     <div className="flex items-center border border-surface-alt rounded-lg overflow-hidden">
                       <button onClick={() => updateQty(item.id, item.qty - 1)} className="p-1.5 hover:bg-surface-alt text-ink">
@@ -136,8 +135,8 @@ export function CartDrawer() {
               <span className="font-semibold text-ink-muted">Subtotal</span>
               <span className="font-mono font-bold text-2xl text-ink">₹{getCartTotal().toLocaleString('en-IN')}</span>
             </div>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               onClick={() => {
                 toggleCart();
                 if (!session) {

@@ -5,6 +5,8 @@ import { Order } from '@/lib/models/Order';
 
 const SECRET = process.env.NEXTAUTH_SECRET || process.env.SECRET || 'fallback-secret';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     // getToken reads the JWT cookie directly — works reliably in all Route Handler environments

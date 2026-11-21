@@ -41,6 +41,7 @@ export interface CatalogProduct {
   benefits: string[];
   image: string;
   images: string[];
+  videoUrl?: string;
   variants: {
     size: string;
     dimensions: string;

@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ShieldCheck, 
-  CheckCircle2, 
-  AlertCircle, 
-  FileText, 
-  Award, 
-  HelpCircle, 
-  Loader2, 
-  Sparkles, 
-  Download, 
+import {
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
+  Award,
+  HelpCircle,
+  Loader2,
+  Sparkles,
+  Download,
   Phone,
   Calendar,
   Tag
@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 
 export default function WarrantyPage() {
   const [activeTab, setActiveTab] = useState<"register" | "claim">("register");
-  
+
   // Registration Form State
   const [regForm, setRegForm] = useState({
     name: "",
@@ -34,7 +34,7 @@ export default function WarrantyPage() {
     purchaseDate: new Date().toISOString().split("T")[0],
     serialNo: ""
   });
-  
+
   // Claim Form State
   const [claimForm, setClaimForm] = useState({
     warrantyId: "",
@@ -75,7 +75,7 @@ export default function WarrantyPage() {
     setIsSubmitting(true);
     const generatedWarId = `WAR-2026-${Math.floor(10000 + Math.random() * 90000)}`;
     setRegSuccessId(generatedWarId);
-    
+
     // Save to localStorage so user can see it in account if logged in
     try {
       const existingProfStr = localStorage.getItem("drwell_user_profile");
@@ -85,7 +85,7 @@ export default function WarrantyPage() {
         prof.registeredModel = regForm.model;
         localStorage.setItem("drwell_user_profile", JSON.stringify(prof));
       }
-    } catch (err) {}
+    } catch (err) { }
 
     const whatsappNumber = "919342922044";
     const waText = `*NEW WARRANTY REGISTRATION (${generatedWarId})*\n` +
@@ -176,7 +176,7 @@ export default function WarrantyPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pt-20 font-body">
-      
+
       {/* Hero Banner */}
       <section className="bg-[#0B1A2A] text-white py-16 sm:py-24 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#7cb93e]/10 rounded-full blur-3xl pointer-events-none" />
@@ -197,26 +197,24 @@ export default function WarrantyPage() {
 
       {/* Main Container */}
       <section className="container mx-auto px-4 py-16 max-w-5xl -mt-8 relative z-20">
-        
+
         {/* Tab Navigation Bar */}
         <div className="bg-white rounded-3xl p-2 shadow-lg border border-slate-200/80 flex max-w-xl mx-auto mb-12">
           <button
             onClick={() => { setActiveTab("register"); setError(""); setRegSuccessId(""); }}
-            className={`flex-1 py-3.5 px-6 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 ${
-              activeTab === "register"
-                ? "bg-[#0B1A2A] text-white shadow-md"
-                : "text-slate-600 hover:text-[#0B1A2A] hover:bg-slate-50"
-            }`}
+            className={`flex-1 py-3.5 px-6 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 ${activeTab === "register"
+              ? "bg-[#0B1A2A] text-white shadow-md"
+              : "text-slate-600 hover:text-[#0B1A2A] hover:bg-slate-50"
+              }`}
           >
             <ShieldCheck className="w-4 h-4 text-[#7cb93e]" /> Register New Warranty
           </button>
           <button
             onClick={() => { setActiveTab("claim"); setError(""); setClaimSuccessId(""); }}
-            className={`flex-1 py-3.5 px-6 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 ${
-              activeTab === "claim"
-                ? "bg-[#0682E4] text-white shadow-md"
-                : "text-slate-600 hover:text-[#0682E4] hover:bg-slate-50"
-            }`}
+            className={`flex-1 py-3.5 px-6 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 ${activeTab === "claim"
+              ? "bg-[#0682E4] text-white shadow-md"
+              : "text-slate-600 hover:text-[#0682E4] hover:bg-slate-50"
+              }`}
           >
             <FileText className="w-4 h-4 text-white" /> File Support Claim
           </button>
@@ -225,9 +223,9 @@ export default function WarrantyPage() {
         {/* Error Display */}
         <AnimatePresence>
           {error && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }} 
-              animate={{ opacity: 1, y: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className="mb-8 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 text-red-700 text-xs sm:text-sm font-semibold shadow-sm max-w-3xl mx-auto"
             >
@@ -239,7 +237,7 @@ export default function WarrantyPage() {
 
         {/* Form Sections */}
         <div className="bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 sm:p-12 mb-16">
-          
+
           {/* TAB 1: REGISTRATION FORM */}
           {activeTab === "register" && (
             <div>
@@ -252,7 +250,7 @@ export default function WarrantyPage() {
                   <p className="text-slate-600 text-sm max-w-lg mx-auto leading-relaxed">
                     Congratulations, <span className="font-bold text-[#0B1A2A]">{regForm.name}</span>! Your 10-Year Orthopaedic Warranty has been officially registered and verified in our central Chennai database.
                   </p>
-                  
+
                   <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-300 rounded-3xl max-w-md mx-auto text-left space-y-3">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-slate-500 font-bold uppercase tracking-wider">Certificate ID:</span>
@@ -440,7 +438,7 @@ export default function WarrantyPage() {
         </div>
 
       </section>
-      
+
     </div>
   );
 }

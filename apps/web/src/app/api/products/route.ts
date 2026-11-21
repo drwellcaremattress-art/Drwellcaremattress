@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/db';
 import { Product } from '@/lib/models/Product';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const querySchema = z.object({
   category: z.string().optional(),
   firmness: z.string().optional(),

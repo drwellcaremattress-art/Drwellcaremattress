@@ -22,14 +22,18 @@ export interface IOrder extends Document {
   shipping: number;
   tax: number;
   total: number;
+  advanceAmount?: number;
+  balanceAmount?: number;
   paymentStatus: string;
   paymentGateway: string;
   paymentMethod: string;
   paymentRef: string;
   orderStatus: string;
-  trackingId: string;
-  courier: string;
-  couponApplied: string;
+  trackingId?: string;
+  courier?: string;
+  trackingUrl?: string;
+  estimatedDelivery?: string;
+  couponApplied?: string;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -57,6 +61,8 @@ const OrderSchema: Schema = new Schema(
     shipping: { type: Number, default: 0 },
     tax: { type: Number, default: 0 },
     total: { type: Number, required: true },
+    advanceAmount: { type: Number, default: 0 },
+    balanceAmount: { type: Number, default: 0 },
     paymentStatus: {
       type: String,
       default: 'pending',
@@ -66,11 +72,12 @@ const OrderSchema: Schema = new Schema(
     paymentRef: { type: String },
     orderStatus: {
       type: String,
-      enum: ['placed', 'confirmed', 'packed', 'shipped', 'delivered', 'returned', 'cancelled'],
-      default: 'placed',
+      default: 'Processing',
     },
-    trackingId: { type: String },
-    courier: { type: String },
+    trackingId: { type: String, default: '' },
+    courier: { type: String, default: '' },
+    trackingUrl: { type: String, default: '' },
+    estimatedDelivery: { type: String, default: '' },
     couponApplied: { type: String },
   },
   {

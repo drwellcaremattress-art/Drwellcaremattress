@@ -18,8 +18,11 @@ export const metadata: Metadata = {
   title: "Dr Well Care - Orthopaedic & Wellness Mattresses",
   description: "Say No To Back Pain with Dr Well Care's orthopaedic and memory foam mattresses. 10-Year Warranty.",
   icons: {
-    icon: "/images/logo.png",
-    shortcut: "/images/logo.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/images/logo.png",
   },
 };
@@ -46,6 +49,8 @@ export default function RootLayout({
             fbq('track', 'PageView');
           `}
         </Script>
+      </head>
+      <body className={`${inter.variable} ${poppins.variable} ${dmSans.variable} ${workSans.variable} font-body bg-surface text-ink min-h-screen flex flex-col`}>
         <noscript>
           <img 
             height="1" 
@@ -55,8 +60,6 @@ export default function RootLayout({
             alt=""
           />
         </noscript>
-      </head>
-      <body className={`${inter.variable} ${poppins.variable} ${dmSans.variable} ${workSans.variable} font-body bg-surface text-ink min-h-screen flex flex-col`}>
         <Providers>
           <Navbar />
           <CartDrawer />

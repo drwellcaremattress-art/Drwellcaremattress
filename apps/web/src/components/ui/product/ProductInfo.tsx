@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
-import { Star, ShieldCheck, Truck, Check, ChevronDown, RotateCcw, X, BedDouble, Zap, Sparkles, Layers, CheckCircle2, Lock } from 'lucide-react';
+import { Star, ShieldCheck, Truck, Check, ChevronDown, RotateCcw, X, BedDouble, Zap, Sparkles, Layers, CheckCircle2, Lock, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '@/store/cartStore';
 import { useSession } from 'next-auth/react';
@@ -13,6 +13,8 @@ interface ProductInfoProps {
   product: any;
   externalVariantIndex?: number;
   onVariantChange?: (idx: number, slug?: string) => void;
+  selectedColor?: string;
+  onColorChange?: (colorName: string) => void;
 }
 
 // ─── Base size dimensions & area per category ─────────────────────────────────
@@ -88,7 +90,13 @@ const getDynamicSizeData = (rate: number, productVariants?: any[]) => {
   return result;
 };
 
-export function ProductInfo({ product, externalVariantIndex, onVariantChange }: ProductInfoProps) {
+export function ProductInfo({
+  product,
+  externalVariantIndex,
+  onVariantChange,
+  selectedColor: propsSelectedColor,
+  onColorChange,
+}: ProductInfoProps) {
   const initialVariantIndex = 0;
   const [internalVariantIndex, setInternalVariantIndex] = useState<number>(initialVariantIndex);
   const activeVariantIndex = externalVariantIndex !== undefined ? externalVariantIndex : internalVariantIndex;
@@ -101,13 +109,59 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
   const [selectedSize, setSelectedSize] = useState('Single');
   const [selectedDim, setSelectedDim] = useState('72" × 36"'); // default 72"×36"
   const selectedThickness = activeVariant ? activeVariant.thickness : (product.thickness || '6 Inch');
-  const [selectedColor, setSelectedColor] = useState('White');
-  const colors = ['White', 'Blue', 'Gray'];
+
+  // Normalize color options from product (array of objects { name, hex, image } or strings)
+  const productColors: { name: string; hex: string; image?: string }[] =
+    product.colors && product.colors.length > 0
+      ? product.colors.map((c: any) =>
+          typeof c === 'string'
+            ? {
+                name: c,
+                hex: c.toLowerCase() === 'white' ? '#F8FAFC' : c.toLowerCase() === 'blue' ? '#0682E4' : '#64748B',
+                image: '',
+              }
+            : {
+                name: c.name || 'Color',
+                hex: c.hex || '#FFFFFF',
+                image: c.image || '',
+              }
+        )
+      : [
+          { name: 'White', hex: '#F8FAFC', image: '' },
+          { name: 'Blue', hex: '#0682E4', image: '' },
+          { name: 'Gray', hex: '#64748B', image: '' },
+        ];
+
+  const defaultColorName = productColors[0]?.name || 'White';
+  const [localSelectedColor, setLocalSelectedColor] = useState(defaultColorName);
+  const activeColorName = propsSelectedColor !== undefined ? propsSelectedColor : localSelectedColor;
+
+  const handleColorSelect = (colorName: string) => {
+    setLocalSelectedColor(colorName);
+    if (onColorChange) {
+      onColorChange(colorName);
+    }
+  };
   const [popupOpen, setPopupOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [customL, setCustomL] = useState('');
   const [customW, setCustomW] = useState('');
   const [addedClarificationItem, setAddedClarificationItem] = useState<any | null>(null);
+
+  // ── Deduplicated unique view tracking (24h session cookie) ──
+  const [liveViewCount, setLiveViewCount] = useState<number>(product.viewCount || 1);
+
+  useEffect(() => {
+    if (!product?.slug) return;
+    fetch(`/api/products/${encodeURIComponent(product.slug)}/view`, { method: 'POST' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.viewCount !== undefined && typeof data.viewCount === 'number') {
+          setLiveViewCount(data.viewCount);
+        }
+      })
+      .catch((err) => console.error('View tracking error:', err));
+  }, [product?.slug]);
   const { addItem, toggleCart } = useCartStore();
   const { data: session } = useSession();
   const router = useRouter();
@@ -143,14 +197,19 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
   const displayWarranty = activeVariant ? activeVariant.warranty : (product.warranty || 10);
 
   const handleAddToCart = () => {
+    const activeColorObj = productColors.find(c => c.name.toLowerCase() === activeColorName.toLowerCase());
+    const chosenImage = (activeColorObj?.image && activeColorObj.image.trim())
+      ? activeColorObj.image.trim()
+      : (activeVariant && activeVariant.image ? activeVariant.image : (product.images && product.images[0] ? product.images[0] : ''));
+
     const itemObj = {
       id: activeVariant ? activeVariant.slug : product.id.toString(),
       name: product.title,
       size: selectedSubSize ? `${selectedSize} (${selectedSubSize.dim}) - ${selectedThickness}` : `${selectedSize} - ${selectedThickness}`,
       price: displayPrice,
-      image: activeVariant && activeVariant.image ? activeVariant.image : (product.images && product.images[0] ? product.images[0] : ''),
+      image: chosenImage,
       qty: 1,
-      color: selectedColor,
+      color: activeColorName,
     };
     addItem(itemObj);
     setAddedClarificationItem(itemObj);
@@ -186,12 +245,17 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
         <div className="flex justify-between items-start gap-4">
           <div className="flex flex-col gap-5">
             <div>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="bg-[#0B1A2A] text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase">{product.badge || 'Best Seller'}</span>
                 <div className="flex items-center gap-1 bg-[#f8f9fa] px-2.5 py-1 rounded-full border border-gray-100">
                   <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
                   <span className="text-xs font-bold text-[#0B1A2A]">{product.rating || 4.8}</span>
                   <span className="text-xs text-[#64748b]">({(product.reviews || 1240).toLocaleString('en-IN')} reviews)</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 bg-blue-50/90 text-[#0682E4] px-2.5 py-1 rounded-full border border-blue-100 text-xs font-extrabold shadow-2xs">
+                  <Eye className="w-3.5 h-3.5 text-[#0682E4]" />
+                  <span>{liveViewCount.toLocaleString('en-IN')} views</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" title="Live Unique Views" />
                 </div>
               </div>
 
@@ -376,25 +440,44 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
           {/* Color Selection */}
           <div className="mt-5">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-sm font-bold text-[#0B1A2A]">Select Color</h3>
+              <h3 className="text-sm font-bold text-[#0B1A2A] flex items-center gap-2">
+                <span>Select Fabric Color:</span>
+                <span className="text-[#0682E4] font-extrabold">{activeColorName}</span>
+              </h3>
+              <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">Click color to view picture</span>
             </div>
-            <div className="flex gap-3">
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`flex-1 py-2.5 rounded-xl border-2 font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                    selectedColor === color
-                      ? 'border-[#0B1A2A] bg-[#0B1A2A] text-white shadow-md'
-                      : 'border-gray-200 bg-white text-[#64748b] hover:border-gray-300'
-                  }`}
-                >
-                  <span className={`w-3.5 h-3.5 rounded-full border border-gray-300/50 shadow-inner block ${
-                    color === 'White' ? 'bg-[#f8fafc]' : color === 'Blue' ? 'bg-[#0682E4]' : 'bg-[#64748b]'
-                  }`} />
-                  {color}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-2.5">
+              {productColors.map((col) => {
+                const isSelected = activeColorName.toLowerCase() === col.name.toLowerCase();
+                return (
+                  <button
+                    key={col.name}
+                    type="button"
+                    onClick={() => handleColorSelect(col.name)}
+                    className={`px-3.5 py-2.5 rounded-xl border-2 font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${
+                      isSelected
+                        ? 'border-[#0B1A2A] bg-[#0B1A2A] text-white shadow-md scale-[1.02]'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-black/20 shadow-inner block shrink-0"
+                      style={{ backgroundColor: col.hex || '#FFFFFF' }}
+                    />
+                    <span>{col.name}</span>
+                    {col.image && (
+                      <span
+                        className={`text-[9px] px-1.5 py-0.2 rounded font-mono uppercase tracking-wider ${
+                          isSelected ? 'bg-white/20 text-white' : 'bg-blue-50 text-[#0682E4]'
+                        }`}
+                        title="Specific image available"
+                      >
+                        Photo
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -470,7 +553,7 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
                             price: customPrice,
                             image: product.images[0],
                             qty: 1,
-                            color: selectedColor,
+                            color: activeColorName,
                           });
                           toggleCart();
                         }}
@@ -487,7 +570,7 @@ export function ProductInfo({ product, externalVariantIndex, onVariantChange }: 
                             price: customPrice,
                             image: product.images[0],
                             qty: 1,
-                            color: selectedColor,
+                            color: activeColorName,
                           });
                           if (!session) {
                             alert('Please login or create an account first to complete your purchase!');

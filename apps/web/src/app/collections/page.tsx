@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { ProductListing } from '@/components/ui/ProductListing';
-import { 
+import {
   Moon,
   ShieldCheck,
   Activity,
@@ -21,15 +21,15 @@ export default function CollectionsPage() {
     target: containerRef,
     offset: ["start start", "end start"]
   });
-  
+
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
 
   return (
     <div className="bg-white min-h-screen pb-0 flex flex-col" ref={containerRef}>
-      
+
       {/* 1. Immersive Header Section */}
       <div className="relative w-full h-[50vh] min-h-[400px] mb-20 overflow-hidden pt-20 flex items-center">
-        
+
         {/* Parallax Background Image */}
         <motion.div style={{ y }} className="absolute inset-0 w-full h-[120%] -top-[10%]">
           <Image src="/images/collections_hero.png"
@@ -46,7 +46,7 @@ export default function CollectionsPage() {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
@@ -54,7 +54,7 @@ export default function CollectionsPage() {
             >
               Our Mattresses
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
@@ -66,7 +66,7 @@ export default function CollectionsPage() {
         </div>
 
         {/* Floating Glassmorphism Feature Icons */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.5 }}
@@ -182,7 +182,7 @@ export default function CollectionsPage() {
 
       {/* Marquee Footer Banner */}
       <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#0c1824] via-[#102a43] to-[#0c1824] py-24 mt-auto flex flex-col items-center justify-center shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] border-y border-white/5">
-        
+
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
           <div className="absolute top-[-50%] left-[-20%] w-[70%] h-[150%] bg-[#0682E4] opacity-[0.07] blur-[120px] rounded-full mix-blend-screen"></div>
@@ -192,7 +192,7 @@ export default function CollectionsPage() {
 
         {/* Infinite Marquee */}
         <div className="flex w-full whitespace-nowrap overflow-hidden relative z-10 before:absolute before:left-0 before:top-0 before:z-20 before:h-full before:w-[100px] md:before:w-[250px] before:bg-gradient-to-r before:from-[#0c1824] before:to-transparent after:absolute after:right-0 after:top-0 after:z-20 after:h-full after:w-[100px] md:after:w-[250px] after:bg-gradient-to-l after:from-[#0c1824] after:to-transparent">
-          <motion.div 
+          <motion.div
             animate={{ x: ["0%", "-50%"] }}
             transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
             className="flex items-center min-w-max"
@@ -218,7 +218,7 @@ export default function CollectionsPage() {
           </motion.div>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

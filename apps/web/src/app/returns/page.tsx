@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  RefreshCw, 
-  Truck, 
-  ShieldCheck, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle, 
-  HelpCircle, 
-  Loader2, 
-  Sparkles, 
+import {
+  RefreshCw,
+  Truck,
+  ShieldCheck,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  HelpCircle,
+  Loader2,
+  Sparkles,
   ArrowRight,
   HeartHandshake,
   Calendar,
@@ -104,7 +104,7 @@ export default function ReturnsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pt-20 font-body">
-      
+
       {/* Hero Section */}
       <section className="bg-[#0B1A2A] text-white py-16 sm:py-24 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#0682E4]/10 rounded-full blur-3xl pointer-events-none" />
@@ -125,7 +125,7 @@ export default function ReturnsPage() {
 
       {/* Main Container */}
       <section className="container mx-auto px-4 py-16 max-w-6xl -mt-8 relative z-20">
-        
+
         {/* 3-Step Process Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           {steps.map((st, idx) => (
@@ -159,9 +159,9 @@ export default function ReturnsPage() {
           {/* Error Banner */}
           <AnimatePresence>
             {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }} 
-                animate={{ opacity: 1, y: 0 }} 
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="mb-8 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 text-red-700 text-xs sm:text-sm font-semibold shadow-sm"
               >
@@ -249,7 +249,7 @@ export default function ReturnsPage() {
         </div>
 
       </section>
-      
+
     </div>
   );
 }

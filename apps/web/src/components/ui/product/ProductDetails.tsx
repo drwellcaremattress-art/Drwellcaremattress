@@ -2,9 +2,16 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ShieldCheck, Activity, Moon, CircleDot, User, Wind, Leaf, Award } from 'lucide-react';
+import { ShieldCheck, Activity, Moon, CircleDot, User, Wind, Leaf, Award, Video, Play } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { ReviewSection } from './ReviewSection';
+
+const getYouTubeEmbedUrl = (url: string): string | null => {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? `https://www.youtube.com/embed/${match[2]}` : null;
+};
 
 export function ProductDetails({ product, activeVariant }: { product?: any; activeVariant?: any }) {
   const containerVariants: Variants = {
@@ -266,6 +273,46 @@ export function ProductDetails({ product, activeVariant }: { product?: any; acti
           </div>
         </div>
       </section>
+
+      {/* Video Walkthrough Section (if video exists) */}
+      {product?.videoUrl && (
+        <section className="bg-slate-900 rounded-[2.5rem] p-6 lg:p-12 text-white relative overflow-hidden border border-slate-800 shadow-2xl">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#0682E4]/20 text-[#0682E4] border border-[#0682E4]/30 uppercase tracking-wider mb-2">
+                  <Video size={13} /> Official Showcase
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-heading font-bold text-white">
+                  Experience {product?.title || 'Our Mattress'} in Motion
+                </h3>
+              </div>
+              <p className="text-xs text-slate-400 max-w-xs">
+                Take a closer look at the craftsmanship, materials, and responsive ergonomic comfort.
+              </p>
+            </div>
+
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-inner border border-white/10">
+              {getYouTubeEmbedUrl(product.videoUrl) ? (
+                <iframe
+                  src={getYouTubeEmbedUrl(product.videoUrl)!}
+                  title={`${product?.title || 'Product'} Video Showcase`}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  src={product.videoUrl}
+                  controls
+                  playsInline
+                  className="w-full h-full object-contain"
+                />
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 2. Key Benefits */}
       <section className="bg-[#0B1A2A] rounded-[3rem] p-10 lg:p-20 text-white relative overflow-hidden">

@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Sparkles, 
-  CheckCircle2, 
-  ArrowRight, 
-  RefreshCw, 
-  ShieldCheck, 
-  Award, 
-  Moon, 
-  Activity, 
-  Heart, 
+import {
+  Sparkles,
+  CheckCircle2,
+  ArrowRight,
+  RefreshCw,
+  ShieldCheck,
+  Award,
+  Moon,
+  Activity,
+  Heart,
   UserCheck,
   ChevronRight,
   ShoppingBag
@@ -133,7 +133,7 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pt-20 font-body">
-      
+
       {/* Hero Header */}
       <section className="bg-[#0B1A2A] text-white py-16 sm:py-20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#7cb93e]/10 rounded-full blur-3xl pointer-events-none" />
@@ -154,7 +154,7 @@ export default function QuizPage() {
 
       {/* Quiz Area */}
       <section className="container mx-auto px-4 py-16 max-w-4xl -mt-8 relative z-20">
-        
+
         {isCalculating ? (
           <div className="bg-white rounded-3xl shadow-xl border border-slate-200/80 p-12 sm:p-20 text-center space-y-6">
             <div className="w-20 h-20 bg-[#0682E4]/10 text-[#0682E4] rounded-3xl flex items-center justify-center mx-auto animate-pulse">
@@ -221,7 +221,7 @@ export default function QuizPage() {
           </motion.div>
         ) : (
           <div className="bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 sm:p-12">
-            
+
             {/* Step Progress Bar */}
             <div className="mb-8">
               <div className="flex justify-between items-center text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">
@@ -229,11 +229,11 @@ export default function QuizPage() {
                 <span className="text-[#0682E4]">{Math.round((step / 4) * 100)}% Completed</span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: `${((step - 1) / 4) * 100}%` }} 
-                  animate={{ width: `${(step / 4) * 100}%` }} 
+                <motion.div
+                  initial={{ width: `${((step - 1) / 4) * 100}%` }}
+                  animate={{ width: `${(step / 4) * 100}%` }}
                   transition={{ duration: 0.4 }}
-                  className="h-full bg-gradient-to-r from-[#0B1A2A] to-[#0682E4] rounded-full" 
+                  className="h-full bg-gradient-to-r from-[#0B1A2A] to-[#0682E4] rounded-full"
                 />
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function QuizPage() {
         )}
 
       </section>
-      
+
     </div>
   );
 }

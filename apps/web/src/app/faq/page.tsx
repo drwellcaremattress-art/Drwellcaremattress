@@ -64,12 +64,12 @@ export default function FAQPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pt-20 font-body relative">
-      
+
       {/* CATALOGUE DOWNLOAD MODAL */}
       {showCatalogueModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative">
-            <button 
+            <button
               onClick={() => setShowCatalogueModal(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"
             >
@@ -144,7 +144,7 @@ export default function FAQPage() {
             Frequently Asked <span className="text-[#7cb93e]">Questions</span>
           </h1>
           <p className="text-lg sm:text-xl text-white/70 font-medium">
-            Everything you need to know about our products, trial, and delivery. 
+            Everything you need to know about our products, trial, and delivery.
             Can't find the answer? Our support team is here to help.
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function FAQPage() {
 
       {/* FAQ Content */}
       <section className="container mx-auto px-4 py-20 max-w-5xl">
-        
+
         {/* Category 1: Warranty & Protection */}
         <div className="mb-20">
           <div className="flex items-center gap-4 mb-8">
@@ -205,13 +205,13 @@ export default function FAQPage() {
             Our sleep experts are available 7 days a week to help you find the perfect mattress.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link 
-              href="/contact" 
+            <Link
+              href="/contact"
               className="bg-[#0682E4] hover:bg-[#7cb93e] text-white px-8 py-4 rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center justify-center"
             >
               Contact Support
             </Link>
-            <button 
+            <button
               onClick={() => setShowCatalogueModal(true)}
               className="bg-[#f8f9fa] hover:bg-gray-100 border border-gray-200 text-[#0B1A2A] px-8 py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
             >
@@ -220,7 +220,7 @@ export default function FAQPage() {
           </div>
         </div>
       </section>
-      
+
     </div>
   );
 }

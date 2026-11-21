@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/db';
 import { Product } from '@/lib/models/Product';
 import mongoose from 'mongoose';
 
+export const dynamic = 'force-dynamic';
+
 function buildQuery(slugOrId: string) {
   if (mongoose.Types.ObjectId.isValid(slugOrId)) {
     return { _id: slugOrId };
@@ -65,6 +67,31 @@ export async function PUT(
     
     if (!updatedProduct) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+    }
+
+    // Sync shared media (colors and videoUrl) to sibling products in the same mattress family
+    if (updatedProduct.name && (body.colors !== undefined || body.videoUrl !== undefined)) {
+      try {
+        const cleanName = (n: string) =>
+          (n || '').replace(/\s*-\s*\d+\s*(inch|")?|\s+\d+\s*(inch|")?$/i, '').replace(/\s+plus$/i, '').trim().toLowerCase();
+        const baseName = cleanName(updatedProduct.name);
+
+        const allProds = await Product.find({ _id: { $ne: updatedProduct._id } });
+        const siblingsToSync = allProds.filter(p => cleanName(p.name) === baseName);
+
+        const syncFields: any = {};
+        if (body.colors !== undefined) syncFields.colors = updatedProduct.colors;
+        if (body.videoUrl !== undefined) syncFields.videoUrl = updatedProduct.videoUrl;
+
+        if (siblingsToSync.length > 0 && Object.keys(syncFields).length > 0) {
+          await Product.updateMany(
+            { _id: { $in: siblingsToSync.map(s => s._id) } },
+            { $set: syncFields }
+          );
+        }
+      } catch (syncErr) {
+        console.error('Error syncing sibling product media:', syncErr);
+      }
     }
     
     return NextResponse.json(updatedProduct);

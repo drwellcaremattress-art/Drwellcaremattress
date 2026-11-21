@@ -3,10 +3,10 @@
 import React, { useRef } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { 
-  Heart, 
-  ShieldCheck, 
-  Leaf, 
+import {
+  Heart,
+  ShieldCheck,
+  Leaf,
   Award,
   Users,
   Moon,
@@ -25,7 +25,7 @@ export default function AboutPage() {
     target: containerRef,
     offset: ["start start", "end start"]
   });
-  
+
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
@@ -73,10 +73,10 @@ export default function AboutPage() {
 
   return (
     <div className="flex flex-col bg-[#0B1A2A] overflow-hidden" ref={containerRef}>
-      
+
       {/* 1. Immersive Hero Section */}
       <section className="relative w-full h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden pt-20">
-        
+
         {/* Parallax Background */}
         <motion.div style={{ y, opacity }} className="absolute inset-0 w-full h-[120%] -top-[10%] z-0">
           <div className="absolute inset-0 bg-[#0B1A2A] z-0"></div>
@@ -94,9 +94,9 @@ export default function AboutPage() {
         </motion.div>
 
         <div className="container mx-auto px-4 relative z-10 flex flex-col items-start text-left pt-12 md:pt-20">
-          
+
           {/* Animated Badge */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, type: "spring" }}
@@ -106,20 +106,20 @@ export default function AboutPage() {
             <span className="text-white/80 text-xs font-semibold">The pursuit of perfect sleep</span>
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             className="font-heading text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6 max-w-4xl"
           >
-            <motion.span 
-              initial={{ opacity: 0, y: 30 }} 
-              animate={{ opacity: 1, y: 0 }} 
+            <motion.span
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
               className="block"
             >
               We engineer <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-[#7cb93e]">dreams,</span>
             </motion.span>
-            <motion.span 
-              initial={{ opacity: 0, y: 30 }} 
-              animate={{ opacity: 1, y: 0 }} 
+            <motion.span
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
               className="block"
             >
@@ -127,7 +127,7 @@ export default function AboutPage() {
             </motion.span>
           </motion.h1>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -135,15 +135,15 @@ export default function AboutPage() {
           >
             At Dr. Well Mattress, we've spent over a decade researching sleep biomechanics to create the ultimate restorative sleep system for the modern Indian lifestyle.
           </motion.p>
-          
+
           {/* Scroll Indicator */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1, duration: 1 }}
             className="absolute bottom-10 left-1/2 -translate-x-1/2 md:left-4 md:-translate-x-0"
           >
-            <motion.div 
+            <motion.div
               animate={{ y: [0, 10, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               className="w-[30px] h-[50px] rounded-full border-2 border-white/20 flex justify-center p-1"
@@ -157,7 +157,7 @@ export default function AboutPage() {
 
       {/* 2. The Journey (Timeline/Split Section) */}
       <section className="py-24 relative z-20 container mx-auto px-4">
-        <motion.div 
+        <motion.div
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
@@ -174,7 +174,7 @@ export default function AboutPage() {
                 Dr. Well Mattress started with a simple observation by our founders: modern lifestyles were breaking our backs, and traditional mattresses were only making it worse.
               </p>
             </div>
-            
+
             <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/10 before:to-transparent">
               <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                 <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-[#0B1A2A] text-[#7cb93e] group-[.is-active]:bg-[#7cb93e] group-[.is-active]:text-white shadow-[0_0_15px_rgba(124,185,62,0.5)] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 transition-colors duration-500">
@@ -185,7 +185,7 @@ export default function AboutPage() {
                   <p className="text-white/60 text-sm">Identifying the critical link between spinal alignment and deep REM sleep.</p>
                 </div>
               </div>
-              
+
               <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
                 <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-[#0B1A2A] text-white/50 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
                   <span className="font-bold text-sm">02</span>
@@ -195,7 +195,7 @@ export default function AboutPage() {
                   <p className="text-white/60 text-sm">Developing our proprietary multi-layer foam technology.</p>
                 </div>
               </div>
-              
+
               <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
                 <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-[#0B1A2A] text-white/50 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
                   <span className="font-bold text-sm">03</span>
@@ -215,9 +215,9 @@ export default function AboutPage() {
               fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-contain transition-transform duration-1000 group-hover:scale-105"
             />
-            
+
             {/* Overlay stat card */}
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.05 }}
               className="absolute -bottom-6 left-4 right-4 md:bottom-0 md:left-12 md:right-12 bg-[#0B1A2A]/95 backdrop-blur-xl border border-white/20 p-6 rounded-2xl z-30 shadow-2xl"
             >
@@ -238,7 +238,7 @@ export default function AboutPage() {
       {/* 3. The Wellcare Standard (NEW) */}
       <section className="py-24 relative z-20 bg-[#0B1A2A]">
         <div className="container mx-auto px-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -248,7 +248,7 @@ export default function AboutPage() {
             {/* Background elements */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#7cb93e]/10 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
-            
+
             <div className="flex flex-col gap-12 md:gap-16 relative z-10">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -267,7 +267,7 @@ export default function AboutPage() {
                 <p className="text-lg text-white/70 leading-relaxed font-body mb-8">
                   Our signature Wellcare technology is the culmination of years of biomechanical research. It actively adapts to your body's micro-movements, ensuring zero pressure points and deep, uninterrupted REM sleep.
                 </p>
-                
+
                 <div className="flex justify-center gap-8 md:gap-16">
                   <div className="flex flex-col gap-2 items-center">
                     <span className="text-4xl md:text-5xl font-heading font-bold text-white">98%</span>
@@ -290,7 +290,7 @@ export default function AboutPage() {
               >
                 {/* Rectangular Border Animation Wrapper */}
                 <motion.div
-                  animate={{ 
+                  animate={{
                     boxShadow: [
                       "0px 0px 0px 0px rgba(124,185,62,0.1)",
                       "0px 0px 25px 5px rgba(124,185,62,0.6)",
@@ -301,7 +301,7 @@ export default function AboutPage() {
                   className="bg-[#0B1A2A] border-[3px] border-[#7cb93e]/40 overflow-hidden relative z-20"
                 >
                   <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] md:aspect-[3/1] lg:aspect-[3.5/1] overflow-hidden">
-                    <motion.div 
+                    <motion.div
                       whileHover={{ scale: 1.05 }}
                       transition={{ duration: 0.8, ease: "easeOut" }}
                       className="absolute inset-0"
@@ -312,9 +312,9 @@ export default function AboutPage() {
                         className="object-cover object-center"
                       />
                     </motion.div>
-                    
+
                     {/* Floating animated label over image */}
-                    <motion.div 
+                    <motion.div
                       animate={{ y: [0, -10, 0] }}
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                       className="absolute top-6 right-6 md:top-12 md:right-12 bg-[#06101B]/90 backdrop-blur-md border border-white/20 p-4 shadow-2xl z-30"
@@ -329,30 +329,30 @@ export default function AboutPage() {
                         </div>
                       </div>
                     </motion.div>
-                    
+
                     <div className="absolute inset-0 bg-gradient-to-t from-[#06101B] via-[#06101B]/20 to-transparent opacity-80 pointer-events-none" />
                   </div>
 
                   {/* Description Underneath Image */}
                   <div className="bg-[#06101B] p-8 md:p-12 relative z-30 border-t border-white/10">
-                     <h3 className="text-2xl md:text-3xl font-bold font-heading text-white mb-8 flex items-center gap-3">
-                       <CheckCircle2 className="w-8 h-8 text-[#7cb93e]" />
-                       The Dr. Well Care Advantage
-                     </h3>
-                     <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-                       <motion.div whileHover={{ y: -5 }} className="bg-white/5 p-6 border border-white/5 transition-colors hover:border-[#7cb93e]/30">
-                         <h4 className="text-[#7cb93e] font-bold mb-3 text-lg">Spinal Alignment</h4>
-                         <p className="text-white/70 text-sm leading-relaxed">Targeted zones adapt to your body weight, keeping your spine naturally aligned throughout the night.</p>
-                       </motion.div>
-                       <motion.div whileHover={{ y: -5 }} className="bg-white/5 p-6 border border-white/5 transition-colors hover:border-[#7cb93e]/30">
-                         <h4 className="text-[#7cb93e] font-bold mb-3 text-lg">Temperature Neutral</h4>
-                         <p className="text-white/70 text-sm leading-relaxed">Advanced breathable materials dissipate heat, maintaining the perfect sleep climate.</p>
-                       </motion.div>
-                       <motion.div whileHover={{ y: -5 }} className="bg-white/5 p-6 border border-white/5 transition-colors hover:border-[#7cb93e]/30">
-                         <h4 className="text-[#7cb93e] font-bold mb-3 text-lg">Pressure Relief</h4>
-                         <p className="text-white/70 text-sm leading-relaxed">Distributes weight evenly to eliminate pressure points on hips and shoulders.</p>
-                       </motion.div>
-                     </div>
+                    <h3 className="text-2xl md:text-3xl font-bold font-heading text-white mb-8 flex items-center gap-3">
+                      <CheckCircle2 className="w-8 h-8 text-[#7cb93e]" />
+                      The Dr. Well Care Advantage
+                    </h3>
+                    <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+                      <motion.div whileHover={{ y: -5 }} className="bg-white/5 p-6 border border-white/5 transition-colors hover:border-[#7cb93e]/30">
+                        <h4 className="text-[#7cb93e] font-bold mb-3 text-lg">Spinal Alignment</h4>
+                        <p className="text-white/70 text-sm leading-relaxed">Targeted zones adapt to your body weight, keeping your spine naturally aligned throughout the night.</p>
+                      </motion.div>
+                      <motion.div whileHover={{ y: -5 }} className="bg-white/5 p-6 border border-white/5 transition-colors hover:border-[#7cb93e]/30">
+                        <h4 className="text-[#7cb93e] font-bold mb-3 text-lg">Temperature Neutral</h4>
+                        <p className="text-white/70 text-sm leading-relaxed">Advanced breathable materials dissipate heat, maintaining the perfect sleep climate.</p>
+                      </motion.div>
+                      <motion.div whileHover={{ y: -5 }} className="bg-white/5 p-6 border border-white/5 transition-colors hover:border-[#7cb93e]/30">
+                        <h4 className="text-[#7cb93e] font-bold mb-3 text-lg">Pressure Relief</h4>
+                        <p className="text-white/70 text-sm leading-relaxed">Distributes weight evenly to eliminate pressure points on hips and shoulders.</p>
+                      </motion.div>
+                    </div>
                   </div>
                 </motion.div>
               </motion.div>
@@ -362,9 +362,9 @@ export default function AboutPage() {
       </section>
 
       {/* 4. Why Choose Dr Well Care (5-column Grid) */}
-      <motion.section 
-        animate={{ 
-          backgroundColor: ["#06101B", "#0B1A2A", "#06101B"] 
+      <motion.section
+        animate={{
+          backgroundColor: ["#06101B", "#0B1A2A", "#06101B"]
         }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         className="py-24 relative overflow-hidden"
@@ -374,23 +374,23 @@ export default function AboutPage() {
             <h2 className="text-2xl md:text-3xl font-bold text-white tracking-wider uppercase mb-2">
               Why Choose Dr Well Care Mattress?
             </h2>
-            <motion.div 
-              animate={{ width: ["0%", "80px", "0%"] }} 
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} 
-              className="h-1 bg-[#7cb93e] mx-auto mt-4" 
+            <motion.div
+              animate={{ width: ["0%", "80px", "0%"] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="h-1 bg-[#7cb93e] mx-auto mt-4"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
             {/* Item 1 */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1, duration: 0.5 }}
               className="flex flex-col items-center text-center group"
             >
-              <motion.div 
+              <motion.div
                 whileHover={{ rotateY: 180, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
                 className="w-28 h-28 bg-[#3b82f6]/10 rounded-full flex items-center justify-center shadow-lg mb-6 border border-white/10 group-hover:border-[#3b82f6] group-hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] cursor-pointer"
@@ -402,14 +402,14 @@ export default function AboutPage() {
             </motion.div>
 
             {/* Item 2 */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.5 }}
               className="flex flex-col items-center text-center group"
             >
-              <motion.div 
+              <motion.div
                 whileHover={{ rotateY: 180, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
                 className="w-28 h-28 bg-[#ef4444]/10 rounded-full flex items-center justify-center shadow-lg mb-6 border border-white/10 group-hover:border-[#ef4444] group-hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] cursor-pointer"
@@ -421,14 +421,14 @@ export default function AboutPage() {
             </motion.div>
 
             {/* Item 3 */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.5 }}
               className="flex flex-col items-center text-center group"
             >
-              <motion.div 
+              <motion.div
                 whileHover={{ rotateY: 180, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
                 className="w-28 h-28 bg-[#0ea5e9]/10 rounded-full flex items-center justify-center shadow-lg mb-6 border border-white/10 group-hover:border-[#0ea5e9] group-hover:shadow-[0_0_20px_rgba(14,165,233,0.3)] cursor-pointer"
@@ -440,14 +440,14 @@ export default function AboutPage() {
             </motion.div>
 
             {/* Item 4 */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4, duration: 0.5 }}
               className="flex flex-col items-center text-center group"
             >
-              <motion.div 
+              <motion.div
                 whileHover={{ rotateY: 180, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
                 className="w-28 h-28 bg-[#7cb93e]/10 rounded-full flex items-center justify-center shadow-lg mb-6 border border-white/10 group-hover:border-[#7cb93e] group-hover:shadow-[0_0_20px_rgba(124,185,62,0.3)] cursor-pointer"
@@ -459,14 +459,14 @@ export default function AboutPage() {
             </motion.div>
 
             {/* Item 5 */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5, duration: 0.5 }}
               className="flex flex-col items-center text-center group"
             >
-              <motion.div 
+              <motion.div
                 whileHover={{ rotateY: 180, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
                 className="w-28 h-28 bg-[#eab308]/10 rounded-full flex items-center justify-center shadow-lg mb-6 border border-white/10 group-hover:border-[#eab308] group-hover:shadow-[0_0_20px_rgba(234,179,8,0.3)] cursor-pointer"
@@ -482,43 +482,43 @@ export default function AboutPage() {
 
       {/* 4. Our Experts */}
       <section className="py-24 relative z-20 container mx-auto px-4">
-         <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="font-heading text-4xl sm:text-5xl font-bold text-white mb-6">Meet the <span className="text-[#7cb93e]">Experts</span></h2>
-            <p className="text-white/70 max-w-2xl mx-auto">Our multidisciplinary team combines medical expertise with cutting-edge materials science.</p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {experts.map((expert, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2, duration: 0.6 }}
-                className="bg-white/5 rounded-[2rem] border border-white/10 p-6 flex flex-col items-center text-center group hover:bg-white/10 transition-colors cursor-pointer"
-              >
-                <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#0B1A2A] to-[#1a3556] border-2 border-[#7cb93e]/30 group-hover:border-[#7cb93e] transition-colors mb-4 flex items-center justify-center shadow-lg">
-                  <Users className="w-10 h-10 text-white/50 group-hover:text-white transition-colors" />
-                </div>
-                <h4 className="text-white font-bold text-xl mb-1">{expert.name}</h4>
-                <p className="text-[#7cb93e] text-sm font-medium mb-3">{expert.role}</p>
-                <div className="flex items-center gap-1 bg-[#0B1A2A] px-3 py-1 rounded-full border border-white/10">
-                  <Award className="w-3 h-3 text-white/50" />
-                  <span className="text-white/60 text-xs">{expert.exp}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="font-heading text-4xl sm:text-5xl font-bold text-white mb-6">Meet the <span className="text-[#7cb93e]">Experts</span></h2>
+          <p className="text-white/70 max-w-2xl mx-auto">Our multidisciplinary team combines medical expertise with cutting-edge materials science.</p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {experts.map((expert, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.2, duration: 0.6 }}
+              className="bg-white/5 rounded-[2rem] border border-white/10 p-6 flex flex-col items-center text-center group hover:bg-white/10 transition-colors cursor-pointer"
+            >
+              <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#0B1A2A] to-[#1a3556] border-2 border-[#7cb93e]/30 group-hover:border-[#7cb93e] transition-colors mb-4 flex items-center justify-center shadow-lg">
+                <Users className="w-10 h-10 text-white/50 group-hover:text-white transition-colors" />
+              </div>
+              <h4 className="text-white font-bold text-xl mb-1">{expert.name}</h4>
+              <p className="text-[#7cb93e] text-sm font-medium mb-3">{expert.role}</p>
+              <div className="flex items-center gap-1 bg-[#0B1A2A] px-3 py-1 rounded-full border border-white/10">
+                <Award className="w-3 h-3 text-white/50" />
+                <span className="text-white/60 text-xs">{expert.exp}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* Marquee Footer Banner (Matches Homepage) */}
       <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#0c1824] via-[#102a43] to-[#0c1824] py-24 mt-auto flex flex-col items-center justify-center shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] border-y border-white/5">
-        
+
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
           <div className="absolute top-[-50%] left-[-20%] w-[70%] h-[150%] bg-[#0682E4] opacity-[0.07] blur-[120px] rounded-full mix-blend-screen"></div>
@@ -528,7 +528,7 @@ export default function AboutPage() {
 
         {/* Infinite Marquee */}
         <div className="flex w-full whitespace-nowrap overflow-hidden relative z-10 before:absolute before:left-0 before:top-0 before:z-20 before:h-full before:w-[100px] md:before:w-[250px] before:bg-gradient-to-r before:from-[#0c1824] before:to-transparent after:absolute after:right-0 after:top-0 after:z-20 after:h-full after:w-[100px] md:after:w-[250px] after:bg-gradient-to-l after:from-[#0c1824] after:to-transparent">
-          <motion.div 
+          <motion.div
             animate={{ x: ["0%", "-50%"] }}
             transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
             className="flex items-center min-w-max"
@@ -554,7 +554,7 @@ export default function AboutPage() {
           </motion.div>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -562,8 +562,8 @@ export default function AboutPage() {
         >
           <p className="text-white/80 max-w-lg mx-auto text-lg md:text-xl font-medium tracking-wide">Join thousands of Indians who have upgraded their sleep experience.</p>
           <Button size="lg" className="mt-8 bg-[#7cb93e] hover:bg-[#68a032] text-white rounded-full px-8 h-14 text-base font-bold shadow-[0_8px_20px_-8px_rgba(124,185,62,0.8)] transition-all hover:-translate-y-1 group">
-             Shop Collection
-             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            Shop Collection
+            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </motion.div>
       </div>

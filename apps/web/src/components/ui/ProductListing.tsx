@@ -6,19 +6,35 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
-import { 
-  Heart, 
+import {
+  Heart,
   ChevronUp,
   RotateCcw,
   CircleDot,
   ShieldCheck,
   Filter,
-  Star
+  Star,
+  ArrowRight,
+  Sparkles
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PRODUCT_CATALOG, getDeduplicatedCatalog } from '@/lib/catalog';
+import { LuxuryHRSeriesSection } from '@/components/series/LuxuryHRSeriesSection';
+import { BondedSeriesSection } from '@/components/series/BondedSeriesSection';
 
-function ProductListingContent() {
+export interface ProductListingProps {
+  showFilters?: boolean;
+  gridCols?: 2 | 3 | 4;
+  headingTitle?: string;
+  headingSubtitle?: string;
+}
+
+function ProductListingContent({
+  showFilters = true,
+  gridCols = 3,
+  headingTitle,
+  headingSubtitle
+}: ProductListingProps) {
   const searchParams = useSearchParams();
   const typeParam = searchParams ? searchParams.get('type') : null;
 
@@ -34,7 +50,7 @@ function ProductListingContent() {
         const parsed = JSON.parse(saved);
         setWishlist(parsed.map((item: any) => typeof item === 'string' ? item : item.slug));
       }
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   const toggleWishlist = (product: any, e: React.MouseEvent) => {
@@ -57,7 +73,7 @@ function ProductListingContent() {
       }
       localStorage.setItem('drwell_user_wishlist', JSON.stringify(current));
       setWishlist(current.map(item => typeof item === 'string' ? item : item.slug));
-    } catch (err) {}
+    } catch (err) { }
   };
 
   useEffect(() => {
@@ -73,13 +89,13 @@ function ProductListingContent() {
           'luxury-hr': 'Luxury HR Series',
           'budget': 'Budget Mattress'
         };
-        
+
         const staticDedupe = getDeduplicatedCatalog();
         const seenNames = new Set<string>();
         const cleanName = (name: string) => (name || 'Mattress').replace(/\s*-\s*\d+\s*(inch|")?|\s+\d+\s*(inch|")?$/i, '').replace(/\s+plus$/i, '').trim();
 
         const mapped: any[] = [];
-        
+
         staticDedupe.forEach((s, idx) => {
           seenNames.add(s.title.toLowerCase().trim());
           const priceVal = s.priceValue || 12999;
@@ -136,7 +152,7 @@ function ProductListingContent() {
           const priceVal = leastP.price || (firstV ? firstV.price : (leastP.sqftPrice ? leastP.sqftPrice * 18 : 12999));
           const origPrice = leastP.originalPrice || (firstV ? firstV.mrp : Math.round(priceVal * 1.3));
           const dbImage = leastP.images && leastP.images[0] ? (typeof leastP.images[0] === 'string' ? leastP.images[0] : leastP.images[0].url) : null;
-          const allInchDisplay = Array.from(new Set(groupProducts.map(gp => `${Math.round(getThicknessCm(gp)/2.54)}"`))).join(' / ');
+          const allInchDisplay = Array.from(new Set(groupProducts.map(gp => `${Math.round(getThicknessCm(gp) / 2.54)}"`))).join(' / ');
 
           if (seenNames.has(baseNameLower)) {
             const existingIndex = mapped.findIndex(m => m.title.toLowerCase().trim() === baseNameLower);
@@ -165,7 +181,7 @@ function ProductListingContent() {
             description: leastP.description || 'Advanced spine support and pressure relief.',
             badge: 'NEW',
             badgeColor: 'bg-[#3b82f6] text-white',
-            thickness: allInchDisplay || `${Math.round(getThicknessCm(leastP)/2.54)} Inch`,
+            thickness: allInchDisplay || `${Math.round(getThicknessCm(leastP) / 2.54)} Inch`,
             price: `₹${priceVal.toLocaleString('en-IN')}`,
             priceValue: priceVal,
             originalPrice: origPrice,
@@ -233,7 +249,7 @@ function ProductListingContent() {
         const slugLower = (p.slug || '').toLowerCase().trim();
         const typeLower = (p.type || '').toLowerCase().trim();
         const categoryLower = (p.category || '').toLowerCase().trim();
-        
+
         if (normT === 'latex') return typeLower === 'latex' || categoryLower === 'latex' || titleLower.includes('latex') || slugLower.includes('latex') || slugLower.includes('ecolatex');
         if (normT === 'memory foam') return typeLower === 'memory foam' || categoryLower === 'memory-foam' || titleLower.includes('memory') || slugLower.includes('memory');
         if (normT === 'hybrid') {
@@ -263,8 +279,8 @@ function ProductListingContent() {
         if (normF === 'medium firm') return slugLower.includes('ecolatex') || slugLower.includes('softy-bond') || slugLower.includes('mona-softy');
         return (p.firmness || '').toLowerCase().includes(normF);
       });
-      let sizeMatch = true; 
-      
+      let sizeMatch = true;
+
       return typeMatch && firmnessMatch && sizeMatch;
     });
 
@@ -298,96 +314,123 @@ function ProductListingContent() {
     return filtered;
   }, [products, selectedTypes, selectedFirmnesses, selectedSizes, sortBy]);
 
+  const isSpecialSeries = selectedTypes.includes('Bonded Series') || selectedTypes.includes('Luxury HR Series');
+  const hasFilterSidebar = showFilters && !isSpecialSeries;
+
   return (
-    <div className="container mx-auto px-4 pb-8 relative z-20 bg-white pt-10">
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        
-        {/* Mobile Filter Toggle */}
-        <div className="lg:hidden w-full flex justify-between items-center bg-gray-50 p-4 rounded-xl -mb-4 border border-gray-100">
-          <Button onClick={() => setShowMobileFilters(!showMobileFilters)} variant="outline" className="flex items-center gap-2 font-bold text-[#0B1A2A] bg-white">
-            <Filter className="w-4 h-4" />
-            {showMobileFilters ? "Hide Filters" : "Show Filters"}
-          </Button>
-          <span className="text-sm font-bold text-gray-500">{processedProducts.length} Products</span>
+    <div className="container mx-auto px-4 pb-16 relative z-20 bg-white pt-6 sm:pt-10">
+      
+      {/* Dynamic Series Dedicated Showroom Showcase (Placed at top, full width, when series is active) */}
+      {selectedTypes.includes('Bonded Series') && (
+        <div className="mb-14 w-full">
+          <BondedSeriesSection />
         </div>
+      )}
+
+      {selectedTypes.includes('Luxury HR Series') && (
+        <div className="mb-14 w-full">
+          <LuxuryHRSeriesSection />
+        </div>
+      )}
+
+      <div id="series-products" className={`flex flex-col ${hasFilterSidebar ? 'lg:flex-row' : ''} gap-8 items-start`}>
+
+        {/* Mobile Filter Toggle */}
+        {hasFilterSidebar && (
+          <div className="lg:hidden w-full flex justify-between items-center bg-gray-50 p-4 rounded-xl -mb-4 border border-gray-100">
+            <Button onClick={() => setShowMobileFilters(!showMobileFilters)} variant="outline" className="flex items-center gap-2 font-bold text-[#0B1A2A] bg-white">
+              <Filter className="w-4 h-4" />
+              {showMobileFilters ? "Hide Filters" : "Show Filters"}
+            </Button>
+            <span className="text-sm font-bold text-gray-500">{processedProducts.length} Products</span>
+          </div>
+        )}
 
         {/* Sidebar */}
-        <aside className={`w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] overflow-y-auto hide-scrollbar self-start ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
-          <div className="bg-white rounded-2xl p-6 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] mb-4">
-            <h2 className="font-heading font-bold text-lg mb-6 text-[#0B1A2A]">Filter By</h2>
-            
-            {/* Mattress Type */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4 cursor-pointer">
-                <h3 className="font-semibold text-sm">Mattress Type</h3>
-                <ChevronUp className="w-4 h-4 text-[#64748b]" />
+        {hasFilterSidebar && (
+          <aside className={`w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] overflow-y-auto hide-scrollbar self-start ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
+            <div className="bg-white rounded-2xl p-6 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] mb-4">
+              <h2 className="font-heading font-bold text-lg mb-6 text-[#0B1A2A]">Filter By</h2>
+
+              {/* Mattress Type */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-4 cursor-pointer">
+                  <h3 className="font-semibold text-sm">Mattress Type</h3>
+                  <ChevronUp className="w-4 h-4 text-[#64748b]" />
+                </div>
+                <div className="space-y-3">
+                  {typesList.map((type) => {
+                    const isActive = selectedTypes.includes(type);
+                    return (
+                      <label key={type} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleFilter(selectedTypes, setSelectedTypes, type)}>
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isActive ? 'bg-[#0B1A2A] border-[#0B1A2A]' : 'border-gray-200 group-hover:border-[#0B1A2A]'}`}>
+                          {isActive && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                        </div>
+                        <span className={`text-sm transition-colors ${isActive ? 'text-[#0B1A2A] font-semibold' : 'text-[#64748b] group-hover:text-[#0B1A2A]'}`}>{type}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="space-y-3">
-                {typesList.map((type) => {
-                  const isActive = selectedTypes.includes(type);
-                  return (
-                    <label key={type} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleFilter(selectedTypes, setSelectedTypes, type)}>
-                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isActive ? 'bg-[#0B1A2A] border-[#0B1A2A]' : 'border-gray-200 group-hover:border-[#0B1A2A]'}`}>
-                        {isActive && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                      </div>
-                      <span className={`text-sm transition-colors ${isActive ? 'text-[#0B1A2A] font-semibold' : 'text-[#64748b] group-hover:text-[#0B1A2A]'}`}>{type}</span>
-                    </label>
-                  );
-                })}
+
+              <div className="h-px bg-gray-100 w-full mb-6"></div>
+
+              {/* Firmness Level */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-4 cursor-pointer">
+                  <h3 className="font-semibold text-sm">Firmness Level</h3>
+                  <ChevronUp className="w-4 h-4 text-[#64748b]" />
+                </div>
+                <div className="space-y-3">
+                  {firmnessList.map((level) => {
+                    const isActive = selectedFirmnesses.includes(level);
+                    return (
+                      <label key={level} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleFilter(selectedFirmnesses, setSelectedFirmnesses, level)}>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${isActive ? 'border-[#0B1A2A]' : 'border-gray-200 group-hover:border-[#0B1A2A]'}`}>
+                          {isActive && <div className="w-2 h-2 rounded-full bg-[#0B1A2A]"></div>}
+                        </div>
+                        <span className={`text-sm transition-colors ${isActive ? 'text-[#0B1A2A] font-semibold' : 'text-[#64748b] group-hover:text-[#0B1A2A]'}`}>{level}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
+
+              <Button onClick={clearFilters} variant="outline" className="w-full flex items-center justify-center gap-2 border-gray-200 text-[#0B1A2A] hover:bg-gray-50 rounded-lg">
+                <RotateCcw className="w-4 h-4 text-[#7cb93e]" />
+                Clear All Filters
+              </Button>
             </div>
-            
-            <div className="h-px bg-gray-100 w-full mb-6"></div>
-
-            {/* Firmness Level */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4 cursor-pointer">
-                <h3 className="font-semibold text-sm">Firmness Level</h3>
-                <ChevronUp className="w-4 h-4 text-[#64748b]" />
-              </div>
-              <div className="space-y-3">
-                {firmnessList.map((level) => {
-                  const isActive = selectedFirmnesses.includes(level);
-                  return (
-                    <label key={level} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleFilter(selectedFirmnesses, setSelectedFirmnesses, level)}>
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${isActive ? 'border-[#0B1A2A]' : 'border-gray-200 group-hover:border-[#0B1A2A]'}`}>
-                        {isActive && <div className="w-2 h-2 rounded-full bg-[#0B1A2A]"></div>}
-                      </div>
-                      <span className={`text-sm transition-colors ${isActive ? 'text-[#0B1A2A] font-semibold' : 'text-[#64748b] group-hover:text-[#0B1A2A]'}`}>{level}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-
-
-            <Button onClick={clearFilters} variant="outline" className="w-full flex items-center justify-center gap-2 border-gray-200 text-[#0B1A2A] hover:bg-gray-50 rounded-lg">
-              <RotateCcw className="w-4 h-4 text-[#7cb93e]" />
-              Clear All Filters
-            </Button>
-          </div>
-        </aside>
+          </aside>
+        )}
 
         {/* Main Content */}
-        <main className="flex-grow">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4 border-b border-gray-100 pb-6">
+        <main className={hasFilterSidebar ? "flex-grow min-w-0" : "w-full"}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4 border-b border-gray-100 pb-6">
             <div>
-              <h2 className="font-heading text-4xl font-bold text-[#0B1A2A] mb-2 tracking-tight">
-                {selectedTypes.includes('Bonded Series') ? 'Bonded Series Collection' : selectedTypes.includes('Luxury HR Series') ? 'Luxury HR Series Collection' : 'Our Collections'}
+              {isSpecialSeries && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-[#0682E4] text-xs font-bold uppercase tracking-wider mb-2">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {selectedTypes.includes('Bonded Series') ? 'Heavy Weight Support Range' : 'Showroom Flagship Collection'}
+                </div>
+              )}
+              <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#0B1A2A] tracking-tight">
+                {headingTitle || (selectedTypes.includes('Bonded Series') ? 'Bonded Series Models' : selectedTypes.includes('Luxury HR Series') ? 'Luxury HR Series Models' : 'Our Collections')}
               </h2>
-              <p className="text-[#64748b] text-sm md:text-base font-medium max-w-xl">
-                {selectedTypes.includes('Bonded Series') 
-                  ? 'Specially designed for heavy weight sleepers above 80 kg, engineered with High-Density Bonded Foam.'
+              <p className="text-[#64748b] text-sm md:text-base font-medium max-w-xl mt-1">
+                {headingSubtitle || (selectedTypes.includes('Bonded Series')
+                  ? 'Specially designed for heavy weight sleepers above 80 kg, engineered with High-Density Bonded Foam for zero mattress sagging.'
                   : selectedTypes.includes('Luxury HR Series')
-                  ? 'Experience luxury and choose your comfort with our flagship high resilience & organic variants.'
-                  : 'Explore our meticulously crafted range of mattresses, designed for the ultimate restorative sleep experience.'}
+                    ? 'Experience luxury and choose your comfort with our flagship high resilience & organic variants.'
+                    : 'Explore our meticulously crafted range of mattresses, designed for the ultimate restorative sleep experience.')}
               </p>
             </div>
-            <div className="flex items-center gap-2 mt-4 sm:mt-0 shrink-0">
-              <span className="text-sm font-semibold text-[#64748b]">Sort by:</span>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-2 rounded-xl">
+                {processedProducts.length} Models
+              </span>
               <div className="relative">
-                <select 
+                <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm font-bold text-[#0B1A2A] focus:outline-none focus:ring-2 focus:ring-[#7cb93e] focus:border-transparent transition-shadow cursor-pointer shadow-sm"
@@ -402,132 +445,102 @@ function ProductListingContent() {
             </div>
           </div>
 
-          {/* Dynamic Series Showcase Banner */}
-          {selectedTypes.includes('Bonded Series') && (
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8 p-6 md:p-8 bg-gradient-to-r from-[#0B1A2A] via-[#0f253d] to-[#0B1A2A] rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-[#0682E4]/40">
-              <div className="space-y-2 text-center md:text-left">
-                <div className="inline-block px-3 py-1 rounded-full bg-[#0682E4]/30 text-[#0682E4] font-extrabold text-xs uppercase tracking-wider border border-[#0682E4]/40">Heavy Weight Ortho Support</div>
-                <h3 className="text-2xl md:text-3xl font-extrabold text-white">BONDED SERIES</h3>
-                <p className="text-white/80 text-sm md:text-base max-w-xl">Best Mattress for People Above 80 kg with strong, durable, long-lasting spinal support and zero sagging.</p>
-              </div>
-              <div className="flex flex-wrap gap-2 justify-center shrink-0">
-                <span className="px-3 py-1.5 bg-[#0682E4]/20 text-white rounded-xl text-xs font-bold border border-[#0682E4]/30">✔️ Strong Support</span>
-                <span className="px-3 py-1.5 bg-[#0682E4]/20 text-white rounded-xl text-xs font-bold border border-[#0682E4]/30">✔️ 80kg+ Support</span>
-                <span className="px-3 py-1.5 bg-[#0682E4]/20 text-white rounded-xl text-xs font-bold border border-[#0682E4]/30">✔️ Ortho Alignment</span>
-              </div>
-            </motion.div>
-          )}
-
-          {selectedTypes.includes('Luxury HR Series') && (
-            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8 p-6 md:p-8 bg-gradient-to-r from-[#0f172a] via-[#1a2f1c] to-[#0f172a] rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-[#6CB50E]/40">
-              <div className="space-y-2 text-center md:text-left">
-                <div className="inline-block px-3 py-1 rounded-full bg-[#6CB50E]/30 text-[#6CB50E] font-extrabold text-xs uppercase tracking-wider border border-[#6CB50E]/40">Showroom Flagship Collection</div>
-                <h3 className="text-2xl md:text-3xl font-extrabold text-white">LUXURY HR SERIES</h3>
-                <p className="text-white/80 text-sm md:text-base max-w-xl">Experience Luxury. Choose Your Comfort. Crafted with premium high resilience foam, natural latex, and independent pocket springs.</p>
-              </div>
-              <div className="flex flex-wrap gap-2 justify-center shrink-0">
-                <span className="px-3 py-1.5 bg-[#6CB50E]/20 text-white rounded-xl text-xs font-bold border border-[#6CB50E]/30">✨ HR Foam</span>
-                <span className="px-3 py-1.5 bg-[#6CB50E]/20 text-white rounded-xl text-xs font-bold border border-[#6CB50E]/30">✨ Memory Foam</span>
-                <span className="px-3 py-1.5 bg-[#6CB50E]/20 text-white rounded-xl text-xs font-bold border border-[#6CB50E]/30">✨ Natural Latex</span>
-                <span className="px-3 py-1.5 bg-[#6CB50E]/20 text-white rounded-xl text-xs font-bold border border-[#6CB50E]/30">✨ Pocket Spring</span>
-              </div>
-            </motion.div>
-          )}
-
           {processedProducts.length === 0 ? (
             <div className="py-20 text-center text-gray-500 font-medium">No products match your selected filters.</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-8">
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${!hasFilterSidebar || gridCols === 3 ? 'lg:grid-cols-3' : 'xl:grid-cols-2'} gap-8`}>
               {processedProducts.map((product, index) => (
-                <motion.div 
-                  key={product.id} 
+                <motion.div
+                  key={product.id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.5, delay: (index % 4) * 0.1 }}
-                  className="bg-white rounded-[2rem] p-5 flex flex-col shadow-[0_4px_20px_-10px_rgba(0,0,0,0.08)] group hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] transition-all duration-500 border border-gray-100 hover:border-transparent hover:-translate-y-1"
+                  className="bg-white rounded-3xl p-5 flex flex-col shadow-[0_4px_20px_-10px_rgba(0,0,0,0.06)] group hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.12)] transition-all duration-300 border border-gray-100 hover:border-gray-200 hover:-translate-y-1"
                 >
-                  
-                  {/* Image & Badges */}
-                  <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#f8fafc] mb-6 shadow-inner">
-                    <Image src={product.image} alt={product.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
 
-                    <button 
-                      onClick={(e) => toggleWishlist(product, e)}
-                      className={`absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all transform active:scale-90 ${
-                        wishlist.includes(product.slug) ? 'text-red-500' : 'text-[#64748b] hover:text-red-500'
-                      }`}
-                    >
-                      <Heart className={`w-4 h-4 ${wishlist.includes(product.slug) ? 'fill-red-500 text-red-500' : ''}`} strokeWidth={2.5} />
-                    </button>
-                  </div>
-                  
-                  {/* Content */}
-                  <div className="flex-grow flex flex-col px-2 pb-2">
-                    <div className="flex justify-between items-start mb-2 gap-4">
-                      <div>
-                        <h3 className="font-heading font-extrabold text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#0682E4] to-[#7cb93e] leading-tight group-hover:scale-[1.02] transition-transform origin-left">{product.title}</h3>
-                        <div className="flex items-center gap-1.5 mt-1.5">
-                          <div className="inline-flex items-center gap-1 bg-[#f8f9fa] px-2.5 py-0.5 rounded-full border border-gray-200/80">
-                            <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
-                            <span className="text-xs font-bold text-[#0B1A2A]">{product.rating || 4.8}</span>
-                            <span className="text-[11px] text-[#64748b]">({(product.reviews || 1240).toLocaleString('en-IN')} reviews)</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="text-[10px] uppercase font-bold tracking-widest text-[#64748b] block mb-0.5">From</span>
-                        <div className="flex items-baseline justify-end gap-1.5">
-                          {product.originalPrice && (
-                            <span className="text-xs font-semibold text-gray-400 line-through">
-                              ₹{product.originalPrice.toLocaleString('en-IN')}
-                            </span>
-                          )}
-                          <span className="text-xl font-black text-[#0B1A2A]">{product.price}</span>
-                        </div>
-                      </div>
+                    {/* Image & Wishlist */}
+                    <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#f8fafc] mb-4">
+                      <Image src={product.image} alt={product.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out" />
+
+                      <button
+                        onClick={(e) => toggleWishlist(product, e)}
+                      className={`absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all transform active:scale-90 ${wishlist.includes(product.slug) ? 'text-red-500' : 'text-[#64748b] hover:text-red-500'
+                          }`}
+                      >
+                        <Heart className={`w-4 h-4 ${wishlist.includes(product.slug) ? 'fill-red-500 text-red-500' : ''}`} strokeWidth={2} />
+                      </button>
                     </div>
-                    <p className="text-[#7cb93e] text-xs font-bold uppercase tracking-wider mb-3">{product.subtitle}</p>
-                    
-                    <div className="flex items-center gap-5 mb-6 text-xs text-[#475569] font-bold mt-auto bg-gray-50/80 p-3 rounded-xl border border-gray-100 flex-wrap">
-                      <div className="flex items-center gap-2 bg-[#7cb93e]/15 text-[#5a8b2a] px-3 py-1.5 rounded-lg border border-[#7cb93e]/30 shadow-sm">
-                        <CircleDot className="w-4 h-4 text-[#5a8b2a]" />
-                        Thickness: <span className="text-[#3b5c1c]">{product.thickness}</span>
-                      </div>
-                      <div className="w-px h-4 bg-gray-300 hidden sm:block"></div>
-                      <div className="flex items-center gap-2 text-[#0B1A2A]">
-                        <ShieldCheck className="w-4 h-4 text-[#0B1A2A]" />
-                        {product.warranty || 10}-Year Warranty
-                      </div>
-                    </div>
-                    
-                    <Link href={`/product/${product.slug}`} className="mt-auto block">
-                      <Button className="w-full bg-[#0682E4] hover:bg-[#7cb93e] text-white rounded-xl py-6 font-bold text-[15px] shadow-[0_4px_14px_0_rgba(6,130,228,0.25)] hover:shadow-[0_6px_20px_rgba(124,185,62,0.3)] transition-all duration-300 relative overflow-hidden group/btn">
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                          View Details
-                          <svg className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                          </svg>
-                        </span>
-                      </Button>
-                    </Link>
-                  </div>
-                  
-                </motion.div>
+
+                    {/* Content */}
+                              <div className="flex-grow flex flex-col justify-between">
+                                <div>
+                                  {/* Title & Price Header */}
+                                  <div className="flex justify-between items-start gap-3 mb-3">
+                                    <div className="min-w-0">
+                                      <h3 className="font-heading font-extrabold text-xl text-[#0B1A2A] group-hover:text-[#0682E4] transition-colors leading-snug truncate">{product.title}</h3>
+                                      <div className="flex items-center gap-1.5 mt-1">
+                                        <div className="inline-flex items-center gap-1 bg-amber-50/80 px-2 py-0.5 rounded-full border border-amber-200/60">
+                                          <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
+                                          <span className="text-xs font-bold text-[#0B1A2A]">{product.rating || 4.8}</span>
+                                          <span className="text-[11px] text-[#64748b]">({(product.reviews || 1240).toLocaleString('en-IN')})</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                      {/* Price block */}
+                                      <div className="text-right shrink-0">
+                                        <span className="text-[10px] uppercase font-bold tracking-wider text-[#64748b] block">From</span>
+                                        <div className="flex items-baseline justify-end gap-1.5">
+                                          {product.originalPrice && (
+                                            <span className="text-xs font-semibold text-gray-400 line-through">
+                                              ₹{Number(product.originalPrice).toLocaleString('en-IN')}
+                                            </span>
+                                          )}
+                                          <span className="text-xl font-black text-[#0B1A2A]">{product.price}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                      {/* Minimal Specs Row */}
+                                      <div className="flex items-center gap-2 mb-5 flex-wrap">
+                                        {product.thickness && (
+                                          <span className="inline-flex items-center gap-1.5 bg-gray-50 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200/70">
+                                            <CircleDot className="w-3.5 h-3.5 text-[#0682E4]" />
+                                            {product.thickness}
+                                          </span>
+                                        )}
+                                        <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200/60">
+                                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                                          {product.warranty || 10}-Year Warranty
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                        {/* Action Button */}
+                                        <Link href={`/product/${product.slug}`} className="block mt-auto">
+                                          <Button className="w-full bg-[#0682E4] hover:bg-[#0570c7] text-white rounded-xl h-12 font-bold text-sm shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 group/btn">
+                                            <span>View Details</span>
+                                            <ArrowRight className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" />
+                                          </Button>
+                                        </Link>
+                                      </div>
+
+                                    </motion.div>
               ))}
-            </div>
+                                  </div>
           )}
-        </main>
-      </div>
-    </div>
-  );
+                                </main>
+                              </div>
+                            </div>
+                            );
 }
 
-export function ProductListing() {
+                            export function ProductListing(props: ProductListingProps = { }) {
   return (
-    <Suspense fallback={<div className="py-20 text-center text-gray-500 font-bold text-lg">Loading collection...</div>}>
-      <ProductListingContent />
-    </Suspense>
-  );
+                            <Suspense fallback={<div className="py-20 text-center text-gray-500 font-bold text-lg">Loading collection...</div>}>
+                              <ProductListingContent {...props} />
+                            </Suspense>
+                            );
 }
 

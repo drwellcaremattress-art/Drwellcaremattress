@@ -19,7 +19,7 @@ interface PageProps {
 export default async function ProductPage({ params }: PageProps) {
   // Use params.slug directly in Next.js 14 App Router
   const { slug } = params;
-  
+
   const productCatalog = [...PRODUCT_CATALOG];
   let dbProduct: any = null;
   let allDbProducts: any[] = [];
@@ -50,6 +50,29 @@ export default async function ProductPage({ params }: PageProps) {
     const targetBase = cleanName(dbProduct.name);
     const siblingProducts = allDbProducts.filter(p => cleanName(p.name) === targetBase);
 
+    // 1. Find matching catalog product FIRST (must be before familyVideoUrl/familyColors use it)
+    const matchInCatalog = productCatalog.find(p => p.slug === dbProduct.slug || cleanName(p.name) === targetBase);
+
+    // Family-level media sharing: if any sibling in the mattress family has video or colors, inherit it!
+    const familyVideoUrl =
+      dbProduct.videoUrl ||
+      siblingProducts.find((p: any) => p.videoUrl)?.videoUrl ||
+      matchInCatalog?.videoUrl ||
+      null;
+
+    const rawFamilyColors =
+      dbProduct.colors && dbProduct.colors.length > 0
+        ? dbProduct.colors
+        : (siblingProducts.find((p: any) => p.colors && p.colors.length > 0)?.colors || null);
+
+    const familyColors = rawFamilyColors && rawFamilyColors.length > 0
+      ? rawFamilyColors.map((c: any) => ({
+          name: c.name || 'Color',
+          hex: c.hex || '#FFFFFF',
+          image: c.image || '',
+        }))
+      : null;
+
     const getInchVal = (tCm?: number, tStr?: string) => {
       if (tStr) {
         const m = tStr.match(/(\d+)\s*inch/i);
@@ -61,8 +84,7 @@ export default async function ProductPage({ params }: PageProps) {
 
     const thicknessMap = new Map<number, any>();
 
-    // 1. Seed from matching catalog product if available
-    const matchInCatalog = productCatalog.find(p => p.slug === dbProduct.slug || cleanName(p.name) === targetBase);
+    // Seed from matching catalog product if available
     if (matchInCatalog && matchInCatalog.thicknessVariants) {
       matchInCatalog.thicknessVariants.forEach((cv: any) => {
         const inch = getInchVal(cv.thickness_cm, cv.thickness);
@@ -94,14 +116,18 @@ export default async function ProductPage({ params }: PageProps) {
         image: spImages[0] || undefined,
         images: spImages.length > 0 ? spImages : undefined,
         layersImage: sp.layersImage || undefined,
-        slug: dbProduct.slug, // Keep slug consistent to prevent navigation resets
+        videoUrl: sp.videoUrl || familyVideoUrl,
+        colors: (sp.colors && sp.colors.length > 0)
+          ? sp.colors.map((c: any) => ({ name: c.name || 'Color', hex: c.hex || '#FFFFFF', image: c.image || '' }))
+          : familyColors,
+        slug: sp.slug || dbProduct.slug,
         warranty: sp.warranty_years || sp.warranty || 10,
         warranty_years: sp.warranty_years || sp.warranty || 10
       });
     });
 
     const dbThicknessVariants = Array.from(thicknessMap.values()).sort((a: any, b: any) => a.thickness_cm - b.thickness_cm);
-    
+
     // Primary display defaults to the LEAST THICKNESS variant (index 0)
     const leastVariant = dbThicknessVariants[0] || null;
     const defaultImages = leastVariant?.images || (dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images.map((i: any) => typeof i === 'string' ? i : i.url) : ["/images/products/ecolatex-6.jpeg"]);
@@ -123,7 +149,14 @@ export default async function ProductPage({ params }: PageProps) {
       warranty: dbProduct.warranty_years || dbProduct.warranty || 10,
       features: dbProduct.benefits || ['Advanced spine support', 'Pressure relief', 'Eco-friendly materials'],
       images: defaultImages,
+      videoUrl: familyVideoUrl,
       layersImage: dbProduct.layersImage || null,
+      viewCount: dbProduct.viewCount || 1,
+      colors: familyColors && familyColors.length > 0 ? familyColors : [
+        { name: 'White', hex: '#F8FAFC', image: defaultImages[0] || '' },
+        { name: 'Blue', hex: '#0682E4', image: '' },
+        { name: 'Gray', hex: '#64748B', image: '' },
+      ],
       thicknessVariants: dbThicknessVariants.length > 0 ? dbThicknessVariants : undefined,
       // Pass full variants so ProductInfo can read custom subDimensions from the admin
       // Need to stringify/parse to strip out Mongoose ObjectIds and internal properties
@@ -136,6 +169,11 @@ export default async function ProductPage({ params }: PageProps) {
       originalPrice: foundProduct.originalPrice || Math.round((foundProduct.priceValue || 12999) * 1.3),
       price: foundProduct.priceValue || 12999,
       warranty: foundProduct.warranty_years || foundProduct.warranty || 10,
+      colors: (foundProduct as any).colors || [
+        { name: 'White', hex: '#F8FAFC', image: (foundProduct.images && foundProduct.images[0]) || '' },
+        { name: 'Blue', hex: '#0682E4', image: '' },
+        { name: 'Gray', hex: '#64748B', image: '' },
+      ],
       thicknessVariants: foundProduct.thicknessVariants
     }) : null;
   }
@@ -146,7 +184,7 @@ export default async function ProductPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-16">
-      
+
       {/* Top Section: Breadcrumb + Gallery + Product Info */}
       <div className="container mx-auto px-4 lg:px-8">
         {/* Breadcrumbs */}
@@ -163,7 +201,7 @@ export default async function ProductPage({ params }: PageProps) {
       </div>
 
 
-      
+
       {/* RELATED PRODUCTS SECTION */}
       <section className="container mx-auto px-4 lg:px-8 pt-20 pb-10 border-t border-gray-100">
         <div className="flex items-center justify-between mb-10">
@@ -172,7 +210,7 @@ export default async function ProductPage({ params }: PageProps) {
             View All Products &rarr;
           </Link>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {mergedCatalog.filter(p => p.slug !== slug).slice(0, 4).map((relatedProduct, i) => {
             return (
@@ -184,14 +222,14 @@ export default async function ProductPage({ params }: PageProps) {
                     <Heart className="w-4 h-4 text-[#64748b]" />
                   </button>
                 </div>
-                
+
                 {/* Content */}
                 <div className="flex-grow flex flex-col">
                   <h3 className="font-heading font-extrabold text-lg text-transparent bg-clip-text bg-gradient-to-r from-[#0682E4] to-[#7cb93e] mb-1">{relatedProduct.title}</h3>
                   <p className="text-blue-500 text-xs font-medium mb-3">
                     {relatedProduct.subtitle}
                   </p>
-                  
+
                   <div className="flex flex-col gap-3 mt-auto pt-4">
                     <div className="flex items-center gap-1.5 text-xs text-[#64748b] font-semibold">
                       <ShieldCheck className="w-3.5 h-3.5 text-[#7cb93e]" />
@@ -220,7 +258,7 @@ export default async function ProductPage({ params }: PageProps) {
           })}
         </div>
       </section>
-      
+
     </div>
   );
 }

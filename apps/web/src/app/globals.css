@@ -99,6 +99,36 @@
   }
 }
 
+/* ===== Seamless Infinite Marquee Keyframes ===== */
+@keyframes marqueeLeft {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marqueeRight {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.anim-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marqueeLeft 32s linear infinite;
+  will-change: transform;
+}
+
+.anim-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marqueeRight 32s linear infinite;
+  will-change: transform;
+}
+
+.anim-marquee-left:hover,
+.anim-marquee-right:hover {
+  animation-play-state: paused;
+}
+
 .anim-fade-in-up {
   animation: fadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -131,4 +161,18 @@
 .anim-scale-in,
 .anim-slide-in-right {
   opacity: 0;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .anim-fade-in-up,
+  .anim-fade-in-left,
+  .anim-scale-in,
+  .anim-slide-in-right {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

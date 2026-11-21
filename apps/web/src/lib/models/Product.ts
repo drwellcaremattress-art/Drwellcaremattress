@@ -8,6 +8,7 @@ export interface IProduct extends Document {
   description: string;
   benefits: string[];
   images: { url: string; alt: string; position: number }[];
+  videoUrl?: string;
   variants: {
     size: string;
     dimensions: string;
@@ -25,6 +26,11 @@ export interface IProduct extends Document {
   thickness?: string;
   trialNights: number;
   layersImage?: string;
+  colors?: {
+    name: string;
+    hex?: string;
+    image?: string;
+  }[];
   ratingAvg: number;
   ratingCount: number;
   seo: {
@@ -32,6 +38,7 @@ export interface IProduct extends Document {
     description: string;
     keywords: string;
   };
+  viewCount?: number;
   status: string;
 }
 
@@ -53,6 +60,7 @@ const ProductSchema: Schema = new Schema(
         position: { type: Number },
       },
     ],
+    videoUrl: { type: String, default: '' },
     variants: [
       {
         size: { type: String, required: true },
@@ -81,6 +89,13 @@ const ProductSchema: Schema = new Schema(
     sqftPrice: { type: Number, default: 546 },
     thickness: { type: String, default: '6 Inch' },
     layersImage: { type: String },
+    colors: [
+      {
+        name: { type: String, required: true },
+        hex: { type: String, default: '#FFFFFF' },
+        image: { type: String, default: '' },
+      },
+    ],
     trialNights: { type: Number, default: 100 },
     ratingAvg: { type: Number, default: 0 },
     ratingCount: { type: Number, default: 0 },
@@ -89,6 +104,7 @@ const ProductSchema: Schema = new Schema(
       description: String,
       keywords: String,
     },
+    viewCount: { type: Number, default: 0 },
     status: {
       type: String,
       enum: ['active', 'draft'],

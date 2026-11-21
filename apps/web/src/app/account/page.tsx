@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { 
   Package, MapPin, Heart, User, LogOut, ChevronRight, ShieldCheck, 
   Award, Sparkles, CheckCircle, Clock, Truck, FileText, Plus, 
-  Edit3, Trash2, Phone, Mail, Calendar, Activity, Star, Moon, ArrowUpRight
+  Edit3, Trash2, Phone, Mail, Calendar, Activity, Star, Moon, ArrowUpRight,
+  ExternalLink, Copy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import axios from 'axios';
+import OrderReceiptModal from '@/components/orders/OrderReceiptModal';
 
 interface UserProfile {
   fullName: string;
@@ -64,6 +66,8 @@ export default function AccountPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newAddr, setNewAddr] = useState({ tag: 'Home' as const, name: '', street: '', city: '', state: '', pincode: '', phone: '', isDefault: false });
   const [trackingOrder, setTrackingOrder] = useState<any | null>(null);
+  const [selectedReceiptOrder, setSelectedReceiptOrder] = useState<any | null>(null);
+  const [copiedTrackingId, setCopiedTrackingId] = useState<string | null>(null);
 
   const formatDisplayName = (email?: string | null, name?: string | null) => {
     if (!email) return name || 'VIP Customer';
@@ -182,13 +186,18 @@ export default function AccountPage() {
               const isShipped = isOutForDelivery || currentStatus === 'Shipped';
               const isConfirmed = isShipped || currentStatus === 'Confirmed' || currentStatus === 'Processing';
 
+              const courierName = o.courier || 'Blue Dart Express';
+              const dispatchLabel = o.trackingId
+                ? `Dispatched via ${courierName} (AWB: ${o.trackingId})`
+                : `Dispatched via ${courierName}`;
+
               const steps = currentStatus === 'Cancelled' ? [
                 { label: 'Order Placed', time: 'Completed', done: true },
                 { label: 'Order Cancelled', time: 'Cancelled', done: true },
               ] : [
                 { label: 'Order Confirmed', time: 'Completed', done: isConfirmed },
                 { label: 'Manufactured & QC Passed (Pune Plant)', time: isConfirmed ? 'Completed' : 'Pending', done: isConfirmed },
-                { label: 'Dispatched via BlueDart Express', time: isShipped ? 'In Transit' : 'Pending', done: isShipped },
+                { label: dispatchLabel, time: isShipped ? (o.trackingId ? `AWB: ${o.trackingId}` : 'In Transit') : 'Pending', done: isShipped },
                 { label: 'Out for Delivery (Local Hub)', time: isDelivered ? 'Delivered' : isOutForDelivery ? 'Out for Delivery' : 'Expected Soon', done: isOutForDelivery },
               ];
 
@@ -196,17 +205,30 @@ export default function AccountPage() {
                 _id: o._id,
                 id: o.orderNumber?.replace('DRWELL-ORD-', 'DW-') || `DW-${o._id?.toString().slice(-6)}`,
                 rawNumber: o.orderNumber,
+                orderNumber: o.orderNumber,
                 date: new Date(o.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
                 total: o.total || o.totalPrice || 0,
+                totalPrice: o.total || o.totalPrice || 0,
+                subtotal: o.subtotal || o.total || o.totalPrice || 0,
                 status: currentStatus,
+                orderStatus: currentStatus,
                 statusColor,
                 itemTitle: o.items?.[0]?.name || 'Dr.Well Care Orthopaedic Series',
-                size: o.items?.[0]?.variantSku || 'Standard Size',
+                size: o.items?.[0]?.variantSku || o.items?.[0]?.dimensions || 'Standard Size',
                 qty: o.items?.reduce((s: number, i: any) => s + (i.qty || 1), 0) || 1,
                 payment: o.paymentMethod || o.paymentGateway || 'Online Paid',
+                paymentMethod: o.paymentMethod || o.paymentGateway || 'Online Paid',
+                isPaid: o.isPaid || o.paymentStatus === 'paid' || false,
                 warrantyId: `WAR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
                 steps,
                 items: o.items || o.orderItems || [],
+                trackingId: o.trackingId || '',
+                courier: o.courier || '',
+                trackingUrl: o.trackingUrl || '',
+                shippingAddress: o.shippingAddress,
+                customerName: o.customerName || (o.shippingAddress?.firstName ? `${o.shippingAddress.firstName} ${o.shippingAddress.lastName || ''}`.trim() : ''),
+                customerPhone: o.customerPhone || o.shippingAddress?.phone || '',
+                customerEmail: o.userEmail || o.customerEmail || o.shippingAddress?.email || '',
               };
             });
 
@@ -793,19 +815,25 @@ export default function AccountPage() {
                             <p className="text-xs text-emerald-600 font-bold mt-1 flex items-center gap-1">
                               <ShieldCheck className="w-3.5 h-3.5" /> Warranty Code: {order.warrantyId}
                             </p>
+                            {order.trackingId && (
+                              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#0682E4] text-xs font-bold border border-blue-100 dark:border-blue-900/50 mt-1">
+                                <Truck size={13} />
+                                <span>{order.courier || 'Blue Dart'}: <span className="font-mono">{order.trackingId}</span></span>
+                              </div>
+                            )}
                           </div>
 
                           <div className="flex items-center gap-3 self-end sm:self-center">
                             <Button
                               variant="outline"
-                              onClick={() => alert(`Downloading Tax Invoice for Order #${order.id}. Total: ₹${Number(order.total).toLocaleString('en-IN')}`)}
-                              className="rounded-xl text-xs font-bold border-slate-300 dark:border-slate-700 flex items-center gap-1.5"
+                              onClick={() => setSelectedReceiptOrder(order)}
+                              className="rounded-xl text-xs font-bold border-slate-300 dark:border-slate-700 flex items-center gap-1.5 cursor-pointer"
                             >
                               <FileText className="w-4 h-4 text-slate-500" /> Invoice
                             </Button>
                             <Button
                               onClick={() => setTrackingOrder(order)}
-                              className="bg-[#0B1A2A] hover:bg-[#162a42] text-white rounded-xl text-xs font-bold px-5 py-2.5 flex items-center gap-1.5 shadow-sm"
+                              className="bg-[#0B1A2A] hover:bg-[#162a42] text-white rounded-xl text-xs font-bold px-5 py-2.5 flex items-center gap-1.5 shadow-sm cursor-pointer"
                             >
                               <Truck className="w-4 h-4 text-[#7cb93e]" /> Track Live
                             </Button>
@@ -1105,9 +1133,70 @@ export default function AccountPage() {
                   </button>
                 </div>
 
-                <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200/60 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  <strong>Item:</strong> {trackingOrder.itemTitle}<br />
-                  <strong>Current Status:</strong> <span className="text-[#0682E4] font-bold">{trackingOrder.status}</span>
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200/60 text-xs space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-medium">Item:</span>
+                    <span className="font-extrabold text-[#0B1A2A] dark:text-white truncate max-w-[200px]">{trackingOrder.itemTitle}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-medium">Status:</span>
+                    <span className="text-[#0682E4] font-black">{trackingOrder.status}</span>
+                  </div>
+
+                  {/* Live Courier & AWB Code Box */}
+                  {trackingOrder.trackingId ? (
+                    <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500 font-medium">Courier:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{trackingOrder.courier || 'Blue Dart Express'}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500 font-medium">Tracking Code / AWB:</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-extrabold text-[#0B1A2A] dark:text-white bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                            {trackingOrder.trackingId}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(trackingOrder.trackingId);
+                              setCopiedTrackingId(trackingOrder.id);
+                              setTimeout(() => setCopiedTrackingId(null), 2000);
+                            }}
+                            className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                            title="Copy AWB"
+                          >
+                            {copiedTrackingId === trackingOrder.id ? (
+                              <CheckCircle size={14} className="text-emerald-500" />
+                            ) : (
+                              <Copy size={14} />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Direct Courier Website Link */}
+                      <div className="pt-1">
+                        <a
+                          href={
+                            trackingOrder.trackingUrl ||
+                            (trackingOrder.courier?.toLowerCase().includes('delhivery')
+                              ? `https://www.delhivery.com/track/package/${trackingOrder.trackingId}`
+                              : `https://www.bluedart.com/tracking`)
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-full py-2 px-3 bg-[#0682E4] hover:bg-[#0571c7] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                        >
+                          <ExternalLink size={13} /> Track on Courier Website
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="pt-1 text-[11px] text-slate-400 font-medium italic">
+                      Tracking code will appear here as soon as our warehouse team dispatches your package.
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-4 pl-2">
@@ -1131,8 +1220,17 @@ export default function AccountPage() {
                   ))}
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-                  <Button onClick={() => setTrackingOrder(null)} className="bg-[#0B1A2A] text-white rounded-xl font-bold text-xs px-6 py-2.5">
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedReceiptOrder(trackingOrder);
+                    }}
+                    className="rounded-xl text-xs font-bold border-slate-300 dark:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <FileText className="w-4 h-4 text-slate-500" /> Download Invoice
+                  </Button>
+                  <Button onClick={() => setTrackingOrder(null)} className="bg-[#0B1A2A] text-white rounded-xl font-bold text-xs px-6 py-2.5 cursor-pointer">
                     Close Tracker
                   </Button>
                 </div>
@@ -1261,6 +1359,13 @@ export default function AccountPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ─── Modal: Official Tax Receipt & Invoice ───────────────────────── */}
+        <OrderReceiptModal
+          order={selectedReceiptOrder}
+          open={Boolean(selectedReceiptOrder)}
+          onClose={() => setSelectedReceiptOrder(null)}
+        />
 
       </div>
     </div>
