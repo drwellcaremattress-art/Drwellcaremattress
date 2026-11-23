@@ -127,34 +127,34 @@ export function FestivalSaleBadge({
       <div className="absolute -top-1 -left-2 text-yellow-300 text-[10px] animate-pulse pointer-events-none">✦</div>
 
       {/* Main Circular Seal Container */}
-      <div className="relative w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center">
+      <div className="relative w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center">
         {/* Golden Sunburst Scalloped Outer Edge */}
         <SunburstFrame />
 
         {/* Inner Ivory / Cream Medallion */}
-        <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-b from-[#FFFDF2] via-[#FFFBEB] to-[#FEF3C7] border-2 border-amber-300 shadow-[inset_0_2px_8px_rgba(245,158,11,0.25)] flex flex-col items-center justify-center p-2 text-center z-10 overflow-hidden">
+        <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-b from-[#FFFDF2] via-[#FFFBEB] to-[#FEF3C7] border-2 border-amber-300 shadow-[inset_0_2px_8px_rgba(245,158,11,0.25)] flex flex-col items-center justify-center p-1.5 sm:p-2 text-center z-10 overflow-hidden">
           
           {/* Top Tag: e.g. "— BIG —" */}
           {topTag && (
-            <div className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#991B1B] uppercase leading-none mb-0.5 max-w-[90px] truncate">
+            <div className="text-[8px] sm:text-[10px] font-black tracking-widest text-[#991B1B] uppercase leading-none mb-0.5 max-w-[80px] sm:max-w-[90px] truncate">
               {topTag}
             </div>
           )}
 
           {/* Middle: e.g. "Festival" in elegant serif font */}
           {middleText && (
-            <div className="font-serif italic text-sm sm:text-base font-bold text-[#B91C1C] leading-tight max-w-[95px] truncate">
+            <div className="font-serif italic text-xs sm:text-base font-bold text-[#B91C1C] leading-tight max-w-[85px] sm:max-w-[95px] truncate">
               {middleText}
             </div>
           )}
 
           {/* Bottom: e.g. "SALE" in extra-bold dark red */}
-          <div className="text-lg sm:text-xl font-black text-[#7F1D1D] tracking-tight leading-none mb-1 max-w-[95px] truncate">
+          <div className="text-base sm:text-xl font-black text-[#7F1D1D] tracking-tight leading-none mb-0.5 sm:mb-1 max-w-[85px] sm:max-w-[95px] truncate">
             {bottomText}
           </div>
 
           {/* Dynamic 25% OFF Badge Pill */}
-          <div className="bg-gradient-to-r from-[#DC2626] via-[#B91C1C] to-[#991B1B] text-white text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded-full shadow-md border border-amber-200 tracking-wider uppercase shrink-0">
+          <div className="bg-gradient-to-r from-[#DC2626] via-[#B91C1C] to-[#991B1B] text-white text-[8px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full shadow-md border border-amber-200 tracking-wider uppercase shrink-0">
             FLAT {discountPercentage}% OFF
           </div>
         </div>

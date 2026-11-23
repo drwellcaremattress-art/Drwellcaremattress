@@ -140,8 +140,8 @@ export function Real3DTrustCards() {
         </svg>
       </div>
 
-      {/* ── 4 Real 3D Slanted Parallelogram Cards Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-5 xl:gap-6 items-center justify-center">
+      {/* ── 4 Real 3D Slanted Parallelogram Cards Grid (2x2 on Mobile, 4 Cols on Desktop) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-5 xl:gap-6 items-center justify-center">
         {TRUST_CARDS.map((card, idx) => (
           <motion.div
             key={card.id}
@@ -155,7 +155,7 @@ export function Real3DTrustCards() {
             <Link href={card.link} className="block relative">
               {/* ── CARD SHELL: Skewed Parallelogram with Deep 3D Shadow ── */}
               <div
-                className={`relative flex items-stretch h-[82px] sm:h-[88px] rounded-[22px] overflow-hidden bg-white/95 backdrop-blur-md border border-white/80 ${card.glowShadow} transition-all duration-300 group-hover:shadow-2xl`}
+                className={`relative flex items-stretch h-[74px] sm:h-[88px] rounded-[18px] sm:rounded-[22px] overflow-hidden bg-white/95 backdrop-blur-md border border-white/80 ${card.glowShadow} transition-all duration-300 group-hover:shadow-2xl`}
                 style={{
                   transform: 'skewX(-13deg)',
                   boxShadow: '0 16px 32px -8px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.06)',
@@ -163,7 +163,7 @@ export function Real3DTrustCards() {
               >
                 {/* ── LEFT SECTION: Glossy Color Dome Capsule ── */}
                 <div
-                  className={`relative w-[38%] min-w-[76px] sm:min-w-[84px] bg-gradient-to-br ${card.gradientLeft} flex items-center justify-center overflow-hidden shrink-0`}
+                  className={`relative w-[36%] min-w-[56px] sm:min-w-[84px] bg-gradient-to-br ${card.gradientLeft} flex items-center justify-center overflow-hidden shrink-0`}
                 >
                   {/* Glass Top Rim Specular Highlight (The 3D Gloss) */}
                   <div className="absolute top-0 inset-x-0 h-[48%] bg-gradient-to-b from-white/45 via-white/15 to-transparent pointer-events-none rounded-t-xl" />
@@ -176,7 +176,7 @@ export function Real3DTrustCards() {
 
                   {/* Icon (Un-skewed to stay straight & upright) */}
                   <div
-                    className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                    className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 scale-90 sm:scale-100"
                     style={{ transform: 'skewX(13deg)' }}
                   >
                     {card.icon}
@@ -187,24 +187,24 @@ export function Real3DTrustCards() {
                 </div>
 
                 {/* ── RIGHT SECTION: High-Gloss White Surface with Typography ── */}
-                <div className="relative flex-1 bg-gradient-to-b from-[#ffffff] via-[#fbfcfe] to-[#f1f5f9] flex flex-col justify-center px-4 sm:px-5">
+                <div className="relative flex-1 bg-gradient-to-b from-[#ffffff] via-[#fbfcfe] to-[#f1f5f9] flex flex-col justify-center px-2.5 sm:px-5 overflow-hidden">
                   {/* Inner top gloss line */}
                   <div className="absolute top-0 inset-x-0 h-[1.5px] bg-white pointer-events-none" />
 
                   {/* Text Container (Un-skewed to maintain typography readability) */}
                   <div
-                    className="flex flex-col justify-center"
+                    className="flex flex-col justify-center min-w-0"
                     style={{ transform: 'skewX(13deg)' }}
                   >
-                    <span className="text-[14px] sm:text-[15px] xl:text-[16px] font-black text-[#0B1A2A] tracking-tight leading-[1.15]">
+                    <span className="text-[12px] sm:text-[15px] xl:text-[16px] font-black text-[#0B1A2A] tracking-tight leading-[1.15] truncate">
                       {card.title}
                     </span>
-                    <span className="text-[12px] sm:text-[13px] font-bold text-[#5B6B7B] tracking-tight leading-[1.15] mt-0.5">
+                    <span className="text-[10px] sm:text-[13px] font-bold text-[#5B6B7B] tracking-tight leading-[1.15] mt-0.5 truncate">
                       {card.subtitle}
                     </span>
 
                     {/* Green Accent Underline Pill (Matching Reference Image) */}
-                    <div className="w-6 sm:w-7 h-[3px] rounded-full bg-[#6CB50E] mt-1.5 shadow-sm" />
+                    <div className="w-5 sm:w-7 h-[2.5px] sm:h-[3px] rounded-full bg-[#6CB50E] mt-1 sm:mt-1.5 shadow-sm" />
                   </div>
                 </div>
 

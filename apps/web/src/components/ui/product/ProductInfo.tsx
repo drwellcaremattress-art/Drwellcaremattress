@@ -508,7 +508,7 @@ export function ProductInfo({
                       <input
                         type="number"
                         min="1"
-                        placeholder="e.g. 75"
+                        placeholder="Enter length (e.g. 75)"
                         value={customL}
                         onChange={e => setCustomL(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B1A2A] focus:outline-none focus:border-[#0682E4] focus:ring-1 focus:ring-[#0682E4]/30 bg-white"
@@ -520,7 +520,7 @@ export function ProductInfo({
                       <input
                         type="number"
                         min="1"
-                        placeholder="e.g. 42"
+                        placeholder="Enter width (e.g. 42)"
                         value={customW}
                         onChange={e => setCustomW(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B1A2A] focus:outline-none focus:border-[#0682E4] focus:ring-1 focus:ring-[#0682E4]/30 bg-white"

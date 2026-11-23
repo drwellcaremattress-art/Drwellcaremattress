@@ -24,6 +24,7 @@ interface OrderItemDraft {
   variantSku: string;
   size: string;
   thickness: string;
+  color?: string;
   qty: number;
   price: number;
   image: string;
@@ -76,7 +77,13 @@ export default function AdminCreateUserOrderModal({
     products[0]?.slug || ''
   );
   const [selectedSize, setSelectedSize] = useState<string>('Single');
+  // Sub-dimension selection (like product page popup)
+  const [selectedSubDim, setSelectedSubDim] = useState<{ dim: string; sqft: number } | null>(null);
+  const [isCustomSize, setIsCustomSize] = useState<boolean>(false);
+  const [customL, setCustomL] = useState<string>('');
+  const [customW, setCustomW] = useState<string>('');
   const [selectedThickness, setSelectedThickness] = useState<string>('6 Inch');
+  const [selectedColor, setSelectedColor] = useState<string>('Pure White');
   const [itemQty, setItemQty] = useState<number>(1);
   const [customPrice, setCustomPrice] = useState<string>('');
 
@@ -107,28 +114,110 @@ export default function AdminCreateUserOrderModal({
   // Find currently active product in picker
   const activeProduct = products.find((p) => p.slug === selectedProductSlug) || products[0];
 
-  // Calculate default price for current selected variant
-  const getSelectedVariantPrice = () => {
-    if (!activeProduct) return 9828;
-    const variant = activeProduct.variants?.find((v) => v.size.toLowerCase() === selectedSize.toLowerCase());
-    if (variant && variant.price) return variant.price;
-    const rate = Number(activeProduct.sqftPrice) || 546;
+  // Colors available for this product
+  const availableColors = React.useMemo(() => {
+    if (activeProduct?.colors && activeProduct.colors.length > 0) {
+      const list = activeProduct.colors
+        .map((c: any) => (typeof c === 'string' ? c : c?.name))
+        .filter(Boolean);
+      if (list.length > 0) return Array.from(new Set(list));
+    }
+    return ['Pure White', 'Royal Blue', 'Slate Gray'];
+  }, [activeProduct]);
+
+  // Keep selectedColor aligned when activeProduct changes
+  React.useEffect(() => {
+    if (availableColors.length > 0 && !availableColors.includes(selectedColor)) {
+      setSelectedColor(availableColors[0]);
+    }
+  }, [availableColors, selectedColor]);
+
+  // Active variant for current size category
+  const activeVariant = React.useMemo(() =>
+    activeProduct?.variants?.find((v) => v.size.toLowerCase() === selectedSize.toLowerCase()),
+    [activeProduct, selectedSize]
+  );
+
+  // Sub-dimensions list; fallback to single default if none defined
+  const subDimensions = React.useMemo(() => {
+    if (activeVariant?.subDimensions && activeVariant.subDimensions.length > 0) {
+      return activeVariant.subDimensions as { dim: string; sqft: number }[];
+    }
+    // Fallback defaults per size category
+    const defaults: Record<string, { dim: string; sqft: number }[]> = {
+      Single: [
+        { dim: '72" × 30"', sqft: 15 },
+        { dim: '75" × 30"', sqft: 15.63 },
+        { dim: '72" × 36"', sqft: 18 },
+        { dim: '75" × 36"', sqft: 18.75 },
+        { dim: '78" × 36"', sqft: 19.5 },
+      ],
+      Double: [
+        { dim: '72" × 48"', sqft: 24 },
+        { dim: '75" × 48"', sqft: 25 },
+        { dim: '78" × 48"', sqft: 26 },
+      ],
+      Queen: [
+        { dim: '72" × 60"', sqft: 30 },
+        { dim: '75" × 60"', sqft: 31.25 },
+        { dim: '78" × 60"', sqft: 32.5 },
+      ],
+      King: [
+        { dim: '72" × 72"', sqft: 36 },
+        { dim: '75" × 72"', sqft: 37.5 },
+        { dim: '78" × 72"', sqft: 39 },
+      ],
+    };
+    return defaults[selectedSize] || defaults.Single;
+  }, [activeVariant, selectedSize]);
+
+  // Auto-select first sub-dim when product or size category changes
+  React.useEffect(() => {
+    if (subDimensions.length > 0) {
+      setSelectedSubDim(subDimensions[0]);
+    }
+    setIsCustomSize(false);
+    setCustomL('');
+    setCustomW('');
+  }, [activeProduct, selectedSize]);
+
+  // Compute price from sqftPrice × sqft (same formula as product page)
+  const computedPrice = React.useMemo(() => {
+    const sqftRate = Number(activeProduct?.sqftPrice) || 546;
+    if (isCustomSize && customL && customW) {
+      const sqft = (Number(customL) * Number(customW)) / 144;
+      return Math.round(sqftRate * sqft);
+    }
+    if (selectedSubDim) return Math.round(sqftRate * selectedSubDim.sqft);
+    if (activeVariant?.price) return activeVariant.price;
     const sqftMap: Record<string, number> = { Single: 18, Double: 24, Queen: 30, King: 36 };
-    return Math.round(rate * (sqftMap[selectedSize] || 18));
-  };
+    return Math.round(sqftRate * (sqftMap[selectedSize] || 18));
+  }, [activeProduct, activeVariant, selectedSubDim, isCustomSize, customL, customW, selectedSize]);
 
   // Add Item to Order Draft
   const handleAddItem = () => {
     if (!activeProduct) return;
-    const price = customPrice ? Number(customPrice) : getSelectedVariantPrice();
-    const image = activeProduct.images?.[0]?.url || '/images/products/ecolatex-6.jpeg';
+    const price = customPrice ? Number(customPrice) : computedPrice;
+
+    // Determine dimension label for this item
+    const dimLabel = isCustomSize
+      ? `${customL}" × ${customW}"`
+      : (selectedSubDim?.dim || selectedSize);
+
+    // Check if the selected color has a specific image
+    const matchedColorObj = activeProduct?.colors?.find(
+      (c: any) => (typeof c === 'string' ? c : c?.name)?.toLowerCase() === selectedColor.toLowerCase()
+    );
+    const colorSpecificImage = typeof matchedColorObj === 'object' && matchedColorObj?.image ? matchedColorObj.image : '';
+    const image = colorSpecificImage || activeProduct.images?.[0]?.url || '/images/products/ecolatex-6.jpeg';
 
     const newItem: OrderItemDraft = {
       productId: activeProduct.slug,
       name: activeProduct.name,
-      variantSku: `${activeProduct.slug.toUpperCase()}-${selectedSize.toUpperCase()}-${selectedThickness.replace(/\s+/g, '')}`,
-      size: selectedSize,
+      variantSku: `${activeProduct.slug.toUpperCase()}-${dimLabel.replace(/[^A-Z0-9]/gi, '')}-${selectedThickness.replace(/\s+/g, '')}-${selectedColor.replace(/\s+/g, '').toUpperCase()}`,
+      size: dimLabel,
       thickness: selectedThickness,
+      color: selectedColor,
       qty: itemQty,
       price,
       image,
@@ -137,7 +226,7 @@ export default function AdminCreateUserOrderModal({
     setItems((prev) => [...prev, newItem]);
     setCustomPrice('');
     setItemQty(1);
-    showToast('success', `Added "${activeProduct.name} (${selectedSize})" to order.`);
+    showToast('success', `Added "${activeProduct.name} (${dimLabel}, ${selectedColor})" to order.`);
   };
 
   const handleRemoveItem = (idx: number) => {
@@ -471,16 +560,16 @@ export default function AdminCreateUserOrderModal({
                 </div>
 
                 {/* Product Selector Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                   {/* Product Dropdown */}
-                  <div className="sm:col-span-4">
+                  <div className="sm:col-span-3">
                     <label className="block text-[11px] font-bold text-slate-600 mb-1">
                       Choose Product
                     </label>
                     <select
                       value={selectedProductSlug}
                       onChange={(e) => setSelectedProductSlug(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white"
+                      className="w-full px-2.5 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white"
                     >
                       {products.map((p) => (
                         <option key={p.slug} value={p.slug}>
@@ -490,20 +579,20 @@ export default function AdminCreateUserOrderModal({
                     </select>
                   </div>
 
-                  {/* Size */}
+                  {/* Size Category */}
                   <div className="sm:col-span-2">
                     <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                      Size
+                      Size Category
                     </label>
                     <select
                       value={selectedSize}
                       onChange={(e) => setSelectedSize(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white"
+                      className="w-full px-2.5 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white"
                     >
-                      <option value="Single">Single (72x36)</option>
-                      <option value="Double">Double (72x48)</option>
-                      <option value="Queen">Queen (72x60)</option>
-                      <option value="King">King (72x72)</option>
+                      <option value="Single">Single</option>
+                      <option value="Double">Double</option>
+                      <option value="Queen">Queen</option>
+                      <option value="King">King</option>
                     </select>
                   </div>
 
@@ -515,7 +604,7 @@ export default function AdminCreateUserOrderModal({
                     <select
                       value={selectedThickness}
                       onChange={(e) => setSelectedThickness(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white"
+                      className="w-full px-2.5 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white"
                     >
                       <option value="5 Inch">5 Inch</option>
                       <option value="6 Inch">6 Inch</option>
@@ -524,8 +613,26 @@ export default function AdminCreateUserOrderModal({
                     </select>
                   </div>
 
-                  {/* Quantity */}
+                  {/* Colour Selection */}
                   <div className="sm:col-span-2">
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1 flex items-center justify-between">
+                      <span>Colour</span>
+                    </label>
+                    <select
+                      value={selectedColor}
+                      onChange={(e) => setSelectedColor(e.target.value)}
+                      className="w-full px-2.5 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      {availableColors.map((col) => (
+                        <option key={col} value={col}>
+                          {col}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Quantity */}
+                  <div className="sm:col-span-1">
                     <label className="block text-[11px] font-bold text-slate-600 mb-1">
                       Qty
                     </label>
@@ -535,7 +642,7 @@ export default function AdminCreateUserOrderModal({
                       max="10"
                       value={itemQty}
                       onChange={(e) => setItemQty(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800"
+                      className="w-full px-2 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 text-center"
                     />
                   </div>
 
@@ -548,6 +655,112 @@ export default function AdminCreateUserOrderModal({
                     >
                       <Plus size={14} /> Add Item
                     </button>
+                  </div>
+                </div>
+
+                {/* ── Inline Sub-Dimension / Custom Size Picker ── */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  {/* Header row */}
+                  <div className="grid grid-cols-12 text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 border-b border-slate-200 px-3 py-2">
+                    <div className="col-span-1"></div>
+                    <div className="col-span-4">Dimensions (L × W)</div>
+                    <div className="col-span-3 text-center">Surface Area</div>
+                    <div className="col-span-4 text-right">Price</div>
+                  </div>
+                  <div className="divide-y divide-slate-100">
+                    {subDimensions.map((sd) => {
+                      const sqftRate = Number(activeProduct?.sqftPrice) || 546;
+                      const price = Math.round(sqftRate * sd.sqft);
+                      const isSelected = !isCustomSize && selectedSubDim?.dim === sd.dim;
+                      return (
+                        <label
+                          key={sd.dim}
+                          className={`grid grid-cols-12 items-center px-3 py-2.5 cursor-pointer transition-all text-xs ${
+                            isSelected
+                              ? 'bg-blue-50 text-[#0682E4]'
+                              : 'hover:bg-slate-50 text-slate-700'
+                          }`}
+                        >
+                          <div className="col-span-1">
+                            <input
+                              type="radio"
+                              checked={isSelected}
+                              onChange={() => { setSelectedSubDim(sd); setIsCustomSize(false); }}
+                              className="accent-[#0682E4]"
+                            />
+                          </div>
+                          <div className="col-span-4 font-bold">{sd.dim}</div>
+                          <div className="col-span-3 text-center text-slate-400 text-[11px]">{sd.sqft.toFixed(2)} sq.ft</div>
+                          <div className={`col-span-4 text-right font-black ${isSelected ? 'text-[#0682E4]' : 'text-slate-800'}`}>
+                            ₹{price.toLocaleString('en-IN')}
+                          </div>
+                        </label>
+                      );
+                    })}
+
+                    {/* Custom Size Row */}
+                    <label
+                      className={`grid grid-cols-12 items-center px-3 py-2.5 cursor-pointer transition-all text-xs ${
+                        isCustomSize
+                          ? 'bg-purple-50 text-purple-700'
+                          : 'hover:bg-slate-50 text-slate-500'
+                      }`}
+                    >
+                      <div className="col-span-1">
+                        <input
+                          type="radio"
+                          checked={isCustomSize}
+                          onChange={() => setIsCustomSize(true)}
+                          className="accent-purple-500"
+                        />
+                      </div>
+                      <div className="col-span-3 font-bold">Custom Size</div>
+                      {isCustomSize ? (
+                        <>
+                          <div className="col-span-5 flex items-center gap-1.5 justify-center">
+                            <input
+                              type="number"
+                              placeholder='L"'
+                              value={customL}
+                              onChange={(e) => setCustomL(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-14 px-2 py-1 rounded-md border border-purple-300 text-xs font-bold text-center bg-white"
+                            />
+                            <span className="text-slate-400 font-bold">×</span>
+                            <input
+                              type="number"
+                              placeholder='W"'
+                              value={customW}
+                              onChange={(e) => setCustomW(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-14 px-2 py-1 rounded-md border border-purple-300 text-xs font-bold text-center bg-white"
+                            />
+                            <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                              {customL && customW ? `${((Number(customL) * Number(customW)) / 144).toFixed(2)} sq.ft` : ''}
+                            </span>
+                          </div>
+                          <div className="col-span-3 text-right font-black text-purple-700">
+                            {customL && customW ? `₹${computedPrice.toLocaleString('en-IN')}` : '—'}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="col-span-8 text-slate-400 text-[11px]">Enter custom L × W in inches →</div>
+                      )}
+                    </label>
+                  </div>
+
+                  {/* Price Preview Footer */}
+                  <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-t border-slate-200">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {isCustomSize && customL && customW
+                        ? `Custom: ${customL}" × ${customW}"`
+                        : selectedSubDim
+                        ? `Selected: ${selectedSubDim.dim}`
+                        : 'No dimension selected'}
+                    </span>
+                    <span className="text-sm font-black text-[#0682E4]">
+                      ₹{computedPrice.toLocaleString('en-IN')}
+                    </span>
                   </div>
                 </div>
 
@@ -567,8 +780,19 @@ export default function AdminCreateUserOrderModal({
                           />
                           <div>
                             <span className="font-black text-slate-900 block">{item.name}</span>
-                            <span className="text-slate-500 text-[11px]">
-                              Size: <b>{item.size}</b> &bull; Thickness: <b>{item.thickness}</b> &bull; Qty: <b>{item.qty}</b>
+                            <span className="text-slate-500 text-[11px] flex items-center gap-1.5 flex-wrap mt-0.5">
+                              <span>Size: <b>{item.size}</b></span>
+                              <span>&bull; Thickness: <b>{item.thickness}</b></span>
+                              {item.color && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 text-[#0682E4] rounded-md font-bold text-[10.5px]">
+                                  <span className={`w-1.5 h-1.5 rounded-full ${item.color.toLowerCase().includes('blue') ? 'bg-[#0682E4]' :
+                                      item.color.toLowerCase().includes('gray') || item.color.toLowerCase().includes('grey') ? 'bg-slate-400' :
+                                        'bg-white border border-slate-300'
+                                    }`} />
+                                  Colour: {item.color}
+                                </span>
+                              )}
+                              <span>&bull; Qty: <b>{item.qty}</b></span>
                             </span>
                           </div>
                         </div>

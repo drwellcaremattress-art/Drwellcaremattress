@@ -559,21 +559,21 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">First Name *</label>
-                <input {...register("firstName")} type="text" placeholder="Ramesh" className={`w-full border ${formErrors.firstName ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                <input {...register("firstName")} type="text" placeholder="Enter your first name" className={`w-full border ${formErrors.firstName ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
                 {formErrors.firstName && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.firstName.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Last Name</label>
-                <input {...register("lastName")} type="text" placeholder="Kumar" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
+                <input {...register("lastName")} type="text" placeholder="Enter your last name" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address</label>
-                <input {...register("email")} type="email" placeholder="ramesh@example.com" className={`w-full border ${formErrors.email ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                <input {...register("email")} type="email" placeholder="Enter your email address" className={`w-full border ${formErrors.email ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
                 {formErrors.email && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.email.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (For Delivery Updates) *</label>
-                <input {...register("phone")} type="tel" placeholder="+91 93429 22044" className={`w-full border ${formErrors.phone ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                <input {...register("phone")} type="tel" placeholder="Enter your mobile number" className={`w-full border ${formErrors.phone ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
                 {formErrors.phone && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.phone.message}</span>}
               </div>
             </div>
@@ -623,12 +623,12 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Door / House No. & Street Address *</label>
-                <input {...register("address")} type="text" placeholder="No. 551, Sivapragasam Nagar, Surapet" className={`w-full border ${formErrors.address ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                <input {...register("address")} type="text" placeholder="Enter your house / flat no. and street address" className={`w-full border ${formErrors.address ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
                 {formErrors.address && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.address.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">City *</label>
-                <input {...register("city")} type="text" placeholder="Chennai" className={`w-full border ${formErrors.city ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                <input {...register("city")} type="text" placeholder="Enter your city" className={`w-full border ${formErrors.city ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
                 {formErrors.city && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.city.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
@@ -645,7 +645,7 @@ export default function CheckoutPage() {
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">PIN Code *</label>
-                <input {...register("pinCode")} type="text" placeholder="600066" className={`w-full border ${formErrors.pinCode ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                <input {...register("pinCode")} type="text" placeholder="Enter your 6-digit PIN code" className={`w-full border ${formErrors.pinCode ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
                 {formErrors.pinCode && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.pinCode.message}</span>}
               </div>
             </div>

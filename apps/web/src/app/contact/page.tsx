@@ -244,7 +244,7 @@ export default function ContactPage() {
                         name="name"
                         value={formState.name}
                         onChange={handleChange}
-                        placeholder="Ramesh Kumar"
+                        placeholder="Enter your full name"
                         className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium"
                       />
                     </div>
@@ -258,7 +258,7 @@ export default function ContactPage() {
                         name="email"
                         value={formState.email}
                         onChange={handleChange}
-                        placeholder="ramesh@example.com"
+                        placeholder="Enter your email address"
                         className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium"
                       />
                     </div>
@@ -274,7 +274,7 @@ export default function ContactPage() {
                         name="phone"
                         value={formState.phone}
                         onChange={handleChange}
-                        placeholder="+91 93429 22044"
+                        placeholder="Enter your mobile number"
                         className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium"
                       />
                     </div>
@@ -308,7 +308,7 @@ export default function ContactPage() {
                       rows={5}
                       value={formState.message}
                       onChange={handleChange}
-                      placeholder="Please describe your requirement or mention your exact cot dimensions (e.g. Length 78 inches by Width 60 inches)..."
+                      placeholder="Enter your message or mention your exact cot dimensions (e.g. Length 78 inches by Width 60 inches)..."
                       className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none transition-all bg-slate-50/50 focus:bg-white font-medium resize-none"
                     />
                   </div>

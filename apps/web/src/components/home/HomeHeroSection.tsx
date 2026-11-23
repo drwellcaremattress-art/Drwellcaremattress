@@ -289,7 +289,7 @@ export function HomeHeroSection() {
         {/* ── RIGHT COLUMN: Stacked Cards (~38% width, exactly matching left height) ── */}
         <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-4 lg:gap-5">
           {/* 1. Top Card: Recliner + Dynamic "BIG Festival SALE 25% OFF" Badge */}
-          <div className="relative flex-1 rounded-3xl overflow-hidden shadow-[0_15px_35px_-12px_rgba(245,158,11,0.18),0_0_1px_1px_rgba(245,158,11,0.15)] border border-amber-200/80 bg-[#fdfbf7] aspect-[16/8] sm:aspect-[16/7] lg:aspect-auto flex items-center justify-between p-4 sm:p-6 group transition-all duration-300 hover:shadow-[0_22px_45px_-10px_rgba(245,158,11,0.25)]">
+          <div className="relative flex-1 rounded-3xl overflow-hidden shadow-[0_15px_35px_-12px_rgba(245,158,11,0.18),0_0_1px_1px_rgba(245,158,11,0.15)] border border-amber-200/80 bg-[#fdfbf7] aspect-[16/9] sm:aspect-[16/7] lg:aspect-auto min-h-[180px] sm:min-h-0 flex items-center justify-between p-3.5 sm:p-6 group transition-all duration-300 hover:shadow-[0_22px_45px_-10px_rgba(245,158,11,0.25)]">
             {/* Background Image of Room with Recliner */}
             <div className="absolute inset-0 z-0">
               <Image

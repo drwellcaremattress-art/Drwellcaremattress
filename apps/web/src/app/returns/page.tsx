@@ -204,15 +204,15 @@ export default function ReturnsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Order ID / Invoice # *</label>
-                  <input type="text" name="orderId" value={form.orderId} onChange={handleChange} placeholder="e.g. DW-8492 or Flipkart ID" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
+                  <input type="text" name="orderId" value={form.orderId} onChange={handleChange} placeholder="Enter your Order ID / Invoice #" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Registered Email *</label>
-                  <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="ramesh@example.com" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
+                  <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Enter your registered email address" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Pickup Phone Number *</label>
-                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+91 93429 22044" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
+                  <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="Enter your mobile number" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
                 </div>
               </div>
 
@@ -238,7 +238,7 @@ export default function ReturnsPage() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Additional Notes / Pickup Instructions *</label>
-                <textarea name="notes" rows={4} value={form.notes} onChange={handleChange} placeholder="Please provide any helpful context regarding your sleep experience or preferred pickup timing..." className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium resize-none" />
+                <textarea name="notes" rows={4} value={form.notes} onChange={handleChange} placeholder="Enter any additional notes or preferred pickup timing..." className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium resize-none" />
               </div>
 
               <Button type="submit" disabled={isSubmitting} className="w-full bg-[#0682E4] hover:bg-[#056ec1] text-white font-black py-4 rounded-xl text-base shadow-lg transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2">

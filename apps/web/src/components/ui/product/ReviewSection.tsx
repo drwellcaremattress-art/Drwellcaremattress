@@ -294,7 +294,7 @@ function ReviewCard({
 }) {
   return (
     <div 
-      className={`w-[350px] sm:w-[410px] md:w-[440px] h-[225px] sm:h-[235px] bg-white rounded-2xl p-5 border transition-all duration-300 flex flex-col justify-between shrink-0 select-none shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(6,130,228,0.12)] hover:border-[#0682E4]/40 ${
+      className={`w-[290px] sm:w-[410px] md:w-[440px] h-[225px] sm:h-[235px] bg-white rounded-2xl p-4 sm:p-5 border transition-all duration-300 flex flex-col justify-between shrink-0 select-none shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(6,130,228,0.12)] hover:border-[#0682E4]/40 ${
         rev.isUserSubmitted 
           ? 'border-2 border-[#7cb93e] bg-gradient-to-br from-white to-emerald-50/30' 
           : 'border-slate-200/90'
@@ -477,7 +477,7 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
   }, [reviews]);
 
   return (
-    <section className="mt-20 pt-16 border-t border-slate-200 relative select-none">
+    <section className="mt-12 pt-10 sm:mt-20 sm:pt-16 border-t border-slate-200 relative select-none">
       
       {/* 1. Header Bar: Professional Minimalist Design */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
@@ -578,7 +578,7 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Dr. Anand Raman"
+                        placeholder="Enter your name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
@@ -618,7 +618,7 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Significant back pain relief within 3 nights"
+                      placeholder="Enter review headline"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
@@ -630,7 +630,7 @@ export function ReviewSection({ productName, productSlug, productCategory }: Rev
                     <textarea
                       required
                       rows={3}
-                      placeholder="Share details about the firmness, temperature comfort, and spinal support..."
+                      placeholder="Enter your detailed review feedback..."
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0682E4]"

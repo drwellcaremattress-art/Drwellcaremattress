@@ -270,7 +270,7 @@ export default function LoginPage() {
                         <div className="flex gap-2">
                           <input 
                             type="email" 
-                            placeholder="e.g. 2002dineshmurugan@gmail.com" 
+                            placeholder="Enter your registered email address" 
                             value={resetEmail}
                             onChange={(e) => setResetEmail(e.target.value)}
                             required
@@ -308,7 +308,7 @@ export default function LoginPage() {
                             </label>
                             <input 
                               type="text" 
-                              placeholder="6-digit code" 
+                              placeholder="Enter 6-digit OTP code" 
                               value={enteredOtp}
                               onChange={(e) => setEnteredOtp(e.target.value)}
                               required
@@ -324,7 +324,7 @@ export default function LoginPage() {
                             <div className="relative">
                               <input 
                                 type={showNewPassword ? "text" : "password"} 
-                                placeholder="Enter new password (min 6 chars)" 
+                                placeholder="Enter your new password (min 6 chars)" 
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 required
@@ -349,7 +349,7 @@ export default function LoginPage() {
                             <div className="relative">
                               <input 
                                 type={showConfirmPassword ? "text" : "password"} 
-                                placeholder="Re-enter new password" 
+                                placeholder="Re-enter your new password" 
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
@@ -423,7 +423,7 @@ export default function LoginPage() {
                           <label className="block text-sm font-bold text-[#0B1A2A]">Full Name</label>
                           <input 
                             type="text" 
-                            placeholder="Dr Well Customer" 
+                            placeholder="Enter your full name" 
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required={!isLogin}
@@ -437,7 +437,7 @@ export default function LoginPage() {
                       <label className="block text-sm font-bold text-[#0B1A2A]">Email Address</label>
                       <input 
                         type="email" 
-                        placeholder="e.g. 2002dineshmurugan@gmail.com" 
+                        placeholder="Enter your email address" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -450,7 +450,7 @@ export default function LoginPage() {
                       <div className="relative">
                         <input 
                           type={showPassword ? "text" : "password"} 
-                          placeholder="••••••••" 
+                          placeholder="Enter your password" 
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required

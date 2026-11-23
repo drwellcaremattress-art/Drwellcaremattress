@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ProductListing } from '@/components/ui/ProductListing';
-import { CollectionsGrid } from '@/components/home/CollectionsGrid';
 import { HomeHeroSection } from '@/components/home/HomeHeroSection';
 import { Real3DTrustCards } from '@/components/home/Real3DTrustCards';
 import { ReviewsMarquee } from '@/components/home/ReviewsMarquee';
@@ -44,8 +43,6 @@ export default function Home() {
       {/* 2. Real Interactive 3D Slanted Badges (Matching Reference Exactly) */}
       <Real3DTrustCards />
 
-      {/* 2.5 Our Collections - Thumbnail Category Grid */}
-      <CollectionsGrid />
 
       {/* 3. Science of Sleep Section (NEW) */}
       {/* The Journey Section */}
@@ -134,7 +131,7 @@ export default function Home() {
       <ProductMarqueeShowcase />
 
       {/* Marquee Footer Banner (Original Dark Background & Dual Opposite Direction Tracks) */}
-      <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#0c1824] via-[#102a43] to-[#0c1824] py-20 sm:py-24 flex flex-col items-center justify-center shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] border-y border-white/5 select-none">
+      <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#0c1824] via-[#102a43] to-[#0c1824] py-14 sm:py-24 flex flex-col items-center justify-center shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] border-y border-white/5 select-none">
 
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
@@ -144,8 +141,8 @@ export default function Home() {
         </div>
 
         {/* Dual Opposite Marquee Container */}
-        <div className="w-full flex flex-col gap-6 relative z-10 before:absolute before:left-0 before:top-0 before:z-20 before:h-full before:w-[80px] md:before:w-[200px] before:bg-gradient-to-r before:from-[#0c1824] before:to-transparent after:absolute after:right-0 after:top-0 after:z-20 after:h-full after:w-[80px] md:after:w-[200px] after:bg-gradient-to-l after:from-[#0c1824] after:to-transparent">
-          
+        <div className="w-full flex flex-col gap-4 sm:gap-6 relative z-10 before:absolute before:left-0 before:top-0 before:z-20 before:h-full before:w-[60px] md:before:w-[200px] before:bg-gradient-to-r before:from-[#0c1824] before:to-transparent after:absolute after:right-0 after:top-0 after:z-20 after:h-full after:w-[60px] md:after:w-[200px] after:bg-gradient-to-l after:from-[#0c1824] after:to-transparent">
+
           {/* TRACK 1: Flows Left */}
           <div className="flex w-full whitespace-nowrap overflow-hidden">
             <motion.div
@@ -156,17 +153,17 @@ export default function Home() {
               {[...Array(2)].map((_, groupIndex) => (
                 <div key={`track1-grp-${groupIndex}`} className="flex items-center">
                   {[...Array(3)].map((_, i) => (
-                    <div key={`track1-${groupIndex}-${i}`} className="flex items-center space-x-8 md:space-x-12 mx-4 md:mx-6">
-                      <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-transparent" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.15)' }}>
+                    <div key={`track1-${groupIndex}-${i}`} className="flex items-center space-x-6 sm:space-x-8 md:space-x-12 mx-3 sm:mx-4 md:mx-6">
+                      <p className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-transparent" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.15)' }}>
                         Better Sleep.
                       </p>
-                      <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-white">
+                      <p className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-white">
                         Better Health.
                       </p>
-                      <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-[#0682E4] drop-shadow-[0_0_20px_rgba(6,130,228,0.4)]">
+                      <p className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-[#0682E4] drop-shadow-[0_0_20px_rgba(6,130,228,0.4)]">
                         Better You.
                       </p>
-                      <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-[#6CB50E] shadow-[0_0_20px_rgba(108,181,14,0.6)]"></div>
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full bg-[#6CB50E] shadow-[0_0_20px_rgba(108,181,14,0.6)]"></div>
                     </div>
                   ))}
                 </div>
@@ -184,20 +181,20 @@ export default function Home() {
               {[...Array(2)].map((_, groupIndex) => (
                 <div key={`track2-grp-${groupIndex}`} className="flex items-center">
                   {[...Array(3)].map((_, i) => (
-                    <div key={`track2-${groupIndex}-${i}`} className="flex items-center space-x-8 md:space-x-12 mx-4 md:mx-6">
-                      <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-white">
+                    <div key={`track2-${groupIndex}-${i}`} className="flex items-center space-x-6 sm:space-x-8 md:space-x-12 mx-3 sm:mx-4 md:mx-6">
+                      <p className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-white">
                         Doctor Certified.
                       </p>
-                      <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-transparent" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.15)' }}>
+                      <p className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-transparent" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.15)' }}>
                         10-Year Warranty.
                       </p>
-                      <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-[#6CB50E] drop-shadow-[0_0_20px_rgba(108,181,14,0.6)]">
+                      {/* <p className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-[#6CB50E] drop-shadow-[0_0_20px_rgba(108,181,14,0.6)]">
                         100-Night Trial.
-                      </p>
-                      <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-[#0682E4] drop-shadow-[0_0_20px_rgba(6,130,228,0.4)]">
+                      </p> */}
+                      <p className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-heading font-black tracking-tight uppercase text-[#0682E4] drop-shadow-[0_0_20px_rgba(6,130,228,0.4)]">
                         Zero Motion Transfer.
                       </p>
-                      <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-[#0682E4] shadow-[0_0_20px_rgba(6,130,228,0.6)]"></div>
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full bg-[#0682E4] shadow-[0_0_20px_rgba(6,130,228,0.6)]"></div>
                     </div>
                   ))}
                 </div>

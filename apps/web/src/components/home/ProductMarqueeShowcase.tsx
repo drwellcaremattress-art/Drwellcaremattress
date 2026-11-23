@@ -159,7 +159,7 @@ function ProductCard({ product }: { product: MarqueeProduct }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group relative w-[320px] sm:w-[380px] md:w-[410px] rounded-2xl bg-white border border-slate-200/90 hover:border-[#0682E4]/50 overflow-hidden shrink-0 transition-all duration-500 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_36px_rgba(6,130,228,0.15)] hover:-translate-y-1.5 flex flex-col select-none"
+      className="group relative w-[270px] sm:w-[350px] md:w-[410px] rounded-2xl bg-white border border-slate-200/90 hover:border-[#0682E4]/50 overflow-hidden shrink-0 transition-all duration-500 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_36px_rgba(6,130,228,0.15)] hover:-translate-y-1.5 flex flex-col select-none"
     >
       {/* Full Mattress Image Container - No badges blocking */}
       <div className="relative w-full aspect-[1.42/1] bg-white p-2 sm:p-2.5 overflow-hidden flex items-center justify-center">
@@ -200,7 +200,7 @@ function ProductCard({ product }: { product: MarqueeProduct }) {
 
 export default function ProductMarqueeShowcase() {
   return (
-    <section className="relative w-full py-20 sm:py-24 bg-white border-y border-slate-100 overflow-hidden select-none z-20">
+    <section className="relative w-full py-14 sm:py-24 bg-white border-y border-slate-100 overflow-hidden select-none z-20">
       
       {/* Background ambient lighting */}
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-[#0682E4]/5 rounded-full blur-[160px] pointer-events-none" />

@@ -629,6 +629,7 @@ export default function AccountPage() {
                           <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Full Name</label>
                           <input
                             type="text"
+                            placeholder="Enter your full name"
                             value={profile.fullName}
                             onChange={e => setProfile({ ...profile, fullName: e.target.value })}
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
@@ -639,6 +640,7 @@ export default function AccountPage() {
                           <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Email Address</label>
                           <input
                             type="email"
+                            placeholder="Enter your email address"
                             value={profile.email}
                             onChange={e => setProfile({ ...profile, email: e.target.value })}
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
@@ -649,6 +651,7 @@ export default function AccountPage() {
                           <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Phone Number (WhatsApp Active)</label>
                           <input
                             type="tel"
+                            placeholder="Enter your mobile number"
                             value={profile.phone}
                             onChange={e => setProfile({ ...profile, phone: e.target.value })}
                             className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
@@ -1278,7 +1281,7 @@ export default function AccountPage() {
                       <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">Recipient Name</label>
                       <input
                         type="text"
-                        placeholder={`e.g. ${profile.fullName}`}
+                        placeholder="Enter recipient full name"
                         value={newAddr.name}
                         onChange={e => setNewAddr({ ...newAddr, name: e.target.value })}
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
@@ -1291,7 +1294,7 @@ export default function AccountPage() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Flat 402, Green Valley Towers, SV Road"
+                      placeholder="Enter street, building or flat no."
                       value={newAddr.street}
                       onChange={e => setNewAddr({ ...newAddr, street: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
@@ -1304,7 +1307,7 @@ export default function AccountPage() {
                       <input
                         type="text"
                         required
-                        placeholder="Mumbai"
+                        placeholder="Enter your city"
                         value={newAddr.city}
                         onChange={e => setNewAddr({ ...newAddr, city: e.target.value })}
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
@@ -1314,7 +1317,7 @@ export default function AccountPage() {
                       <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">State</label>
                       <input
                         type="text"
-                        placeholder="Maharashtra"
+                        placeholder="Enter your state"
                         value={newAddr.state}
                         onChange={e => setNewAddr({ ...newAddr, state: e.target.value })}
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
@@ -1325,7 +1328,7 @@ export default function AccountPage() {
                       <input
                         type="text"
                         required
-                        placeholder="400052"
+                        placeholder="Enter 6-digit PIN code"
                         value={newAddr.pincode}
                         onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })}
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
