@@ -52,8 +52,6 @@ export default function LoginPage() {
           const role = (session?.user as any)?.role;
           if (role === 'admin') {
             window.location.href = '/admin';
-          } else if (role === 'dealer') {
-            window.location.href = '/dealer';
           } else {
             window.location.href = '/account';
           }

@@ -3,8 +3,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, Menu, ShieldCheck, Search, Phone, Mail, X, ArrowRight, Truck } from 'lucide-react';
+import { ShoppingCart, User, Menu, ShieldCheck, Search, Phone, Mail, X, ArrowRight, Truck, Store } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Button } from '../ui/button';
 import { useCartStore } from '@/store/cartStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +13,8 @@ import { getDeduplicatedCatalog } from '@/lib/catalog';
 
 export function Navbar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const isDealer = (session?.user as any)?.role === 'dealer';
   const { toggleCart, items } = useCartStore();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -90,6 +93,15 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center justify-end gap-2 text-[#0B1A2A]">
+            {isDealer && (
+              <Link
+                href="/account?tab=dealer"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0682E4]/10 text-[#0682E4] hover:bg-[#0682E4] hover:text-white transition-all text-xs font-black border border-[#0682E4]/30"
+              >
+                <Store className="w-3.5 h-3.5" />
+                <span>Dealer Portal</span>
+              </Link>
+            )}
             <Button variant="ghost" size="icon" className="hover:text-[#0682E4] hover:bg-[#0682E4]/10 rounded-full transition-colors" onClick={() => setIsSearchOpen(!isSearchOpen)}>
               <Search className="w-[18px] h-[18px]" strokeWidth={2} />
             </Button>
@@ -249,6 +261,19 @@ export function Navbar() {
                 </Link>
                 <Link href="/faq" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>FAQ</Link>
                 <Link href="/contact" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link>
+                {isDealer && (
+                  <Link
+                    href="/account?tab=dealer"
+                    className="px-6 py-3 bg-[#0682E4]/10 text-[#0682E4] font-black mx-6 my-2 rounded-xl hover:bg-[#0682E4]/20 transition-colors flex items-center justify-between border border-[#0682E4]/30"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Store className="w-4 h-4" />
+                      Dealer Portal & Invoices
+                    </span>
+                    <span className="text-[10px] bg-[#0682E4] text-white font-bold px-2 py-0.5 rounded">Partner</span>
+                  </Link>
+                )}
               </nav>
               <div className="mt-auto p-6 border-t border-gray-100 text-sm text-gray-500">
                 <a href="tel:9342922044" className="flex items-center gap-3 mb-4">

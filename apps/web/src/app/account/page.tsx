@@ -5,7 +5,7 @@ import {
   Package, MapPin, Heart, User, LogOut, ChevronRight, ShieldCheck, 
   Award, Sparkles, CheckCircle, Clock, Truck, FileText, Plus, 
   Edit3, Trash2, Phone, Mail, Calendar, Activity, Star, Moon, ArrowUpRight,
-  ExternalLink, Copy
+  ExternalLink, Copy, Store, Printer, IndianRupee, Search, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,6 +13,8 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import axios from 'axios';
 import OrderReceiptModal from '@/components/orders/OrderReceiptModal';
+import AdminCreateUserOrderModal, { DealerInfo } from '@/components/admin/AdminCreateUserOrderModal';
+import { ProductType } from '@/components/admin/AdminProductTable';
 
 interface UserProfile {
   fullName: string;
@@ -50,18 +52,19 @@ const DEFAULT_PROFILE: UserProfile = {
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
-  const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'addresses' | 'reviews' | 'wishlist'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'addresses' | 'reviews' | 'wishlist' | 'dealer'>('profile');
   
   // Profile State
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [profileSuccess, setProfileSuccess] = useState(false);
 
-  // Redirect dealers directly to Dealer Portal
-  useEffect(() => {
-    if ((session?.user as any)?.role === 'dealer') {
-      window.location.href = '/dealer';
-    }
-  }, [session]);
+  // Dealer State & Integration
+  const isDealer = (session?.user as any)?.role === 'dealer';
+  const [dealerInvoices, setDealerInvoices] = useState<any[]>([]);
+  const [dealerInfo, setDealerInfo] = useState<DealerInfo | null>(null);
+  const [dealerProducts, setDealerProducts] = useState<ProductType[]>([]);
+  const [isCreateDealerOrderOpen, setIsCreateDealerOrderOpen] = useState(false);
+  const [dealerSearchQuery, setDealerSearchQuery] = useState('');
 
   // Dynamic Real Data States (100% Mockup Removed)
   const [orders, setOrders] = useState<any[]>([]);
@@ -291,10 +294,49 @@ export default function AccountPage() {
         } catch (e) {}
       }
 
+      // 6. Check URL query parameters for tab (e.g. ?tab=dealer)
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        if (tabParam && ['profile', 'orders', 'addresses', 'reviews', 'wishlist', 'dealer'].includes(tabParam)) {
+          setActiveTab(tabParam as any);
+        }
+      }
+
+      // 7. Dealer Data Sync
+      if ((session?.user as any)?.role === 'dealer') {
+        axios.get('/api/dealer/invoices')
+          .then((res) => {
+            if (res.data) {
+              if (Array.isArray(res.data.orders)) setDealerInvoices(res.data.orders);
+              if (res.data.dealerInfo) setDealerInfo(res.data.dealerInfo);
+            }
+          })
+          .catch((err) => console.error('Failed to sync dealer invoices:', err));
+
+        axios.get('/api/admin/products')
+          .then((res) => {
+            if (res.data && Array.isArray(res.data)) {
+              setDealerProducts(res.data);
+            }
+          })
+          .catch(() => {});
+      }
+
     } catch (e) {
       console.error('Failed to sync real account data:', e);
     }
   }, [session]);
+
+  const refreshDealerInvoices = () => {
+    axios.get('/api/dealer/invoices')
+      .then((res) => {
+        if (res.data && Array.isArray(res.data.orders)) {
+          setDealerInvoices(res.data.orders);
+        }
+      })
+      .catch(() => {});
+  };
 
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -449,6 +491,7 @@ export default function AccountPage() {
           <div className="flex gap-2 w-max pb-1">
             {[
               { id: 'profile', label: 'Profile', icon: User },
+              ...(isDealer ? [{ id: 'dealer', label: `Dealer Portal (${dealerInvoices.length})`, icon: Store }] : []),
               { id: 'orders', label: `Orders (${orders.length})`, icon: Package },
               { id: 'addresses', label: `Addresses (${addresses.length})`, icon: MapPin },
               { id: 'reviews', label: `Reviews (${userReviews.length})`, icon: Star },
@@ -466,7 +509,7 @@ export default function AccountPage() {
                       : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isSelected ? 'text-[#7cb93e]' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 ${isSelected ? (item.id === 'dealer' ? 'text-[#0682E4]' : 'text-[#7cb93e]') : 'text-slate-400'}`} />
                   {item.label}
                 </button>
               );
@@ -506,7 +549,8 @@ export default function AccountPage() {
             </div>
             <nav className="space-y-1.5">
               {[
-                { id: 'profile', label: 'My Profile & Ergonomics', icon: User, badge: 'VIP' },
+                { id: 'profile', label: 'My Profile & Ergonomics', icon: User, badge: isDealer ? 'Dealer' : 'VIP' },
+                ...(isDealer ? [{ id: 'dealer', label: 'Dealer Portal & Invoices', icon: Store, badge: `${dealerInvoices.length}` }] : []),
                 { id: 'orders', label: 'Order History & Tracking', icon: Package, badge: `${orders.length}` },
                 { id: 'addresses', label: 'Saved Shipping Addresses', icon: MapPin, badge: `${addresses.length}` },
                 { id: 'reviews', label: 'My Verified Reviews', icon: Star, badge: `${userReviews.length > 0 ? userReviews.length : '0'}` },
@@ -612,6 +656,49 @@ export default function AccountPage() {
                       <ShieldCheck className="w-4 h-4 text-emerald-600" /> 100% Privacy Secured
                     </span>
                   </div>
+
+                  {/* Dealer Partner Profile Banner */}
+                  {isDealer && (
+                    <div className="bg-gradient-to-r from-[#0B1A2A] via-[#122b46] to-[#07365e] text-white p-5 sm:p-6 rounded-3xl border border-blue-500/30 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                      <div className="flex items-start sm:items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-[#0682E4] flex items-center justify-center text-white shrink-0 shadow-md">
+                          <Store className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-[#0682E4] bg-white/10 px-2.5 py-0.5 rounded-full border border-blue-400/30">
+                              Authorized Dealer Account
+                            </span>
+                            <span className="text-xs text-blue-200 font-bold">
+                              • {dealerInfo?.storeName || (session?.user as any)?.dealerDetails?.storeName || 'Official Showroom Partner'}
+                            </span>
+                          </div>
+                          <h3 className="font-heading font-black text-lg sm:text-xl text-white mt-1">
+                            Dealer Showroom & Invoicing Hub
+                          </h3>
+                          <p className="text-xs text-slate-300 font-medium">
+                            Create customer orders, issue official receipts with your showroom name, and track all your sales.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setIsCreateDealerOrderOpen(true)}
+                          className="px-4 py-2.5 bg-[#0682E4] hover:bg-[#0572cb] text-white rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md transition-all active:scale-95"
+                        >
+                          <Plus className="w-4 h-4" /> Create Order & Invoice
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('dealer')}
+                          className="px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl text-xs font-bold transition-all border border-white/20"
+                        >
+                          View Invoices ({dealerInvoices.length})
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {profileSuccess && (
                     <motion.div
@@ -1113,6 +1200,235 @@ export default function AccountPage() {
                 </motion.div>
               )}
 
+              {/* ─── TAB 6: DEALER PORTAL & INVOICES (FOR AUTHORIZED DEALERS) ─── */}
+              {activeTab === 'dealer' && isDealer && (
+                <motion.div
+                  key="dealer"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  className="space-y-6"
+                >
+                  {/* Dealer Store Identity Card */}
+                  <div className="bg-gradient-to-br from-[#0B1A2A] via-[#122b46] to-[#07365e] rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-blue-500/30 relative overflow-hidden">
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl bg-[#0682E4] flex items-center justify-center text-white shadow-lg shadow-blue-500/20 shrink-0">
+                          <Store className="w-8 h-8" />
+                        </div>
+                        <div>
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[11px] font-black uppercase tracking-wider mb-1.5">
+                            <ShieldCheck className="w-3.5 h-3.5" /> Authorized Dealer Partner
+                          </div>
+                          <h2 className="font-heading font-black text-2xl sm:text-3xl text-white">
+                            {dealerInfo?.storeName || (session?.user as any)?.dealerDetails?.storeName || 'Dealer Store'}
+                          </h2>
+                          <div className="text-xs text-slate-300 font-medium flex items-center gap-3 flex-wrap mt-1">
+                            <span>Partner: <b>{dealerInfo?.name || session?.user?.name || 'Dealer'}</b></span>
+                            {dealerInfo?.phone && <span>• 📞 {dealerInfo.phone}</span>}
+                            {dealerInfo?.city && <span>• 📍 {dealerInfo.city}{dealerInfo?.state ? `, ${dealerInfo.state}` : ''}</span>}
+                            {dealerInfo?.gstNumber && <span>• GST: <b>{dealerInfo.gstNumber}</b></span>}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <Button
+                          onClick={() => setIsCreateDealerOrderOpen(true)}
+                          className="bg-[#0682E4] hover:bg-[#0572cb] text-white font-black px-6 py-5 rounded-2xl shadow-xl transition-all hover:scale-105 flex items-center gap-2"
+                        >
+                          <Plus className="w-5 h-5" /> + Create Customer Order & Invoice
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dealer Metrics Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Customer Invoices</span>
+                        <span className="text-2xl sm:text-3xl font-black text-[#0B1A2A] dark:text-white font-heading mt-1 block">
+                          {dealerInvoices.length}
+                        </span>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#0682E4] flex items-center justify-center font-bold">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Sales Value</span>
+                        <span className="text-2xl sm:text-3xl font-black text-[#7cb93e] font-heading mt-1 block">
+                          ₹{dealerInvoices.reduce((sum, inv) => sum + (Number(inv.total) || Number(inv.totalPrice) || 0), 0).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-[#7cb93e] flex items-center justify-center font-bold">
+                        <IndianRupee className="w-6 h-6" />
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Active / In Transit</span>
+                        <span className="text-2xl sm:text-3xl font-black text-amber-500 font-heading mt-1 block">
+                          {dealerInvoices.filter(i => (i.orderStatus || i.status) !== 'Delivered' && (i.orderStatus || i.status) !== 'Cancelled').length}
+                        </span>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center font-bold">
+                        <Truck className="w-6 h-6" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dealer Invoices Table Header & Filter */}
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                      <div>
+                        <h3 className="font-heading text-xl font-black text-[#0B1A2A] dark:text-white">
+                          Issued Customer Invoices & Orders
+                        </h3>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                          Invoices printed with your store name and authorized dealer credential.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="relative flex-grow sm:w-64">
+                          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            placeholder="Search customer, phone, order #..."
+                            value={dealerSearchQuery}
+                            onChange={(e) => setDealerSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0682E4]"
+                          />
+                        </div>
+                        <Button
+                          onClick={refreshDealerInvoices}
+                          variant="outline"
+                          size="icon"
+                          className="rounded-xl h-9 w-9 text-slate-600 shrink-0"
+                          title="Refresh Invoices"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Table or Empty State */}
+                    {dealerInvoices.length === 0 ? (
+                      <div className="py-12 text-center space-y-4">
+                        <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-950/50 text-[#0682E4] flex items-center justify-center mx-auto text-2xl shadow-inner">
+                          <FileText className="w-8 h-8" />
+                        </div>
+                        <h4 className="font-heading font-black text-lg text-[#0B1A2A] dark:text-white">No Customer Invoices Yet</h4>
+                        <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                          When you book orders for walk-in customers or generate invoices, they will appear here with instant print and download options.
+                        </p>
+                        <Button
+                          onClick={() => setIsCreateDealerOrderOpen(true)}
+                          className="bg-[#0682E4] hover:bg-[#0572cb] text-white font-extrabold text-xs px-6 py-3 rounded-xl shadow-md"
+                        >
+                          + Create Your First Customer Order
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto -mx-6 sm:mx-0">
+                        <table className="w-full text-left text-xs">
+                          <thead>
+                            <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                              <th className="pb-3 px-4">Invoice / Order #</th>
+                              <th className="pb-3 px-4">Customer Details</th>
+                              <th className="pb-3 px-4">Products & Size</th>
+                              <th className="pb-3 px-4">Amount</th>
+                              <th className="pb-3 px-4">Status</th>
+                              <th className="pb-3 px-4 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                            {dealerInvoices
+                              .filter((inv) => {
+                                const q = dealerSearchQuery.toLowerCase().trim();
+                                if (!q) return true;
+                                return (
+                                  (inv.orderNumber || inv.id || '').toLowerCase().includes(q) ||
+                                  (inv.customerName || inv.shippingAddress?.firstName || '').toLowerCase().includes(q) ||
+                                  (inv.customerPhone || inv.shippingAddress?.phone || '').includes(q) ||
+                                  (inv.items || []).some((it: any) => (it.name || '').toLowerCase().includes(q))
+                                );
+                              })
+                              .map((invoice, idx) => {
+                                const orderId = invoice.orderNumber || invoice.id || `DW-${invoice._id?.toString().slice(-6)}`;
+                                const custName = invoice.customerName || (invoice.shippingAddress?.firstName ? `${invoice.shippingAddress.firstName} ${invoice.shippingAddress.lastName || ''}`.trim() : 'Walk-in Customer');
+                                const custPhone = invoice.customerPhone || invoice.shippingAddress?.phone || '—';
+                                const custCity = invoice.shippingAddress?.city || invoice.shippingAddress?.state || '';
+                                const orderTotal = Number(invoice.total || invoice.totalPrice || 0);
+                                const orderStatus = invoice.orderStatus || invoice.status || 'Confirmed';
+                                const orderDate = new Date(invoice.createdAt || Date.now()).toLocaleDateString('en-IN', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                });
+
+                                return (
+                                  <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                                    <td className="py-4 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">
+                                      <div className="font-extrabold text-[#0682E4]">{orderId}</div>
+                                      <div className="text-[10px] text-slate-400 font-sans font-normal">{orderDate}</div>
+                                    </td>
+                                    <td className="py-4 px-4">
+                                      <div className="font-bold text-slate-800 dark:text-slate-200">{custName}</div>
+                                      <div className="text-[11px] text-slate-500 font-normal">{custPhone}</div>
+                                      {custCity && <div className="text-[10px] text-slate-400">{custCity}</div>}
+                                    </td>
+                                    <td className="py-4 px-4 max-w-[200px]">
+                                      {(invoice.items || []).map((it: any, iIdx: number) => (
+                                        <div key={iIdx} className="text-slate-700 dark:text-slate-300 font-semibold truncate">
+                                          {it.qty || 1}x {it.name} <span className="text-[10px] text-slate-400">({it.variantSku || it.dimensions || 'Standard'})</span>
+                                        </div>
+                                      ))}
+                                    </td>
+                                    <td className="py-4 px-4">
+                                      <div className="font-black text-[#7cb93e] font-heading text-sm">
+                                        ₹{orderTotal.toLocaleString('en-IN')}
+                                      </div>
+                                      <div className="text-[10px] text-slate-400 capitalize">
+                                        {invoice.paymentMethod || 'COD'}
+                                      </div>
+                                    </td>
+                                    <td className="py-4 px-4">
+                                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                                        orderStatus === 'Delivered'
+                                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                          : orderStatus === 'Shipped' || orderStatus === 'Out for Delivery'
+                                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                      }`}>
+                                        {orderStatus}
+                                      </span>
+                                    </td>
+                                    <td className="py-4 px-4 text-right">
+                                      <button
+                                        type="button"
+                                        onClick={() => setSelectedReceiptOrder(invoice)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#0682E4] text-slate-700 hover:text-white dark:bg-slate-800 dark:text-slate-300 font-bold text-xs transition-colors shadow-sm"
+                                      >
+                                        <Printer className="w-3.5 h-3.5" /> View / Print
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
             </AnimatePresence>
           </main>
         </div>
@@ -1376,6 +1692,32 @@ export default function AccountPage() {
           open={Boolean(selectedReceiptOrder)}
           onClose={() => setSelectedReceiptOrder(null)}
         />
+
+        {/* ─── Modal: Dealer Create Customer Order & Invoice ────────────────── */}
+        {isDealer && (
+          <AdminCreateUserOrderModal
+            open={isCreateDealerOrderOpen}
+            onClose={() => setIsCreateDealerOrderOpen(false)}
+            products={dealerProducts}
+            dealerInfo={
+              dealerInfo || {
+                id: (session?.user as any)?.id,
+                name: session?.user?.name || '',
+                email: session?.user?.email || '',
+                storeName: (session?.user as any)?.dealerDetails?.storeName || `${session?.user?.name || 'Dealer'}'s Store`,
+              }
+            }
+            onOrderCreated={(newOrder) => {
+              setDealerInvoices((prev) => [newOrder, ...prev]);
+              setIsCreateDealerOrderOpen(false);
+              refreshDealerInvoices();
+            }}
+            onViewReceipt={(order) => setSelectedReceiptOrder(order)}
+            showToast={(type, message) => {
+              if (type === 'error') alert(message);
+            }}
+          />
+        )}
 
       </div>
     </div>

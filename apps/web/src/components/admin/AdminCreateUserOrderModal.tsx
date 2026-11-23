@@ -15,6 +15,10 @@ export interface DealerInfo {
   storeName?: string;
   phone?: string;
   email?: string;
+  city?: string;
+  state?: string;
+  gstNumber?: string;
+  address?: string;
 }
 
 interface AdminCreateUserOrderModalProps {
