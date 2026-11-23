@@ -15,7 +15,8 @@ import {
   Filter,
   Star,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Maximize2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PRODUCT_CATALOG, getDeduplicatedCatalog } from '@/lib/catalog';
@@ -456,75 +457,101 @@ function ProductListingContent({
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.5, delay: (index % 4) * 0.1 }}
-                  className="bg-white rounded-3xl p-5 flex flex-col shadow-[0_4px_20px_-10px_rgba(0,0,0,0.06)] group hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.12)] transition-all duration-300 border border-gray-100 hover:border-gray-200 hover:-translate-y-1"
+                  className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col shadow-[0_4px_20px_-10px_rgba(0,0,0,0.06)] group hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.12)] transition-all duration-300 border border-gray-100 hover:border-gray-200 hover:-translate-y-1"
                 >
 
                     {/* Image & Wishlist */}
-                    <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#f8fafc] mb-4">
-                      <Image src={product.image} alt={product.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out" />
+                    <div className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[4/3] bg-[#f8fafc] mb-3 sm:mb-4">
+                      <Image src={product.image} alt={product.title} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out" />
 
                       <button
                         onClick={(e) => toggleWishlist(product, e)}
-                      className={`absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all transform active:scale-90 ${wishlist.includes(product.slug) ? 'text-red-500' : 'text-[#64748b] hover:text-red-500'
+                        className={`absolute top-2 right-2 sm:top-3 sm:right-3 w-7 h-7 sm:w-9 sm:h-9 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all transform active:scale-90 ${wishlist.includes(product.slug) ? 'text-red-500' : 'text-[#64748b] hover:text-red-500'
                           }`}
                       >
-                        <Heart className={`w-4 h-4 ${wishlist.includes(product.slug) ? 'fill-red-500 text-red-500' : ''}`} strokeWidth={2} />
+                        <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${wishlist.includes(product.slug) ? 'fill-red-500 text-red-500' : ''}`} strokeWidth={2} />
                       </button>
                     </div>
 
                     {/* Content */}
-                              <div className="flex-grow flex flex-col justify-between">
-                                <div>
-                                  {/* Title & Price Header */}
-                                  <div className="flex justify-between items-start gap-3 mb-3">
-                                    <div className="min-w-0">
-                                      <h3 className="font-heading font-extrabold text-xl text-[#0B1A2A] group-hover:text-[#0682E4] transition-colors leading-snug truncate">{product.title}</h3>
-                                      <div className="flex items-center gap-1.5 mt-1">
-                                        <div className="inline-flex items-center gap-1 bg-amber-50/80 px-2 py-0.5 rounded-full border border-amber-200/60">
-                                          <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
-                                          <span className="text-xs font-bold text-[#0B1A2A]">{product.rating || 4.8}</span>
-                                          <span className="text-[11px] text-[#64748b]">({(product.reviews || 1240).toLocaleString('en-IN')})</span>
-                                        </div>
-                                      </div>
-                                    </div>
+                    <div className="flex-grow flex flex-col justify-between">
+                      <div>
+                        {/* Title & Price Header */}
+                        <div className="flex justify-between items-start gap-2 mb-2">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-heading font-black text-base sm:text-2xl text-[#0B1A2A] group-hover:text-[#0682E4] transition-colors leading-tight truncate">
+                              {product.title}
+                            </h3>
+                            <div className="h-0.5 w-7 sm:w-9 bg-[#0682E4] rounded-full mt-1 sm:mt-1.5" />
+                          </div>
 
-                                      {/* Price block */}
-                                      <div className="text-right shrink-0">
-                                        <span className="text-[10px] uppercase font-bold tracking-wider text-[#64748b] block">From</span>
-                                        <div className="flex items-baseline justify-end gap-1.5">
-                                          {product.originalPrice && (
-                                            <span className="text-xs font-semibold text-gray-400 line-through">
-                                              ₹{Number(product.originalPrice).toLocaleString('en-IN')}
-                                            </span>
-                                          )}
-                                          <span className="text-xl font-black text-[#0B1A2A]">{product.price}</span>
-                                        </div>
-                                      </div>
-                                    </div>
+                          {/* Price block */}
+                          <div className="text-right shrink-0">
+                            <span className="inline-block bg-blue-50 text-[#0682E4] text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider mb-0.5">
+                              FROM
+                            </span>
+                            <div className="flex items-baseline justify-end gap-1">
+                              {product.originalPrice && (
+                                <span className="hidden sm:inline text-xs font-semibold text-gray-400 line-through">
+                                  ₹{Number(product.originalPrice).toLocaleString('en-IN')}
+                                </span>
+                              )}
+                              <span className="text-base sm:text-2xl font-black text-[#0B1A2A] leading-tight block">
+                                {product.price}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
 
-                                      {/* Minimal Specs Row */}
-                                      <div className="flex items-center gap-2 mb-5 flex-wrap">
-                                        {product.thickness && (
-                                          <span className="inline-flex items-center gap-1.5 bg-gray-50 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200/70">
-                                            <CircleDot className="w-3.5 h-3.5 text-[#0682E4]" />
-                                            {product.thickness}
-                                          </span>
-                                        )}
-                                        <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200/60">
-                                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                                          {product.warranty || 10}-Year Warranty
-                                        </span>
-                                      </div>
-                                    </div>
+                        {/* Divider */}
+                        <div className="w-full h-px bg-slate-100 my-2 sm:my-3" />
 
-                                        {/* Action Button */}
-                                        <Link href={`/product/${product.slug}`} className="block mt-auto">
-                                          <Button className="w-full bg-[#0682E4] hover:bg-[#0570c7] text-white rounded-xl h-12 font-bold text-sm shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 group/btn">
-                                            <span>View Details</span>
-                                            <ArrowRight className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" />
-                                          </Button>
-                                        </Link>
-                                      </div>
+                        {/* 3-Column Features / Specs Bar */}
+                        <div className="grid grid-cols-3 items-center text-center py-0.5 mb-3 sm:mb-4">
+                          {/* 1. Rating */}
+                          <div className="flex items-center justify-center gap-1 sm:gap-1.5 border-r border-slate-200 pr-1">
+                            <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-400 shrink-0" />
+                            <div className="text-left leading-none">
+                              <span className="text-[11px] sm:text-sm font-extrabold text-[#0B1A2A] block">
+                                {product.rating || 4.8}
+                              </span>
+                              <span className="text-[9px] sm:text-[11px] text-[#64748b] block mt-0.5">
+                                ({(product.reviews || 1240).toLocaleString('en-IN')})
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* 2. Thickness */}
+                          <div className="flex items-center justify-center gap-1 sm:gap-1.5 px-1">
+                            <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0682E4] shrink-0" />
+                            <span className="text-[10px] sm:text-xs font-black text-[#0B1A2A] whitespace-nowrap">
+                              {product.thickness || '5" / 6"'}
+                            </span>
+                          </div>
+
+                          {/* 3. Warranty */}
+                          <div className="flex items-center justify-center gap-1 sm:gap-1.5 border-l border-slate-200 pl-1">
+                            <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
+                            <div className="text-left leading-none">
+                              <span className="text-[10px] sm:text-xs font-black text-emerald-700 block">
+                                {product.warranty ? `${product.warranty}-Year` : '5-Year'}
+                              </span>
+                              <span className="text-[8px] sm:text-[10px] font-bold text-emerald-700 block mt-0.5">
+                                Warranty
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <Link href={`/product/${product.slug}`} className="block mt-auto">
+                        <Button className="w-full bg-[#0682E4] hover:bg-[#0570c7] text-white rounded-xl h-9 sm:h-11 font-black text-xs sm:text-sm shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-1.5 group/btn">
+                          <span>View Details</span>
+                          <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform group-hover/btn:translate-x-1 transition-transform" />
+                        </Button>
+                      </Link>
+                    </div>
 
                                     </motion.div>
               ))}
