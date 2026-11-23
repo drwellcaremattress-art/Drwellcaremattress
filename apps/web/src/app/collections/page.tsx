@@ -97,7 +97,7 @@ export default function CollectionsPage() {
           <h2 className="font-heading text-3xl sm:text-4xl font-black text-[#0B1A2A]">Why Choose Our Orthopaedic Series?</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
               tag: "SCIENTIFIC ALIGNMENT",
