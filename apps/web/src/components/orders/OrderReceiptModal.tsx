@@ -29,6 +29,35 @@ function numberToWords(num: number): string {
   return `${inWords(rounded)} Rupees Only`;
 }
 
+function getValidColor(color?: string, sku?: string) {
+  if (!color || /thickness|inch/i.test(color)) {
+    if (sku) {
+      if (/ROYALBLUE/i.test(sku)) return 'Royal Blue';
+      if (/SLATEGRAY|SLATEGREY/i.test(sku)) return 'Slate Gray';
+      if (/PUREWHITE|WHITE/i.test(sku)) return 'Pure White';
+    }
+    return 'Pure White';
+  }
+  return color;
+}
+
+function getValidDimension(it: any) {
+  if (it.dimensions && it.dimensions !== it.variantSku) return it.dimensions;
+  if (it.size) {
+    return `${it.size}${it.thickness ? ` (${it.thickness})` : ''}`;
+  }
+  if (it.variantSku) {
+    const parts = it.variantSku.split('-');
+    const sizePart = parts.find((p: string) => /single|double|queen|king/i.test(p));
+    const thickPart = parts.find((p: string) => /inch/i.test(p));
+    if (sizePart) {
+      const formattedSize = sizePart.charAt(0).toUpperCase() + sizePart.slice(1).toLowerCase();
+      return `${formattedSize}${thickPart ? ` (${thickPart})` : ''}`;
+    }
+  }
+  return it.thickness ? `${it.thickness} Thickness` : 'Standard';
+}
+
 export default function OrderReceiptModal({ order, open, onClose }: Props) {
   if (!open || !order) return null;
 
@@ -71,10 +100,10 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
             <div style="font-size: 10px; color: #64748b; font-family: monospace; margin-top: 2px;">SKU: ${it.variantSku || 'DW-MATTRESS'}</div>
           </td>
           <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; color: #334155; font-size: 12px;">
-            ${it.dimensions || it.size || it.variantSku || 'Standard'}
+            ${getValidDimension(it)}
           </td>
-          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #334155; font-size: 12px;">
-            ${it.color || 'Standard'}
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #0f172a; font-size: 12px; font-weight: 700;">
+            ${getValidColor(it.color, it.variantSku)}
           </td>
           <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #0f172a; font-size: 12px;">
             ${it.qty || 1}
@@ -668,10 +697,10 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                             <span className="text-[10px] text-slate-400 font-mono">SKU: {it.variantSku || 'DW-MATTRESS'}</span>
                           </td>
                           <td className="py-3 px-3 text-slate-600 font-medium">
-                            {it.dimensions || it.size || it.variantSku || 'Standard'}
+                            {getValidDimension(it)}
                           </td>
-                          <td className="py-3 px-3 text-center text-slate-600 font-medium">
-                            {it.color || 'Standard'}
+                          <td className="py-3 px-3 text-center text-slate-800 font-bold">
+                            {getValidColor(it.color, it.variantSku)}
                           </td>
                           <td className="py-3 px-3 text-center font-bold text-slate-800">
                             {it.qty || 1}
