@@ -448,7 +448,7 @@ function ProductListingContent({
           {processedProducts.length === 0 ? (
             <div className="py-20 text-center text-gray-500 font-medium">No products match your selected filters.</div>
           ) : (
-            <div className={`grid grid-cols-1 md:grid-cols-2 ${!hasFilterSidebar || gridCols === 3 ? 'lg:grid-cols-3' : 'xl:grid-cols-2'} gap-8`}>
+            <div className={`grid grid-cols-2 md:grid-cols-2 ${!hasFilterSidebar || gridCols === 3 ? 'lg:grid-cols-3' : 'xl:grid-cols-2'} gap-3 md:gap-8`}>
               {processedProducts.map((product, index) => (
                 <motion.div
                   key={product.id}
