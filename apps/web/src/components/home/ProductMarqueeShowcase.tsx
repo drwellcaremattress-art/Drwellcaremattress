@@ -158,7 +158,7 @@ const ROW_TWO_PRODUCTS: MarqueeProduct[] = [
 function ProductCard({ product }: { product: MarqueeProduct }) {
   return (
     <Link
-      href={`/products/${product.slug}`}
+      href={`/product/${product.slug}`}
       className="group relative w-[270px] sm:w-[350px] md:w-[410px] rounded-2xl bg-white border border-slate-200/90 hover:border-[#0682E4]/50 overflow-hidden shrink-0 transition-all duration-500 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_36px_rgba(6,130,228,0.15)] hover:-translate-y-1.5 flex flex-col select-none"
     >
       {/* Full Mattress Image Container - No badges blocking */}
