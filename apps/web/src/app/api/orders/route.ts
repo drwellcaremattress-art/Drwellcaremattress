@@ -78,7 +78,12 @@ export async function POST(req: NextRequest) {
     });
 
     const createdOrder = await order.save();
-    return NextResponse.json(createdOrder, { status: 201 });
+    const orderData = createdOrder.toObject ? createdOrder.toObject() : createdOrder;
+    return NextResponse.json({
+      ...orderData,
+      total: orderData.total,
+      totalPrice: orderData.total,
+    }, { status: 201 });
   } catch (error: any) {
     console.error('[POST /api/orders]', error);
     return NextResponse.json({ message: error.message }, { status: 500 });

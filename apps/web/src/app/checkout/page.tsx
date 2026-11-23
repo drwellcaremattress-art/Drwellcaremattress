@@ -271,7 +271,13 @@ export default function CheckoutPage() {
         });
 
         const createdOrderObj = res.ok ? await res.json() : { ...finalPayload, _id: orderNumber, createdAt: new Date().toISOString() };
-        setConfirmedOrder(createdOrderObj);
+        const safeOrder = {
+          ...createdOrderObj,
+          total: createdOrderObj.total || createdOrderObj.totalPrice || total,
+          totalPrice: createdOrderObj.totalPrice || createdOrderObj.total || total,
+          items: createdOrderObj.items || createdOrderObj.orderItems || baseOrderPayload.orderItems,
+        };
+        setConfirmedOrder(safeOrder);
         saveOrderToAccountHistory(orderNumber, items, total, data);
         clearCart();
       } catch (err) {
@@ -483,10 +489,22 @@ export default function CheckoutPage() {
               </div>
 
               {/* Total Calculation */}
-              <div className="bg-[#0B1A2A] text-white p-4 rounded-2xl flex justify-between items-center font-bold text-base sm:text-lg">
-                <span>{confirmedOrder.paymentMethod === 'cod' ? 'Total Amount to Pay on Delivery:' : 'Total Amount Paid:'}</span>
-                <span className="font-mono text-[#7cb93e] text-xl">₹{(confirmedOrder.totalPrice || total).toLocaleString('en-IN')}</span>
-              </div>
+              {(() => {
+                const displayTotal =
+                  Number(confirmedOrder.total) ||
+                  Number(confirmedOrder.totalPrice) ||
+                  (confirmedOrder.orderItems || confirmedOrder.items || []).reduce(
+                    (sum: number, it: any) => sum + (Number(it.price) || 0) * (Number(it.qty) || 1),
+                    0
+                  ) ||
+                  0;
+                return (
+                  <div className="bg-[#0B1A2A] text-white p-4 rounded-2xl flex justify-between items-center font-bold text-base sm:text-lg">
+                    <span>{confirmedOrder.paymentMethod === 'cod' ? 'Total Amount to Pay on Delivery:' : 'Total Amount Paid:'}</span>
+                    <span className="font-mono text-[#7cb93e] text-xl">₹{displayTotal.toLocaleString('en-IN')}</span>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Action Buttons */}
