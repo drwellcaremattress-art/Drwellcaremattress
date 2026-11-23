@@ -107,7 +107,7 @@ const TRUST_CARDS: TrustCardData[] = [
 
 export function Real3DTrustCards() {
   return (
-    <section className="relative w-full py-8 px-3 sm:px-6 max-w-[1440px] mx-auto select-none overflow-hidden">
+    <section className="hidden sm:block relative w-full py-8 px-3 sm:px-6 max-w-[1440px] mx-auto select-none overflow-hidden">
       {/* ── Background Wave Ribbon (Smooth 3D Green Ribbon Flowing Behind) ── */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center -z-10 opacity-75">
         <svg
