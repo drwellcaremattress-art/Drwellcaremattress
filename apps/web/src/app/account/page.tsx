@@ -893,7 +893,7 @@ export default function AccountPage() {
                                 type="text"
                                 value={profile.fullName}
                                 onChange={e => setProfile({ ...profile, fullName: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
+                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                                 required
                               />
                             </div>
@@ -903,7 +903,7 @@ export default function AccountPage() {
                                 type="tel"
                                 value={profile.phone}
                                 onChange={e => setProfile({ ...profile, phone: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
+                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                                 required
                               />
                             </div>
@@ -958,7 +958,7 @@ export default function AccountPage() {
                                 placeholder="Enter your full name"
                                 value={profile.fullName}
                                 onChange={e => setProfile({ ...profile, fullName: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                                 required
                               />
                             </div>
@@ -969,7 +969,7 @@ export default function AccountPage() {
                                 placeholder="Enter your email address"
                                 value={profile.email}
                                 onChange={e => setProfile({ ...profile, email: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                                 required
                               />
                             </div>
@@ -980,7 +980,7 @@ export default function AccountPage() {
                                 placeholder="Enter your mobile number"
                                 value={profile.phone}
                                 onChange={e => setProfile({ ...profile, phone: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                                 required
                               />
                             </div>
@@ -990,7 +990,7 @@ export default function AccountPage() {
                                 type="date"
                                 value={profile.dob}
                                 onChange={e => setProfile({ ...profile, dob: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
                               />
                             </div>
                           </div>
@@ -1006,12 +1006,12 @@ export default function AccountPage() {
                               <select
                                 value={profile.firmnessPref}
                                 onChange={e => setProfile({ ...profile, firmnessPref: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
                               >
-                                <option value="Medium Firm (7/10) — Recommended">Medium Firm (7/10) — Ortho Recommended</option>
-                                <option value="Firm (8.5/10) — Heavy Back Pain Relief">Firm (8.5/10) — Heavy Back Pain Relief</option>
-                                <option value="Medium Soft (5.5/10) — Plush Cloud Comfort">Medium Soft (5.5/10) — Plush Cloud Comfort</option>
-                                <option value="Dual Comfort (Reversible Soft/Firm)">Dual Comfort (Reversible Soft/Firm)</option>
+                                <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Medium Firm (7/10) — Recommended">Medium Firm (7/10) — Ortho Recommended</option>
+                                <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Firm (8.5/10) — Heavy Back Pain Relief">Firm (8.5/10) — Heavy Back Pain Relief</option>
+                                <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Medium Soft (5.5/10) — Plush Cloud Comfort">Medium Soft (5.5/10) — Plush Cloud Comfort</option>
+                                <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Dual Comfort (Reversible Soft/Firm)">Dual Comfort (Reversible Soft/Firm)</option>
                               </select>
                             </div>
                             <div>
@@ -1019,12 +1019,12 @@ export default function AccountPage() {
                               <select
                                 value={profile.sleepPosition}
                                 onChange={e => setProfile({ ...profile, sleepPosition: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
                               >
-                                <option value="Side & Back Sleeper">Side & Back Sleeper (Combination)</option>
-                                <option value="Side Sleeper Only">Side Sleeper Only (Needs Shoulder Pressure Relief)</option>
-                                <option value="Back Sleeper Only">Back Sleeper Only (Needs Lumbar Posture Core)</option>
-                                <option value="Stomach Sleeper">Stomach Sleeper (Needs Flat Firm Surface)</option>
+                                <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Side & Back Sleeper">Side & Back Sleeper (Combination)</option>
+                                <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Side Sleeper Only">Side Sleeper Only (Needs Shoulder Pressure Relief)</option>
+                                <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Back Sleeper Only">Back Sleeper Only (Needs Lumbar Posture Core)</option>
+                                <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Stomach Sleeper">Stomach Sleeper (Needs Flat Firm Surface)</option>
                               </select>
                             </div>
                           </div>
@@ -1036,7 +1036,7 @@ export default function AccountPage() {
                               value={profile.backPainRelief}
                               onChange={e => setProfile({ ...profile, backPainRelief: e.target.value })}
                               placeholder="e.g. L4-L5 disc stiffness, morning neck pain, partner motion disturbance..."
-                              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                              className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                             />
                           </div>
                         </div>
@@ -1883,11 +1883,11 @@ export default function AccountPage() {
                       <select
                         value={newAddr.tag}
                         onChange={e => setNewAddr({ ...newAddr, tag: e.target.value as any })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
                       >
-                        <option value="Home">Home</option>
-                        <option value="Office">Office</option>
-                        <option value="Other">Other</option>
+                        <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Home">Home</option>
+                        <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Office">Office</option>
+                        <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white" value="Other">Other</option>
                       </select>
                     </div>
                     <div>
@@ -1897,7 +1897,7 @@ export default function AccountPage() {
                         placeholder="Enter recipient full name"
                         value={newAddr.name}
                         onChange={e => setNewAddr({ ...newAddr, name: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                       />
                     </div>
                   </div>
@@ -1910,7 +1910,7 @@ export default function AccountPage() {
                       placeholder="Enter street, building or flat no."
                       value={newAddr.street}
                       onChange={e => setNewAddr({ ...newAddr, street: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                     />
                   </div>
 
@@ -1923,7 +1923,7 @@ export default function AccountPage() {
                         placeholder="Enter your city"
                         value={newAddr.city}
                         onChange={e => setNewAddr({ ...newAddr, city: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                       />
                     </div>
                     <div>
@@ -1933,7 +1933,7 @@ export default function AccountPage() {
                         placeholder="Enter your state"
                         value={newAddr.state}
                         onChange={e => setNewAddr({ ...newAddr, state: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                       />
                     </div>
                     <div>
@@ -1944,7 +1944,7 @@ export default function AccountPage() {
                         placeholder="Enter 6-digit PIN code"
                         value={newAddr.pincode}
                         onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4] focus:text-slate-900 dark:focus:text-white"
                       />
                     </div>
                   </div>
