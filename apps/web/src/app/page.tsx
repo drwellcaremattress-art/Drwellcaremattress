@@ -299,11 +299,11 @@ export default function Home() {
                       />
                     </motion.div>
 
-                    {/* Floating animated label over image */}
+                    {/* Floating animated label over image (hidden on mobile to keep background image clearly visible) */}
                     <motion.div
                       animate={{ y: [0, -10, 0] }}
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute top-6 right-6 md:top-12 md:right-12 bg-[#06101B]/90 backdrop-blur-md border border-white/20 p-4 shadow-2xl z-30"
+                      className="hidden md:block absolute top-6 right-6 md:top-12 md:right-12 bg-[#06101B]/90 backdrop-blur-md border border-white/20 p-4 shadow-2xl z-30"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-[#7cb93e] flex items-center justify-center text-white shadow-[0_0_15px_rgba(124,185,62,0.5)]">
