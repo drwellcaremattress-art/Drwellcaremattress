@@ -5,7 +5,8 @@ import {
   Package, MapPin, Heart, User, LogOut, ChevronRight, ShieldCheck, 
   Award, Sparkles, CheckCircle, Clock, Truck, FileText, Plus, 
   Edit3, Trash2, Phone, Mail, Calendar, Activity, Star, Moon, ArrowUpRight,
-  ExternalLink, Copy, Store, Printer, IndianRupee, Search, RefreshCw
+  ExternalLink, Copy, Store, Printer, IndianRupee, Search, RefreshCw,
+  Building, BadgeCheck, CheckCircle2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -65,6 +66,7 @@ export default function AccountPage() {
   const [dealerProducts, setDealerProducts] = useState<ProductType[]>([]);
   const [isCreateDealerOrderOpen, setIsCreateDealerOrderOpen] = useState(false);
   const [dealerSearchQuery, setDealerSearchQuery] = useState('');
+  const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<'All' | 'Confirmed' | 'Processing' | 'Shipped' | 'Delivered'>('All');
 
   // Dynamic Real Data States (100% Mockup Removed)
   const [orders, setOrders] = useState<any[]>([]);
@@ -415,54 +417,106 @@ export default function AccountPage() {
     <div className="bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-10 px-4 sm:px-6 font-body">
       <div className="max-w-7xl mx-auto">
         
-        {/* ─── VIP Hero Header Banner ────────────────────────────────────────── */}
-        <div className="bg-gradient-to-r from-[#0B1A2A] via-[#122840] to-[#183656] rounded-[2.5rem] pt-12 pb-8 sm:pt-16 sm:pb-10 px-6 sm:px-10 text-white shadow-2xl relative overflow-hidden mb-10 border border-white/10">
-          <div className="absolute right-0 top-0 w-96 h-96 bg-[#7cb93e]/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute left-1/3 bottom-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div className="flex items-center gap-5">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-[#7cb93e] to-[#5a8b2a] flex items-center justify-center text-white font-black text-3xl sm:text-4xl shadow-[0_10px_25px_-5px_rgba(124,185,62,0.6)] border-2 border-white/30 shrink-0">
-                {profile.fullName.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-[#7cb93e] bg-white/10 backdrop-blur-md px-3.5 py-1 rounded-full mb-2 border border-white/10">
-                  <Award className="w-4 h-4 text-amber-400 fill-amber-400" />
-                  Dr.Well Care VIP Gold Member
+        {/* ─── Hero Header Banner (Adaptive for Dealer vs Customer) ───────────── */}
+        {isDealer ? (
+          <div className="bg-gradient-to-r from-[#071728] via-[#0B2545] to-[#04325e] rounded-[2.5rem] pt-10 pb-8 sm:pt-14 sm:pb-9 px-6 sm:px-10 text-white shadow-2xl relative overflow-hidden mb-10 border border-blue-400/20">
+            <div className="absolute right-0 top-0 w-96 h-96 bg-[#0682E4]/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute left-1/4 bottom-0 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <div className="flex items-center gap-5">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-[#0682E4] to-[#015bb0] flex items-center justify-center text-white font-black text-3xl sm:text-4xl shadow-[0_10px_25px_-5px_rgba(6,130,228,0.6)] border-2 border-white/30 shrink-0">
+                  <Store className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
                 </div>
-                <h1 className="font-heading text-3xl sm:text-4xl font-black text-white tracking-tight">
-                  {profile.fullName}
-                </h1>
-                <p className="text-sm text-white/80 font-medium mt-1 flex items-center gap-4 flex-wrap">
-                  <span className="flex items-center gap-1.5"><Mail className="w-4 h-4 text-[#7cb93e]" /> {profile.email}</span>
-                  <span className="flex items-center gap-1.5"><Phone className="w-4 h-4 text-[#7cb93e]" /> {profile.phone}</span>
-                </p>
+                <div>
+                  <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-blue-200 bg-white/10 backdrop-blur-md px-3.5 py-1 rounded-full mb-2 border border-blue-400/30">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    Authorized Showroom Partner • Direct HQ Billing
+                  </div>
+                  <h1 className="font-heading text-3xl sm:text-4xl font-black text-white tracking-tight">
+                    {dealerInfo?.storeName || (session?.user as any)?.dealerDetails?.storeName || 'Official Showroom Partner'}
+                  </h1>
+                  <p className="text-sm text-slate-200 font-medium mt-1 flex items-center gap-4 flex-wrap">
+                    <span className="flex items-center gap-1.5 font-bold text-white"><User className="w-4 h-4 text-[#0682E4]" /> {dealerInfo?.name || profile.fullName}</span>
+                    <span className="flex items-center gap-1.5"><Mail className="w-4 h-4 text-[#0682E4]" /> {dealerInfo?.email || profile.email}</span>
+                    {dealerInfo?.phone && <span className="flex items-center gap-1.5"><Phone className="w-4 h-4 text-[#0682E4]" /> {dealerInfo.phone}</span>}
+                    {dealerInfo?.city && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-400" /> {dealerInfo.city}{dealerInfo?.state ? `, ${dealerInfo.state}` : ''}</span>}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* Live Computed Summary Badges (100% Real) */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-5 w-full md:w-auto shrink-0 mt-6 md:mt-10 self-end">
-              <div className="bg-white/10 backdrop-blur-xl py-6 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[110px]">
-                <span className="text-xs font-black text-white/90 uppercase tracking-widest block mb-2 leading-relaxed">Loyalty Pts</span>
-                <span className="text-2xl sm:text-3xl font-black text-[#7cb93e] font-heading leading-none">
-                  {loyaltyPoints.toLocaleString('en-IN')}
-                </span>
-              </div>
-              <div className="bg-white/10 backdrop-blur-xl py-6 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[110px]">
-                <span className="text-xs font-black text-white/90 uppercase tracking-widest block mb-2 leading-relaxed">Warranties</span>
-                <span className="text-2xl sm:text-3xl font-black text-white font-heading leading-none flex items-baseline gap-1">
-                  {activeWarranties} <span className="text-xs sm:text-sm font-bold text-white/70">Active</span>
-                </span>
-              </div>
-              <div className="bg-white/10 backdrop-blur-xl py-6 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[110px]">
-                <span className="text-xs font-black text-white/90 uppercase tracking-widest block mb-2 leading-relaxed">Total Orders</span>
-                <span className="text-2xl sm:text-3xl font-black text-amber-400 font-heading leading-none flex items-baseline gap-1">
-                  {orders.length} <span className="text-xs sm:text-sm font-bold text-amber-300/80">{orders.length === 1 ? 'Order' : 'Orders'}</span>
-                </span>
+              {/* Live Computed Summary Badges for Dealer */}
+              <div className="grid grid-cols-3 gap-3 sm:gap-5 w-full md:w-auto shrink-0 mt-6 md:mt-10 self-end">
+                <div className="bg-white/10 backdrop-blur-xl py-5 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[110px]">
+                  <span className="text-[11px] font-black text-blue-200 uppercase tracking-widest block mb-1.5 leading-relaxed">Invoices</span>
+                  <span className="text-2xl sm:text-3xl font-black text-white font-heading leading-none">
+                    {dealerInvoices.length}
+                  </span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-xl py-5 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[110px]">
+                  <span className="text-[11px] font-black text-emerald-200 uppercase tracking-widest block mb-1.5 leading-relaxed">Turnover</span>
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-heading leading-none">
+                    ₹{dealerInvoices.reduce((sum, inv) => sum + (Number(inv.total) || Number(inv.totalPrice) || 0), 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-xl py-5 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[110px]">
+                  <span className="text-[11px] font-black text-amber-200 uppercase tracking-widest block mb-1.5 leading-relaxed">Partner Tier</span>
+                  <span className="text-base sm:text-lg font-black text-amber-300 font-heading leading-none flex items-center gap-1">
+                    <Award className="w-4 h-4 text-amber-400" /> Platinum
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-r from-[#0B1A2A] via-[#122840] to-[#183656] rounded-[2.5rem] pt-12 pb-8 sm:pt-16 sm:pb-10 px-6 sm:px-10 text-white shadow-2xl relative overflow-hidden mb-10 border border-white/10">
+            <div className="absolute right-0 top-0 w-96 h-96 bg-[#7cb93e]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute left-1/3 bottom-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <div className="flex items-center gap-5">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-[#7cb93e] to-[#5a8b2a] flex items-center justify-center text-white font-black text-3xl sm:text-4xl shadow-[0_10px_25px_-5px_rgba(124,185,62,0.6)] border-2 border-white/30 shrink-0">
+                  {profile.fullName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-[#7cb93e] bg-white/10 backdrop-blur-md px-3.5 py-1 rounded-full mb-2 border border-white/10">
+                    <Award className="w-4 h-4 text-amber-400 fill-amber-400" />
+                    Dr.Well Care VIP Gold Member
+                  </div>
+                  <h1 className="font-heading text-3xl sm:text-4xl font-black text-white tracking-tight">
+                    {profile.fullName}
+                  </h1>
+                  <p className="text-sm text-white/80 font-medium mt-1 flex items-center gap-4 flex-wrap">
+                    <span className="flex items-center gap-1.5"><Mail className="w-4 h-4 text-[#7cb93e]" /> {profile.email}</span>
+                    <span className="flex items-center gap-1.5"><Phone className="w-4 h-4 text-[#7cb93e]" /> {profile.phone}</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Computed Summary Badges (100% Real) */}
+              <div className="grid grid-cols-3 gap-3 sm:gap-5 w-full md:w-auto shrink-0 mt-6 md:mt-10 self-end">
+                <div className="bg-white/10 backdrop-blur-xl py-6 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[110px]">
+                  <span className="text-xs font-black text-white/90 uppercase tracking-widest block mb-2 leading-relaxed">Loyalty Pts</span>
+                  <span className="text-2xl sm:text-3xl font-black text-[#7cb93e] font-heading leading-none">
+                    {loyaltyPoints.toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-xl py-6 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[110px]">
+                  <span className="text-xs font-black text-white/90 uppercase tracking-widest block mb-2 leading-relaxed">Warranties</span>
+                  <span className="text-2xl sm:text-3xl font-black text-white font-heading leading-none flex items-baseline gap-1">
+                    {activeWarranties} <span className="text-xs sm:text-sm font-bold text-white/70">Active</span>
+                  </span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-xl py-6 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[110px]">
+                  <span className="text-xs font-black text-white/90 uppercase tracking-widest block mb-2 leading-relaxed">Total Orders</span>
+                  <span className="text-2xl sm:text-3xl font-black text-amber-400 font-heading leading-none flex items-baseline gap-1">
+                    {orders.length} <span className="text-xs sm:text-sm font-bold text-amber-300/80">{orders.length === 1 ? 'Order' : 'Orders'}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {!session && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white rounded-3xl p-6 sm:p-8 mb-8 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 border-2 border-amber-300/40">
@@ -638,186 +692,366 @@ export default function AccountPage() {
           <main className="col-span-1 lg:col-span-8 space-y-6 min-w-0">
             <AnimatePresence mode="wait">
               
-              {/* ─── TAB 1: MY PROFILE & ERGONOMICS ────────────────────────── */}
+              {/* ─── TAB 1: MY PROFILE & ERGONOMICS (ADAPTIVE FOR DEALER VS USER) ── */}
               {activeTab === 'profile' && (
                 <motion.div
                   key="profile"
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -15 }}
-                  className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-8"
+                  className="space-y-6"
                 >
-                  <div className="flex items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-800">
-                    <div>
-                      <h2 className="font-heading text-2xl font-black text-[#0B1A2A] dark:text-white">Personal Profile & Sleep Ergonomics</h2>
-                      <p className="text-xs text-slate-500 font-medium mt-1">We use your sleep profile to tailor clinical orthopaedic mattress recommendations.</p>
-                    </div>
-                    <span className="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold text-xs px-3.5 py-1.5 rounded-full border border-emerald-200 flex items-center gap-1.5 shrink-0">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600" /> 100% Privacy Secured
-                    </span>
-                  </div>
-
-                  {/* Dealer Partner Profile Banner */}
-                  {isDealer && (
-                    <div className="bg-gradient-to-r from-[#0B1A2A] via-[#122b46] to-[#07365e] text-white p-5 sm:p-6 rounded-3xl border border-blue-500/30 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-                      <div className="flex items-start sm:items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-[#0682E4] flex items-center justify-center text-white shrink-0 shadow-md">
-                          <Store className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-[#0682E4] bg-white/10 px-2.5 py-0.5 rounded-full border border-blue-400/30">
-                              Authorized Dealer Account
-                            </span>
-                            <span className="text-xs text-blue-200 font-bold">
-                              • {dealerInfo?.storeName || (session?.user as any)?.dealerDetails?.storeName || 'Official Showroom Partner'}
-                            </span>
+                  {isDealer ? (
+                    /* ─── DEALER SHOWROOM & BUSINESS PROFILE ─── */
+                    <div className="space-y-6">
+                      {/* Master Showroom Identity Card */}
+                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-[#0682E4] text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+                              <Store className="w-7 h-7" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-[#0682E4] bg-blue-50 dark:bg-blue-950/60 px-3 py-0.5 rounded-full border border-blue-200 dark:border-blue-800 flex items-center gap-1">
+                                  <BadgeCheck className="w-3.5 h-3.5 text-[#0682E4]" /> Authorized Franchise Partner
+                                </span>
+                                <span className="text-xs text-emerald-600 font-extrabold flex items-center gap-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5" /> GST Active
+                                </span>
+                              </div>
+                              <h2 className="font-heading text-2xl font-black text-[#0B1A2A] dark:text-white mt-1">
+                                {dealerInfo?.storeName || (session?.user as any)?.dealerDetails?.storeName || 'Official Showroom'}
+                              </h2>
+                              <p className="text-xs text-slate-500 font-medium">
+                                Direct factory billing & custom branded customer invoicing credential.
+                              </p>
+                            </div>
                           </div>
-                          <h3 className="font-heading font-black text-lg sm:text-xl text-white mt-1">
-                            Dealer Showroom & Invoicing Hub
+
+                          <Button
+                            onClick={() => setIsCreateDealerOrderOpen(true)}
+                            className="bg-[#0682E4] hover:bg-[#0572cb] text-white font-black px-6 py-5 rounded-2xl shadow-lg transition-all hover:scale-105 flex items-center gap-2 shrink-0"
+                          >
+                            <Plus className="w-5 h-5" /> + Create Customer Invoice
+                          </Button>
+                        </div>
+
+                        {/* Bento Grid: Showroom Business Information */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 space-y-3">
+                            <div className="text-[11px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                              <Building className="w-4 h-4 text-[#0682E4]" /> Showroom Identity & Lead
+                            </div>
+                            <div className="space-y-1.5 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Showroom Name:</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white">{dealerInfo?.storeName || 'Official Partner'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Authorized Lead:</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white">{dealerInfo?.name || profile.fullName}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Dealer Code:</span>
+                                <span className="font-mono font-bold text-[#0682E4]">DW-DLR-{(dealerInfo?.id?.slice(-6) || 'HQ01').toUpperCase()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Partnership Tier:</span>
+                                <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                  <Award className="w-3.5 h-3.5" /> Platinum Authorized
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 space-y-3">
+                            <div className="text-[11px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                              <ShieldCheck className="w-4 h-4 text-emerald-600" /> Tax & Business Compliance
+                            </div>
+                            <div className="space-y-1.5 text-xs">
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-500">GSTIN Registration:</span>
+                                <span className="font-mono font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                                  {dealerInfo?.gstNumber || 'Active Registered'}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">State Jurisdiction:</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white">{dealerInfo?.state || 'Tamil Nadu'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Customer Invoices:</span>
+                                <span className="font-extrabold text-emerald-600">Auto-Branded with Store Name</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Factory Warranty:</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white">10-Year Clinical Warranty</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 space-y-3">
+                            <div className="text-[11px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-rose-500" /> Showroom Location & Dispatch
+                            </div>
+                            <div className="space-y-1.5 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">City / District:</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white">{dealerInfo?.city || 'Chennai'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">State:</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white">{dealerInfo?.state || 'Tamil Nadu'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Showroom Address:</span>
+                                <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[180px]">{dealerInfo?.address || 'Showroom Address'}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 space-y-3">
+                            <div className="text-[11px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                              <Phone className="w-4 h-4 text-indigo-500" /> Direct Communications
+                            </div>
+                            <div className="space-y-1.5 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Store WhatsApp:</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white">{dealerInfo?.phone || profile.phone}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Official Email:</span>
+                                <span className="font-extrabold text-slate-900 dark:text-white truncate max-w-[180px]">{dealerInfo?.email || profile.email}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">HQ Factory Support:</span>
+                                <span className="font-bold text-[#0682E4]">+91 93429 22044</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Showroom Direct Action Quick Buttons */}
+                        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setActiveTab('dealer')}
+                              className="px-5 py-3 rounded-xl bg-[#0B1A2A] hover:bg-[#162a42] text-white text-xs font-black shadow-md flex items-center gap-2 transition-all active:scale-95"
+                            >
+                              <FileText className="w-4 h-4 text-[#7cb93e]" /> View Issued Invoices ({dealerInvoices.length})
+                            </button>
+                            <Link href="/collections">
+                              <button
+                                type="button"
+                                className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-extrabold flex items-center gap-2 transition-all"
+                              >
+                                <Package className="w-4 h-4" /> Browse Catalog
+                              </button>
+                            </Link>
+                          </div>
+                          <a
+                            href="tel:9342922044"
+                            className="text-xs font-bold text-slate-500 hover:text-[#0682E4] flex items-center gap-1.5"
+                          >
+                            <Phone className="w-3.5 h-3.5" /> Call HQ Production Line
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Update Contact Details Card */}
+                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                          <div>
+                            <h3 className="font-heading font-black text-lg text-[#0B1A2A] dark:text-white">
+                              Update Contact Information
+                            </h3>
+                            <p className="text-xs text-slate-500 font-medium mt-0.5">
+                              Modify your primary contact person name and mobile number.
+                            </p>
+                          </div>
+                          <span className="text-xs text-slate-400 font-bold">Auto-synced</span>
+                        </div>
+
+                        {profileSuccess && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 text-emerald-800 dark:text-emerald-200 p-4 rounded-2xl flex items-center gap-3 font-bold text-xs shadow-sm"
+                          >
+                            <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                            <div>Your contact details have been successfully updated!</div>
+                          </motion.div>
+                        )}
+
+                        <form onSubmit={handleProfileSave} className="space-y-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Lead Partner Full Name</label>
+                              <input
+                                type="text"
+                                value={profile.fullName}
+                                onChange={e => setProfile({ ...profile, fullName: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Mobile Number (WhatsApp Active)</label>
+                              <input
+                                type="tel"
+                                value={profile.phone}
+                                onChange={e => setProfile({ ...profile, phone: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
+                                required
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end pt-2">
+                            <Button
+                              type="submit"
+                              className="bg-[#0682E4] hover:bg-[#0572cb] text-white px-6 py-4 rounded-xl font-extrabold text-xs shadow-md transition-all active:scale-95"
+                            >
+                              Save Contact Details
+                            </Button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-8">
+                      <div className="flex items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-800">
+                        <div>
+                          <h2 className="font-heading text-2xl font-black text-[#0B1A2A] dark:text-white">Personal Profile & Sleep Ergonomics</h2>
+                          <p className="text-xs text-slate-500 font-medium mt-1">We use your sleep profile to tailor clinical orthopaedic mattress recommendations.</p>
+                        </div>
+                        <span className="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold text-xs px-3.5 py-1.5 rounded-full border border-emerald-200 flex items-center gap-1.5 shrink-0">
+                          <ShieldCheck className="w-4 h-4 text-emerald-600" /> 100% Privacy Secured
+                        </span>
+                      </div>
+
+                      {profileSuccess && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 text-emerald-800 dark:text-emerald-200 p-4 rounded-2xl flex items-center gap-3 font-bold text-sm shadow-sm"
+                        >
+                          <CheckCircle className="w-6 h-6 text-emerald-600 shrink-0" />
+                          <div>
+                            Your personal details and orthopaedic sleep ergonomics have been permanently saved!
+                          </div>
+                        </motion.div>
+                      )}
+
+                      <form onSubmit={handleProfileSave} className="space-y-6">
+                        <div>
+                          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+                            <User className="w-4 h-4 text-[#0B1A2A] dark:text-white" /> 1. Personal Identity
                           </h3>
-                          <p className="text-xs text-slate-300 font-medium">
-                            Create customer orders, issue official receipts with your showroom name, and track all your sales.
-                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Full Name</label>
+                              <input
+                                type="text"
+                                placeholder="Enter your full name"
+                                value={profile.fullName}
+                                onChange={e => setProfile({ ...profile, fullName: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Email Address</label>
+                              <input
+                                type="email"
+                                placeholder="Enter your email address"
+                                value={profile.email}
+                                onChange={e => setProfile({ ...profile, email: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Phone Number (WhatsApp Active)</label>
+                              <input
+                                type="tel"
+                                placeholder="Enter your mobile number"
+                                value={profile.phone}
+                                onChange={e => setProfile({ ...profile, phone: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Date of Birth</label>
+                              <input
+                                type="date"
+                                value={profile.dob}
+                                onChange={e => setProfile({ ...profile, dob: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setIsCreateDealerOrderOpen(true)}
-                          className="px-4 py-2.5 bg-[#0682E4] hover:bg-[#0572cb] text-white rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md transition-all active:scale-95"
-                        >
-                          <Plus className="w-4 h-4" /> Create Order & Invoice
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setActiveTab('dealer')}
-                          className="px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl text-xs font-bold transition-all border border-white/20"
-                        >
-                          View Invoices ({dealerInvoices.length})
-                        </button>
-                      </div>
+
+                        <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+                          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-[#7cb93e]" /> 2. Orthopaedic Sleep Ergonomics Profile
+                          </h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Preferred Mattress Firmness</label>
+                              <select
+                                value={profile.firmnessPref}
+                                onChange={e => setProfile({ ...profile, firmnessPref: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                              >
+                                <option value="Medium Firm (7/10) — Recommended">Medium Firm (7/10) — Ortho Recommended</option>
+                                <option value="Firm (8.5/10) — Heavy Back Pain Relief">Firm (8.5/10) — Heavy Back Pain Relief</option>
+                                <option value="Medium Soft (5.5/10) — Plush Cloud Comfort">Medium Soft (5.5/10) — Plush Cloud Comfort</option>
+                                <option value="Dual Comfort (Reversible Soft/Firm)">Dual Comfort (Reversible Soft/Firm)</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Primary Sleep Position</label>
+                              <select
+                                value={profile.sleepPosition}
+                                onChange={e => setProfile({ ...profile, sleepPosition: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                              >
+                                <option value="Side & Back Sleeper">Side & Back Sleeper (Combination)</option>
+                                <option value="Side Sleeper Only">Side Sleeper Only (Needs Shoulder Pressure Relief)</option>
+                                <option value="Back Sleeper Only">Back Sleeper Only (Needs Lumbar Posture Core)</option>
+                                <option value="Stomach Sleeper">Stomach Sleeper (Needs Flat Firm Surface)</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="mt-4">
+                            <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Primary Orthopaedic Concern / Focus</label>
+                            <input
+                              type="text"
+                              value={profile.backPainRelief}
+                              onChange={e => setProfile({ ...profile, backPainRelief: e.target.value })}
+                              placeholder="e.g. L4-L5 disc stiffness, morning neck pain, partner motion disturbance..."
+                              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end pt-4">
+                          <Button
+                            type="submit"
+                            className="bg-[#0B1A2A] hover:bg-[#162a42] text-white px-8 py-6 rounded-2xl font-extrabold text-base shadow-lg transition-transform hover:-translate-y-0.5"
+                          >
+                            Save Profile & Sleep Ergonomics
+                          </Button>
+                        </div>
+                      </form>
                     </div>
                   )}
-
-                  {profileSuccess && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 text-emerald-800 dark:text-emerald-200 p-4 rounded-2xl flex items-center gap-3 font-bold text-sm shadow-sm"
-                    >
-                      <CheckCircle className="w-6 h-6 text-emerald-600 shrink-0" />
-                      <div>
-                        Your personal details and orthopaedic sleep ergonomics have been permanently saved!
-                      </div>
-                    </motion.div>
-                  )}
-
-                  <form onSubmit={handleProfileSave} className="space-y-6">
-                    <div>
-                      <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
-                        <User className="w-4 h-4 text-[#0B1A2A] dark:text-white" /> 1. Personal Identity
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Full Name</label>
-                          <input
-                            type="text"
-                            placeholder="Enter your full name"
-                            value={profile.fullName}
-                            onChange={e => setProfile({ ...profile, fullName: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Email Address</label>
-                          <input
-                            type="email"
-                            placeholder="Enter your email address"
-                            value={profile.email}
-                            onChange={e => setProfile({ ...profile, email: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Phone Number (WhatsApp Active)</label>
-                          <input
-                            type="tel"
-                            placeholder="Enter your mobile number"
-                            value={profile.phone}
-                            onChange={e => setProfile({ ...profile, phone: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Date of Birth</label>
-                          <input
-                            type="date"
-                            value={profile.dob}
-                            onChange={e => setProfile({ ...profile, dob: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
-                      <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-[#7cb93e]" /> 2. Orthopaedic Sleep Ergonomics Profile
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Preferred Mattress Firmness</label>
-                          <select
-                            value={profile.firmnessPref}
-                            onChange={e => setProfile({ ...profile, firmnessPref: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
-                          >
-                            <option value="Medium Firm (7/10) — Recommended">Medium Firm (7/10) — Ortho Recommended</option>
-                            <option value="Firm (8.5/10) — Heavy Back Pain Relief">Firm (8.5/10) — Heavy Back Pain Relief</option>
-                            <option value="Medium Soft (5.5/10) — Plush Cloud Comfort">Medium Soft (5.5/10) — Plush Cloud Comfort</option>
-                            <option value="Dual Comfort (Reversible Soft/Firm)">Dual Comfort (Reversible Soft/Firm)</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Primary Sleep Position</label>
-                          <select
-                            value={profile.sleepPosition}
-                            onChange={e => setProfile({ ...profile, sleepPosition: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
-                          >
-                            <option value="Side & Back Sleeper">Side & Back Sleeper (Combination)</option>
-                            <option value="Side Sleeper Only">Side Sleeper Only (Needs Shoulder Pressure Relief)</option>
-                            <option value="Back Sleeper Only">Back Sleeper Only (Needs Lumbar Posture Core)</option>
-                            <option value="Stomach Sleeper">Stomach Sleeper (Needs Flat Firm Surface)</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Primary Orthopaedic Concern / Focus</label>
-                        <input
-                          type="text"
-                          value={profile.backPainRelief}
-                          onChange={e => setProfile({ ...profile, backPainRelief: e.target.value })}
-                          placeholder="e.g. L4-L5 disc stiffness, morning neck pain, partner motion disturbance..."
-                          className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B1A2A]"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end pt-4">
-                      <Button
-                        type="submit"
-                        className="bg-[#0B1A2A] hover:bg-[#162a42] text-white px-8 py-6 rounded-2xl font-extrabold text-base shadow-lg transition-transform hover:-translate-y-0.5"
-                      >
-                        Save Profile & Sleep Ergonomics
-                      </Button>
-                    </div>
-                  </form>
                 </motion.div>
               )}
 
@@ -1209,16 +1443,17 @@ export default function AccountPage() {
                   exit={{ opacity: 0, y: -15 }}
                   className="space-y-6"
                 >
-                  {/* Dealer Store Identity Card */}
-                  <div className="bg-gradient-to-br from-[#0B1A2A] via-[#122b46] to-[#07365e] rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-blue-500/30 relative overflow-hidden">
+                  {/* Dealer Store Banner */}
+                  <div className="bg-gradient-to-br from-[#071728] via-[#0B2545] to-[#04325e] rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-blue-400/30 relative overflow-hidden">
+                    <div className="absolute right-0 top-0 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-2xl bg-[#0682E4] flex items-center justify-center text-white shadow-lg shadow-blue-500/20 shrink-0">
                           <Store className="w-8 h-8" />
                         </div>
                         <div>
-                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[11px] font-black uppercase tracking-wider mb-1.5">
-                            <ShieldCheck className="w-3.5 h-3.5" /> Authorized Dealer Partner
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-200 border border-blue-400/30 text-[11px] font-black uppercase tracking-wider mb-1.5">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Authorized Dealer Invoicing Hub
                           </div>
                           <h2 className="font-heading font-black text-2xl sm:text-3xl text-white">
                             {dealerInfo?.storeName || (session?.user as any)?.dealerDetails?.storeName || 'Dealer Store'}
@@ -1243,11 +1478,11 @@ export default function AccountPage() {
                     </div>
                   </div>
 
-                  {/* Dealer Metrics Row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* 4 Metric Cards */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
                       <div>
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Customer Invoices</span>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Invoices</span>
                         <span className="text-2xl sm:text-3xl font-black text-[#0B1A2A] dark:text-white font-heading mt-1 block">
                           {dealerInvoices.length}
                         </span>
@@ -1259,7 +1494,7 @@ export default function AccountPage() {
 
                     <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
                       <div>
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Sales Value</span>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Billed</span>
                         <span className="text-2xl sm:text-3xl font-black text-[#7cb93e] font-heading mt-1 block">
                           ₹{dealerInvoices.reduce((sum, inv) => sum + (Number(inv.total) || Number(inv.totalPrice) || 0), 0).toLocaleString('en-IN')}
                         </span>
@@ -1271,7 +1506,7 @@ export default function AccountPage() {
 
                     <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
                       <div>
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Active / In Transit</span>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">In Transit</span>
                         <span className="text-2xl sm:text-3xl font-black text-amber-500 font-heading mt-1 block">
                           {dealerInvoices.filter(i => (i.orderStatus || i.status) !== 'Delivered' && (i.orderStatus || i.status) !== 'Cancelled').length}
                         </span>
@@ -1280,46 +1515,88 @@ export default function AccountPage() {
                         <Truck className="w-6 h-6" />
                       </div>
                     </div>
+
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Delivered</span>
+                        <span className="text-2xl sm:text-3xl font-black text-emerald-600 font-heading mt-1 block">
+                          {dealerInvoices.filter(i => (i.orderStatus || i.status) === 'Delivered').length}
+                        </span>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 flex items-center justify-center font-bold">
+                        <CheckCircle2 className="w-6 h-6" />
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Dealer Invoices Table Header & Filter */}
+                  {/* Dealer Invoices Table Header & Filter Toolbar */}
                   <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-                      <div>
-                        <h3 className="font-heading text-xl font-black text-[#0B1A2A] dark:text-white">
-                          Issued Customer Invoices & Orders
-                        </h3>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5">
-                          Invoices printed with your store name and authorized dealer credential.
-                        </p>
+                    <div className="flex flex-col gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className="font-heading text-xl font-black text-[#0B1A2A] dark:text-white">
+                            Issued Customer Invoices & Orders
+                          </h3>
+                          <p className="text-xs text-slate-500 font-medium mt-0.5">
+                            Official tax receipts issued with your showroom name and authorized partner credentials.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="relative flex-grow sm:w-72">
+                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                              type="text"
+                              placeholder="Search customer, phone, order #..."
+                              value={dealerSearchQuery}
+                              onChange={(e) => setDealerSearchQuery(e.target.value)}
+                              className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0682E4]"
+                            />
+                          </div>
+                          <Button
+                            onClick={refreshDealerInvoices}
+                            variant="outline"
+                            size="icon"
+                            className="rounded-xl h-10 w-10 text-slate-600 shrink-0"
+                            title="Refresh Invoices"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <div className="relative flex-grow sm:w-64">
-                          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                          <input
-                            type="text"
-                            placeholder="Search customer, phone, order #..."
-                            value={dealerSearchQuery}
-                            onChange={(e) => setDealerSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0682E4]"
-                          />
-                        </div>
-                        <Button
-                          onClick={refreshDealerInvoices}
-                          variant="outline"
-                          size="icon"
-                          className="rounded-xl h-9 w-9 text-slate-600 shrink-0"
-                          title="Refresh Invoices"
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                        </Button>
+                      {/* Status Filter Chips */}
+                      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pt-1">
+                        {(['All', 'Confirmed', 'Processing', 'Shipped', 'Delivered'] as const).map((status) => {
+                          const count = status === 'All'
+                            ? dealerInvoices.length
+                            : dealerInvoices.filter(i => (i.orderStatus || i.status) === status).length;
+                          const isSelected = invoiceStatusFilter === status;
+                          return (
+                            <button
+                              key={status}
+                              onClick={() => setInvoiceStatusFilter(status)}
+                              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                                isSelected
+                                  ? 'bg-[#0682E4] text-white shadow-sm'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                              }`}
+                            >
+                              <span>{status}</span>
+                              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                                isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600'
+                              }`}>
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
                     {/* Table or Empty State */}
                     {dealerInvoices.length === 0 ? (
-                      <div className="py-12 text-center space-y-4">
+                      <div className="py-14 text-center space-y-4">
                         <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-950/50 text-[#0682E4] flex items-center justify-center mx-auto text-2xl shadow-inner">
                           <FileText className="w-8 h-8" />
                         </div>
@@ -1350,6 +1627,10 @@ export default function AccountPage() {
                           <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
                             {dealerInvoices
                               .filter((inv) => {
+                                const currentStatus = inv.orderStatus || inv.status || 'Confirmed';
+                                if (invoiceStatusFilter !== 'All' && currentStatus !== invoiceStatusFilter) {
+                                  return false;
+                                }
                                 const q = dealerSearchQuery.toLowerCase().trim();
                                 if (!q) return true;
                                 return (
@@ -1373,20 +1654,29 @@ export default function AccountPage() {
                                 });
 
                                 return (
-                                  <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                                  <tr key={idx} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
                                     <td className="py-4 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">
                                       <div className="font-extrabold text-[#0682E4]">{orderId}</div>
                                       <div className="text-[10px] text-slate-400 font-sans font-normal">{orderDate}</div>
                                     </td>
                                     <td className="py-4 px-4">
-                                      <div className="font-bold text-slate-800 dark:text-slate-200">{custName}</div>
-                                      <div className="text-[11px] text-slate-500 font-normal">{custPhone}</div>
-                                      {custCity && <div className="text-[10px] text-slate-400">{custCity}</div>}
+                                      <div className="flex items-center gap-2.5">
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-[11px] text-[#0682E4] shrink-0">
+                                          {custName.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                          <div className="font-bold text-slate-800 dark:text-slate-200">{custName}</div>
+                                          <div className="text-[11px] text-slate-500 font-normal">{custPhone}</div>
+                                          {custCity && <div className="text-[10px] text-slate-400">{custCity}</div>}
+                                        </div>
+                                      </div>
                                     </td>
-                                    <td className="py-4 px-4 max-w-[200px]">
+                                    <td className="py-4 px-4 max-w-[220px]">
                                       {(invoice.items || []).map((it: any, iIdx: number) => (
-                                        <div key={iIdx} className="text-slate-700 dark:text-slate-300 font-semibold truncate">
-                                          {it.qty || 1}x {it.name} <span className="text-[10px] text-slate-400">({it.variantSku || it.dimensions || 'Standard'})</span>
+                                        <div key={iIdx} className="text-slate-700 dark:text-slate-300 font-semibold truncate flex items-center gap-1.5 mb-0.5">
+                                          <span className="font-mono text-[#0682E4] font-black">{it.qty || 1}x</span>
+                                          <span className="truncate">{it.name}</span>
+                                          <span className="text-[10px] text-slate-400 font-mono">({it.variantSku || it.dimensions || 'Std'})</span>
                                         </div>
                                       ))}
                                     </td>
