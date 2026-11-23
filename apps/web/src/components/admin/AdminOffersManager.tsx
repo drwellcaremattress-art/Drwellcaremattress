@@ -50,20 +50,20 @@ const DEFAULT_OFFER: OfferData = {
   linkUrl: '/collections',
   isActive: true,
 
-  festiveCardImage: '/images/hero_recliner_sale.png',
+  festiveCardImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244625/file_gxwthh.png',
   festiveBadgeTitle: 'BIG Festival SALE',
   festiveDiscount: 25,
   festiveCouponCode: 'FESTIVAL25',
   festiveLinkUrl: '/collections',
 
-  mainBannerImage: '/images/hero_banner_bedroom.png',
+  mainBannerImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png',
   mainBannerLink: '/collections',
   mainBannerSlides: DEFAULT_SLIDES,
 
-  showcaseCardImage: '/images/hero_dining_showcase.png',
-  showcaseCardVideoUrl: '',
-  showcaseCardTitle: 'Denzen Marble Top Dining Set',
-  showcaseCardBrand: 'DAMRO Internationally Trusted Furniture',
+  showcaseCardImage: '/images/products/ecolatex-6.jpeg',
+  showcaseCardVideoUrl: 'https://res.cloudinary.com/m1dy2af4/video/upload/v1795245939/file_r9wbsi.mp4',
+  showcaseCardTitle: 'DR wellcare',
+  showcaseCardBrand: 'Dr. Well Care Mattress',
   showcaseCardLinkUrl: '/collections',
 };
 

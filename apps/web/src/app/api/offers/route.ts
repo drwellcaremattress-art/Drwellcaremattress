@@ -15,36 +15,36 @@ const DEFAULT_OFFER = {
   cardLayout: 'capsule' as const,
 
   // Hero Section Customization Defaults
-  festiveCardImage: '/images/hero_recliner_sale.png',
+  festiveCardImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244625/file_gxwthh.png',
   festiveBadgeTitle: 'BIG Festival SALE',
   festiveDiscount: 25,
   festiveCouponCode: 'FESTIVAL25',
   festiveLinkUrl: '/collections',
 
-  mainBannerImage: '/images/hero_banner_bedroom.png',
+  mainBannerImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png',
   mainBannerLink: '/collections',
   mainBannerSlides: [
     {
-      image: '/images/hero_banner_bedroom.png',
+      image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png',
       alt: 'Enhance Your Bedroom with Orthopaedic Comfort',
       link: '/collections',
     },
     {
-      image: '/images/luxury_mattress_hero.png',
-      alt: 'Luxury Bedroom with Dr Well Care Mattress',
-      link: '/collections?type=Luxury+HR+Series',
+      image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244667/file_rxcmbo.png',
+      alt: 'Banner Slide 2',
+      link: '/collections',
     },
     {
-      image: '/images/bonded_section_main.png',
-      alt: 'Bonded Orthopaedic Support Mattress',
-      link: '/collections?type=Bonded+Series',
+      image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244687/file_fym4tj.png',
+      alt: 'Banner Slide 3',
+      link: '/collections',
     }
   ],
 
-  showcaseCardImage: '/images/hero_dining_showcase.png',
-  showcaseCardVideoUrl: '',
-  showcaseCardTitle: 'Denzen Marble Top Dining Set',
-  showcaseCardBrand: 'DAMRO Internationally Trusted Furniture',
+  showcaseCardImage: '/images/products/ecolatex-6.jpeg',
+  showcaseCardVideoUrl: 'https://res.cloudinary.com/m1dy2af4/video/upload/v1795245939/file_r9wbsi.mp4',
+  showcaseCardTitle: 'DR wellcare',
+  showcaseCardBrand: 'Dr. Well Care Mattress',
   showcaseCardLinkUrl: '/collections',
 };
 
@@ -99,20 +99,20 @@ export async function PUT(req: Request) {
         showParticles: data.showParticles !== undefined ? Boolean(data.showParticles) : offer.showParticles,
 
         // Hero Customization fields
-        festiveCardImage: data.festiveCardImage ?? offer.festiveCardImage ?? '/images/hero_recliner_sale.png',
+        festiveCardImage: data.festiveCardImage ?? offer.festiveCardImage ?? 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244625/file_gxwthh.png',
         festiveBadgeTitle: data.festiveBadgeTitle ?? offer.festiveBadgeTitle ?? 'BIG Festival SALE',
         festiveDiscount: Number(data.festiveDiscount ?? data.discountPercentage ?? offer.festiveDiscount ?? 25),
         festiveCouponCode: data.festiveCouponCode ?? data.couponCode ?? offer.festiveCouponCode ?? 'FESTIVAL25',
         festiveLinkUrl: data.festiveLinkUrl ?? data.linkUrl ?? offer.festiveLinkUrl ?? '/collections',
 
-        mainBannerImage: data.mainBannerImage ?? offer.mainBannerImage ?? '/images/hero_banner_bedroom.png',
+        mainBannerImage: data.mainBannerImage ?? offer.mainBannerImage ?? 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png',
         mainBannerLink: data.mainBannerLink ?? offer.mainBannerLink ?? '/collections',
         mainBannerSlides: data.mainBannerSlides ?? offer.mainBannerSlides ?? DEFAULT_OFFER.mainBannerSlides,
 
-        showcaseCardImage: data.showcaseCardImage ?? offer.showcaseCardImage ?? '/images/hero_dining_showcase.png',
-        showcaseCardVideoUrl: data.showcaseCardVideoUrl ?? offer.showcaseCardVideoUrl ?? '',
-        showcaseCardTitle: data.showcaseCardTitle ?? offer.showcaseCardTitle ?? 'Denzen Marble Top Dining Set',
-        showcaseCardBrand: data.showcaseCardBrand ?? offer.showcaseCardBrand ?? 'DAMRO Internationally Trusted Furniture',
+        showcaseCardImage: data.showcaseCardImage ?? offer.showcaseCardImage ?? '/images/products/ecolatex-6.jpeg',
+        showcaseCardVideoUrl: data.showcaseCardVideoUrl ?? offer.showcaseCardVideoUrl ?? 'https://res.cloudinary.com/m1dy2af4/video/upload/v1795245939/file_r9wbsi.mp4',
+        showcaseCardTitle: data.showcaseCardTitle ?? offer.showcaseCardTitle ?? 'DR wellcare',
+        showcaseCardBrand: data.showcaseCardBrand ?? offer.showcaseCardBrand ?? 'Dr. Well Care Mattress',
         showcaseCardLinkUrl: data.showcaseCardLinkUrl ?? offer.showcaseCardLinkUrl ?? '/collections',
       });
       await offer.save();

@@ -43,19 +43,19 @@ export interface LiveOfferData {
 
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
-    image: '/images/hero_banner_bedroom.png',
+    image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png',
     alt: 'Enhance Your Bedroom with Orthopaedic Comfort',
     link: '/collections',
   },
   {
-    image: '/images/luxury_mattress_hero.png',
-    alt: 'Luxury Dr. Well Care Bedroom Collection',
-    link: '/collections?type=Luxury+HR+Series',
+    image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244667/file_rxcmbo.png',
+    alt: 'Banner Slide 2',
+    link: '/collections',
   },
   {
-    image: '/images/bonded_section_main.png',
-    alt: 'Bonded Orthopaedic Support Mattress',
-    link: '/collections?type=Bonded+Series',
+    image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244687/file_fym4tj.png',
+    alt: 'Banner Slide 3',
+    link: '/collections',
   },
 ];
 
@@ -67,7 +67,7 @@ const DEFAULT_OFFER: LiveOfferData = {
   linkUrl: '/collections',
   isActive: true,
 
-  festiveCardImage: '/images/hero_recliner_sale.png',
+  festiveCardImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244625/file_gxwthh.png',
   festiveBadgeTitle: 'BIG Festival SALE',
   festiveDiscount: 25,
   festiveCouponCode: 'FESTIVAL25',
@@ -75,10 +75,10 @@ const DEFAULT_OFFER: LiveOfferData = {
 
   mainBannerSlides: DEFAULT_SLIDES,
 
-  showcaseCardImage: '/images/hero_dining_showcase.png',
-  showcaseCardVideoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // fallback or empty
-  showcaseCardTitle: 'Denzen Marble Top Dining Set',
-  showcaseCardBrand: 'DAMRO Internationally Trusted Furniture',
+  showcaseCardImage: '/images/products/ecolatex-6.jpeg',
+  showcaseCardVideoUrl: 'https://res.cloudinary.com/m1dy2af4/video/upload/v1795245939/file_r9wbsi.mp4',
+  showcaseCardTitle: 'DR wellcare',
+  showcaseCardBrand: 'Dr. Well Care Mattress',
   showcaseCardLinkUrl: '/collections',
 };
 
@@ -293,8 +293,8 @@ export function HomeHeroSection() {
             {/* Background Image of Room with Recliner */}
             <div className="absolute inset-0 z-0">
               <Image
-                src={offer.festiveCardImage || '/images/hero_recliner_sale.png'}
-                alt="Big Festival Sale Recliner"
+                src={offer.festiveCardImage || 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244625/file_gxwthh.png'}
+                alt="Big Festival Sale Mattress"
                 fill
                 sizes="(max-width: 1024px) 100vw, 35vw"
                 className="object-cover object-left transition-transform duration-500 group-hover:scale-[1.01]"

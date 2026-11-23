@@ -82,45 +82,45 @@ const OfferSchema: Schema = new Schema(
     showParticles: { type: Boolean, default: false },
 
     // Hero Section Customization Fields
-    festiveCardImage: { type: String, default: '/images/hero_recliner_sale.png' },
+    festiveCardImage: { type: String, default: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244625/file_gxwthh.png' },
     festiveBadgeTitle: { type: String, default: 'BIG Festival SALE' },
     festiveDiscount: { type: Number, default: 25 },
     festiveCouponCode: { type: String, default: 'FESTIVAL25' },
     festiveLinkUrl: { type: String, default: '/collections' },
 
-    mainBannerImage: { type: String, default: '/images/hero_banner_bedroom.png' },
+    mainBannerImage: { type: String, default: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png' },
     mainBannerLink: { type: String, default: '/collections' },
     mainBannerSlides: {
       type: [
         {
-          image: { type: String, default: '/images/hero_banner_bedroom.png' },
+          image: { type: String, default: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png' },
           alt: { type: String, default: 'Enhance Your Bedroom with Orthopaedic Comfort' },
           link: { type: String, default: '/collections' },
         }
       ],
       default: [
         {
-          image: '/images/hero_banner_bedroom.png',
+          image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png',
           alt: 'Enhance Your Bedroom with Orthopaedic Comfort',
           link: '/collections',
         },
         {
-          image: '/images/luxury_mattress_hero.png',
-          alt: 'Luxury Bedroom with Dr Well Care Mattress',
-          link: '/collections?type=Luxury+HR+Series',
+          image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244667/file_rxcmbo.png',
+          alt: 'Banner Slide 2',
+          link: '/collections',
         },
         {
-          image: '/images/bonded_section_main.png',
-          alt: 'Bonded Orthopaedic Support Mattress',
-          link: '/collections?type=Bonded+Series',
+          image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244687/file_fym4tj.png',
+          alt: 'Banner Slide 3',
+          link: '/collections',
         }
       ]
     },
 
-    showcaseCardImage: { type: String, default: '/images/hero_dining_showcase.png' },
-    showcaseCardVideoUrl: { type: String, default: '' },
-    showcaseCardTitle: { type: String, default: 'Denzen Marble Top Dining Set' },
-    showcaseCardBrand: { type: String, default: 'DAMRO Internationally Trusted Furniture' },
+    showcaseCardImage: { type: String, default: '/images/products/ecolatex-6.jpeg' },
+    showcaseCardVideoUrl: { type: String, default: 'https://res.cloudinary.com/m1dy2af4/video/upload/v1795245939/file_r9wbsi.mp4' },
+    showcaseCardTitle: { type: String, default: 'DR wellcare' },
+    showcaseCardBrand: { type: String, default: 'Dr. Well Care Mattress' },
     showcaseCardLinkUrl: { type: String, default: '/collections' },
   },
   { timestamps: true }
