@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Printer, X, ShieldCheck, Truck, Phone, Mail, MapPin } from 'lucide-react';
+import { Printer, X, ShieldCheck, Truck, Phone, Mail, MapPin, Store } from 'lucide-react';
 
 interface Props {
   order: any | null;
@@ -331,6 +331,24 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
             </tr>
           </table>
 
+          ${(order.dealerStoreName || order.dealerName) ? `
+            <div style="background: #f0f7ff; border: 1.5px solid #bae6fd; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; color: #0284c7;">Authorized Dealer / Billed By</div>
+                <div style="font-size: 14px; font-weight: 800; color: #0369a1; margin-top: 2px;">
+                  ${order.dealerStoreName || order.dealerName}
+                </div>
+                ${order.dealerName && order.dealerStoreName ? `<div style="font-size: 11px; color: #075985; margin-top: 2px;">Representative: <strong>${order.dealerName}</strong></div>` : ''}
+              </div>
+              ${order.dealerPhone ? `
+                <div style="text-align: right;">
+                  <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Dealer Phone</div>
+                  <div style="font-family: monospace; font-weight: 800; color: #0f172a; font-size: 12px;">${order.dealerPhone}</div>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+
           <div class="info-grid">
             <div class="info-cell" style="padding-right: 15px;">
               <div class="section-title">Customer & Delivery Address</div>
@@ -611,6 +629,36 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                 </div>
               </div>
             </div>
+
+            {/* Authorized Dealer Badge (if order placed by a dealer) */}
+            {(order.dealerStoreName || order.dealerName) && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/90 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#0682E4] text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+                    <Store size={18} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-wider text-blue-700">
+                      Authorized Dealer / Billed By
+                    </div>
+                    <div className="font-extrabold text-slate-900 text-sm">
+                      {order.dealerStoreName || order.dealerName}
+                    </div>
+                    {order.dealerStoreName && order.dealerName && (
+                      <div className="text-[11px] text-slate-600">
+                        Representative: <span className="font-semibold text-slate-800">{order.dealerName}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {order.dealerPhone && (
+                  <div className="sm:text-right text-xs">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">Dealer Contact</span>
+                    <span className="font-mono font-bold text-slate-900">{order.dealerPhone}</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Billed To / Shipped To & Tracking info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-b border-slate-200">

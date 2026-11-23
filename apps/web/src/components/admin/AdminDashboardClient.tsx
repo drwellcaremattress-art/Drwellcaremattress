@@ -5,6 +5,7 @@ import AdminProductTable, { ProductType } from './AdminProductTable';
 import AdminProductFormDrawer from './AdminProductFormDrawer';
 import AdminDeleteConfirmModal from './AdminDeleteConfirmModal';
 import AdminOffersManager from './AdminOffersManager';
+import AdminDealersManager from './AdminDealersManager';
 import { OfferData } from '../home/HeroOfferDisplay3D';
 import OrderReceiptModal from '../orders/OrderReceiptModal';
 import AdminCreateUserOrderModal from './AdminCreateUserOrderModal';
@@ -12,7 +13,7 @@ import {
   Package, ShoppingCart, Plus, RefreshCw, X, Check,
   Truck, AlertCircle, BarChart3, TrendingUp, IndianRupee, Users, Trash2, MapPin,
   Printer, ExternalLink, Copy, CheckCircle2, Phone, Mail, FileText, Search, ChevronRight,
-  Clock, CreditCard, ShieldCheck, Sparkles, Flame, Send
+  Clock, CreditCard, ShieldCheck, Sparkles, Flame, Send, Store
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -53,7 +54,7 @@ export default function AdminDashboardClient({
   initialOrders: OrderType[];
   initialOffer?: Partial<OfferData> | null;
 }) {
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'offers'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'offers' | 'dealers'>('products');
   const [products, setProducts] = useState<ProductType[]>(initialProducts);
   const [orders, setOrders] = useState<OrderType[]>(initialOrders);
 
@@ -498,6 +499,19 @@ export default function AdminDashboardClient({
             <Sparkles size={16} className={activeTab === 'offers' ? 'text-amber-500' : 'text-slate-400'} /> Festival Sale Offer
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ml-1 ${activeTab === 'offers' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-500'}`}>
               25% OFF Badge
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('dealers')}
+            className={`pb-4 px-4 font-extrabold text-sm flex items-center gap-2 border-b-2 transition-all ${
+              activeTab === 'dealers'
+                ? 'border-[#0682E4] text-[#0682E4]'
+                : 'border-transparent text-slate-400 hover:text-slate-700'
+            }`}
+          >
+            <Store size={16} className={activeTab === 'dealers' ? 'text-[#0682E4]' : 'text-slate-400'} /> Authorized Dealers
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ml-1 ${activeTab === 'dealers' ? 'bg-blue-100 text-[#0682E4]' : 'bg-slate-100 text-slate-500'}`}>
+              Partner Network
             </span>
           </button>
         </div>
@@ -1099,6 +1113,13 @@ export default function AdminDashboardClient({
         {activeTab === 'offers' && (
           <AdminOffersManager
             initialOffer={initialOffer}
+            showToast={showToast}
+          />
+        )}
+
+        {/* ── TAB: AUTHORIZED DEALERS ── */}
+        {activeTab === 'dealers' && (
+          <AdminDealersManager
             showToast={showToast}
           />
         )}

@@ -9,6 +9,14 @@ import {
 } from 'lucide-react';
 import { ProductType } from './AdminProductTable';
 
+export interface DealerInfo {
+  id?: string;
+  name?: string;
+  storeName?: string;
+  phone?: string;
+  email?: string;
+}
+
 interface AdminCreateUserOrderModalProps {
   open: boolean;
   onClose: () => void;
@@ -16,6 +24,7 @@ interface AdminCreateUserOrderModalProps {
   onOrderCreated: (order: any) => void;
   onViewReceipt?: (order: any) => void;
   showToast: (type: 'success' | 'error', message: string) => void;
+  dealerInfo?: DealerInfo;
 }
 
 interface OrderItemDraft {
@@ -45,6 +54,7 @@ export default function AdminCreateUserOrderModal({
   onOrderCreated,
   onViewReceipt,
   showToast,
+  dealerInfo,
 }: AdminCreateUserOrderModalProps) {
   // Step: 'form' | 'success'
   const [step, setStep] = useState<'form' | 'success'>('form');
@@ -277,6 +287,11 @@ export default function AdminCreateUserOrderModal({
           advanceAmount,
           courier,
           trackingId,
+          dealerId: dealerInfo?.id,
+          dealerName: dealerInfo?.name,
+          dealerStoreName: dealerInfo?.storeName,
+          dealerPhone: dealerInfo?.phone,
+          dealerEmail: dealerInfo?.email,
         }),
       });
 
@@ -368,6 +383,13 @@ export default function AdminCreateUserOrderModal({
                   ? 'Set up login username/password, shipping address, products, and generate a user account.'
                   : 'Order placed successfully! Give these credentials to the customer to log in.'}
               </p>
+              {dealerInfo && (
+                <div className="mt-1">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/25 text-blue-300 border border-blue-400/30 text-[10.5px] font-bold">
+                    Issuing Dealer: {dealerInfo.storeName || dealerInfo.name}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           <button

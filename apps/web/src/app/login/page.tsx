@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, CheckCircle2, ShieldCheck, Truck, Loader2, Eye, EyeOff, KeyRound, Sparkles, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -47,7 +47,16 @@ export default function LoginPage() {
         if (res?.error) {
           setError('Invalid email or password. If you forgot your password, click "Forgot password?" below.');
         } else {
-          window.location.href = '/account';
+          // Check role and redirect accordingly
+          const session = await getSession();
+          const role = (session?.user as any)?.role;
+          if (role === 'admin') {
+            window.location.href = '/admin';
+          } else if (role === 'dealer') {
+            window.location.href = '/dealer';
+          } else {
+            window.location.href = '/account';
+          }
         }
       } else {
         // Register

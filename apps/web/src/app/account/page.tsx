@@ -56,6 +56,13 @@ export default function AccountPage() {
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [profileSuccess, setProfileSuccess] = useState(false);
 
+  // Redirect dealers directly to Dealer Portal
+  useEffect(() => {
+    if ((session?.user as any)?.role === 'dealer') {
+      window.location.href = '/dealer';
+    }
+  }, [session]);
+
   // Dynamic Real Data States (100% Mockup Removed)
   const [orders, setOrders] = useState<any[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);

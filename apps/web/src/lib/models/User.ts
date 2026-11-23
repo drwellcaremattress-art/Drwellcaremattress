@@ -9,6 +9,16 @@ export interface IUser extends Document {
   wishlist: mongoose.Types.ObjectId[];
   authProvider: string;
   role: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  dealerDetails?: {
+    storeName?: string;
+    city?: string;
+    state?: string;
+    gstNumber?: string;
+    address?: string;
+    status?: string;
+  };
 }
 
 const UserSchema: Schema = new Schema(
@@ -26,8 +36,16 @@ const UserSchema: Schema = new Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
+      enum: ['user', 'admin', 'dealer'],
       default: 'user',
+    },
+    dealerDetails: {
+      storeName: { type: String },
+      city: { type: String },
+      state: { type: String },
+      gstNumber: { type: String },
+      address: { type: String },
+      status: { type: String, default: 'active' },
     },
   },
   {
@@ -35,4 +53,8 @@ const UserSchema: Schema = new Schema(
   }
 );
 
-export const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+if (mongoose.models && mongoose.models.User) {
+  delete mongoose.models.User;
+}
+
+export const User = mongoose.model<IUser>('User', UserSchema);
