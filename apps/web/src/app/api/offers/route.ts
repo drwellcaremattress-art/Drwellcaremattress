@@ -5,44 +5,44 @@ import { Offer } from '@/lib/models/Offer';
 export const dynamic = 'force-dynamic';
 
 const DEFAULT_OFFER = {
-  title: 'BIG Festival SALE',
-  subtitle: 'Festival Special Discount',
-  couponCode: 'FESTIVAL25',
-  discountPercentage: 25,
+  title: 'New Year SALE',
+  subtitle: 'Festival Special Offer',
+  couponCode: 'CHRISTMAS & NEWYEAR 27',
+  discountPercentage: 40,
   buttonText: 'Shop Festive Deals',
   linkUrl: '/collections',
   isActive: true,
   cardLayout: 'capsule' as const,
 
   // Hero Section Customization Defaults
-  festiveCardImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244625/file_gxwthh.png',
-  festiveBadgeTitle: 'BIG Festival SALE',
-  festiveDiscount: 25,
-  festiveCouponCode: 'FESTIVAL25',
+  festiveCardImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795432683/file_jggz4d.jpg',
+  festiveBadgeTitle: 'New Year SALE',
+  festiveDiscount: 40,
+  festiveCouponCode: 'CHRISTMAS & NEWYEAR 27',
   festiveLinkUrl: '/collections',
 
-  mainBannerImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png',
+  mainBannerImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795433967/file_i4tgbw.jpg',
   mainBannerLink: '/collections',
   mainBannerSlides: [
     {
-      image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png',
+      image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795433967/file_i4tgbw.jpg',
       alt: 'Enhance Your Bedroom with Orthopaedic Comfort',
-      link: '/collections',
+      link: '/collections?type=Luxury+HR+Series',
     },
     {
-      image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244667/file_rxcmbo.png',
+      image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795433980/file_crx7d3.jpg',
       alt: 'Banner Slide 2',
-      link: '/collections',
+      link: '/collections?type=Bonded+Series',
     },
     {
-      image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244687/file_fym4tj.png',
+      image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795433989/file_wb1t9v.jpg',
       alt: 'Banner Slide 3',
       link: '/collections',
     }
   ],
 
   showcaseCardImage: '/images/products/ecolatex-6.jpeg',
-  showcaseCardVideoUrl: 'https://res.cloudinary.com/m1dy2af4/video/upload/v1795245939/file_r9wbsi.mp4',
+  showcaseCardVideoUrl: 'https://res.cloudinary.com/m1dy2af4/video/upload/v1795432402/file_zgloe9.mp4',
   showcaseCardTitle: 'DR wellcare',
   showcaseCardBrand: 'Dr. Well Care Mattress',
   showcaseCardLinkUrl: '/collections',

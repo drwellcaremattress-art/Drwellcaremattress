@@ -43,40 +43,40 @@ export interface LiveOfferData {
 
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
-    image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244653/file_ahpmyj.png',
+    image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795433967/file_i4tgbw.jpg',
     alt: 'Enhance Your Bedroom with Orthopaedic Comfort',
-    link: '/collections',
+    link: '/collections?type=Luxury+HR+Series',
   },
   {
-    image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244667/file_rxcmbo.png',
+    image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795433980/file_crx7d3.jpg',
     alt: 'Banner Slide 2',
-    link: '/collections',
+    link: '/collections?type=Bonded+Series',
   },
   {
-    image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244687/file_fym4tj.png',
+    image: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795433989/file_wb1t9v.jpg',
     alt: 'Banner Slide 3',
     link: '/collections',
   },
 ];
 
 const DEFAULT_OFFER: LiveOfferData = {
-  title: 'BIG Festival SALE',
-  discountPercentage: 25,
-  couponCode: 'FESTIVAL25',
-  subtitle: 'Festive Special Discount',
+  title: 'New Year SALE',
+  discountPercentage: 40,
+  couponCode: 'CHRISTMAS & NEWYEAR 27',
+  subtitle: 'Festival Special Offer',
   linkUrl: '/collections',
   isActive: true,
 
-  festiveCardImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795244625/file_gxwthh.png',
-  festiveBadgeTitle: 'BIG Festival SALE',
-  festiveDiscount: 25,
-  festiveCouponCode: 'FESTIVAL25',
+  festiveCardImage: 'https://res.cloudinary.com/m1dy2af4/image/upload/v1795432683/file_jggz4d.jpg',
+  festiveBadgeTitle: 'New Year SALE',
+  festiveDiscount: 40,
+  festiveCouponCode: 'CHRISTMAS & NEWYEAR 27',
   festiveLinkUrl: '/collections',
 
   mainBannerSlides: DEFAULT_SLIDES,
 
   showcaseCardImage: '/images/products/ecolatex-6.jpeg',
-  showcaseCardVideoUrl: 'https://res.cloudinary.com/m1dy2af4/video/upload/v1795245939/file_r9wbsi.mp4',
+  showcaseCardVideoUrl: 'https://res.cloudinary.com/m1dy2af4/video/upload/v1795432402/file_zgloe9.mp4',
   showcaseCardTitle: 'DR wellcare',
   showcaseCardBrand: 'Dr. Well Care Mattress',
   showcaseCardLinkUrl: '/collections',
@@ -116,9 +116,20 @@ export function HomeHeroSection() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Fetch active offer from Admin DB
+  // Instantly load from localStorage if available to prevent flash of old content on refresh
   useEffect(() => {
-    fetch('/api/offers')
+    try {
+      const cached = localStorage.getItem('drwell_live_offer');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === 'object') {
+          setOffer((prev) => ({ ...prev, ...parsed }));
+        }
+      }
+    } catch (e) {}
+
+    // Fetch active offer from Admin DB
+    fetch('/api/offers', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data?.success && data.offer) {
@@ -126,6 +137,9 @@ export function HomeHeroSection() {
             ...prev,
             ...data.offer,
           }));
+          try {
+            localStorage.setItem('drwell_live_offer', JSON.stringify(data.offer));
+          } catch (e) {}
         }
       })
       .catch(() => { });
@@ -136,12 +150,12 @@ export function HomeHeroSection() {
       ? offer.mainBannerSlides
       : DEFAULT_SLIDES;
 
-  // Auto carousel rotation every 5 seconds (pauses on hover)
+  // Auto carousel rotation - increased speed lightly (3600ms instead of 5500ms)
   useEffect(() => {
     if (slides.length <= 1 || isHovered) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5500);
+    }, 3600);
     return () => clearInterval(interval);
   }, [slides.length, isHovered]);
 
@@ -225,7 +239,7 @@ export function HomeHeroSection() {
                 initial={{ opacity: 0.8, scale: 1.01 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0.8 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
                 className="absolute inset-0 w-full h-full bg-white flex items-center justify-center"
               >
                 <Image
