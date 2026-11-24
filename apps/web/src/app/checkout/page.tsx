@@ -183,17 +183,52 @@ export default function CheckoutPage() {
   const saveOrderToAccountHistory = (ordNum: string, orderItems: any[], orderTotal: number, form: any) => {
     try {
       const existingOrders = JSON.parse(localStorage.getItem('drwell_user_orders') || '[]');
+      const isCod = form.payment === 'cod';
+      const advance = isCod ? (form.advanceAmount || 0) : orderTotal;
+      const balance = isCod ? Math.max(0, orderTotal - advance) : 0;
+      const custFullName = `${form.firstName || ''} ${form.lastName || ''}`.trim() || 'Valued Customer';
+
       const newOrderObj = {
         id: ordNum.replace('DRWELL-ORD-', 'DW-'),
+        orderNumber: ordNum,
+        rawNumber: ordNum,
         date: new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
+        createdAt: new Date().toISOString(),
         total: orderTotal,
+        totalPrice: orderTotal,
+        subtotal: orderTotal,
+        advanceAmount: advance,
+        balanceAmount: balance,
         status: 'In Transit — Processing Dispatch',
+        orderStatus: 'Processing',
         statusColor: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950 dark:text-blue-300',
+        customerName: custFullName,
+        customerPhone: form.phone || '',
+        customerEmail: form.email || '',
+        shippingAddress: {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          name: custFullName,
+          street: form.address,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          pincode: form.pinCode,
+          postalCode: form.pinCode,
+          phone: form.phone,
+          email: form.email,
+          country: 'India'
+        },
+        courier: 'Blue Dart Express',
+        trackingId: 'Awaiting Dispatch',
         itemTitle: orderItems[0]?.name || 'Dr.Well Care Orthopaedic Series',
-        size: orderItems[0]?.size || 'King (78" × 72" × 8")',
+        size: orderItems[0]?.size || orderItems[0]?.dimensions || orderItems[0]?.variantSku || 'Standard Size',
         qty: orderItems.reduce((sum: number, i: any) => sum + (i.qty || 1), 0),
         items: orderItems,
-        payment: form.payment === 'cod' ? 'Cash on Delivery (COD) / Pay at Doorstep' : 'UPI / Online Paid (100% Secured)',
+        orderItems: orderItems,
+        payment: isCod ? 'Cash on Delivery (COD) / Pay at Doorstep' : 'UPI / Online Paid (100% Secured)',
+        paymentMethod: isCod ? 'COD' : 'ONLINE',
+        isPaid: !isCod,
         warrantyId: `WAR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
         steps: [
           { label: 'Order Confirmed', time: 'Just now', done: true },

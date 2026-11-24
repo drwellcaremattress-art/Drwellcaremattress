@@ -18,12 +18,19 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-    const orders = await Order.find({
-      $or: [
-        { userEmail: token.email },
-        { 'shippingAddress.email': token.email },
-      ],
-    }).sort({ createdAt: -1 });
+    const email = (token.email || '').trim();
+    const emailRegex = new RegExp(`^${email}$`, 'i');
+
+    const orClauses: any[] = [
+      { userEmail: emailRegex },
+      { 'shippingAddress.email': emailRegex },
+      { customerEmail: emailRegex },
+    ];
+
+    if (token.id) orClauses.push({ userId: token.id });
+    if (token.sub) orClauses.push({ userId: token.sub });
+
+    const orders = await Order.find({ $or: orClauses }).sort({ createdAt: -1 });
 
     return NextResponse.json(orders);
   } catch (error: any) {

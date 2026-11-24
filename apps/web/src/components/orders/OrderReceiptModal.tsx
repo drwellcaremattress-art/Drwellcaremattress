@@ -61,31 +61,93 @@ function getValidDimension(it: any) {
 export default function OrderReceiptModal({ order, open, onClose }: Props) {
   if (!open || !order) return null;
 
-  const addr = order.shippingAddress || {};
-  const formattedAddress = [
-    addr.street || addr.address || addr.addressLine1,
-    addr.addressLine2,
-    addr.city,
-    addr.state,
-    addr.pincode || addr.pin || addr.zip,
-    addr.country || 'India'
-  ].filter(Boolean).join(', ');
+  // 1. Resolve Display Order Number and Tax Invoice Number
+  const displayOrderNumber =
+    order.orderNumber ||
+    order.rawNumber ||
+    (order.id && typeof order.id === 'string' && order.id.startsWith('DW-')
+      ? order.id.replace('DW-', 'DRWELL-ORD-')
+      : order.id) ||
+    (order._id ? `DRWELL-ORD-${order._id.toString().slice(-6).toUpperCase()}` : 'DRWELL-ORD-045386');
 
-  const items = order.items || order.orderItems || [];
+  const invoiceNumber = `INV-${displayOrderNumber.replace('DRWELL-ORD-', '').replace('DW-', '')}`;
+
+  // 2. Resolve Customer Name
+  const customerName =
+    order.customerName ||
+    (order.shippingAddress?.firstName
+      ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName || ''}`.trim()
+      : '') ||
+    order.shippingAddress?.name ||
+    order.customer ||
+    'Valued Customer';
+
+  // 3. Resolve Customer Phone
+  const customerPhone =
+    order.customerPhone ||
+    order.shippingAddress?.phone ||
+    order.phone ||
+    '';
+
+  // 4. Resolve Customer Email
+  const customerEmail =
+    order.customerEmail ||
+    order.userEmail ||
+    order.shippingAddress?.email ||
+    order.email ||
+    '';
+
+  // 5. Resolve Customer Address
+  const addr = order.shippingAddress || {};
+  const street = addr.street || addr.address || addr.addressLine1 || '';
+  const city = addr.city || '';
+  const state = addr.state || '';
+  const pin = addr.pincode || addr.pin || addr.zip || addr.postalCode || '';
+  const country = addr.country || 'India';
+
+  const addressParts = [
+    street,
+    addr.addressLine2,
+    city,
+    state,
+    pin,
+    country
+  ].filter(Boolean);
+
+  const formattedAddress = addressParts.length > 1
+    ? addressParts.join(', ')
+    : (city || state ? [city, state, country].filter(Boolean).join(', ') : '');
+
+  // 6. Resolve Items and Financials
+  const items = (order.items && order.items.length > 0) ? order.items : (order.orderItems || []);
   const totalAmount = Number(order.totalPrice || order.total || 0);
+
   const advanceAmount = Math.max(0, Number(order.advanceAmount || 0));
-  const balanceAmount = order.balanceAmount !== undefined ? Math.max(0, Number(order.balanceAmount)) : Math.max(0, totalAmount - advanceAmount);
+  const balanceAmount = order.balanceAmount !== undefined
+    ? Math.max(0, Number(order.balanceAmount))
+    : Math.max(0, totalAmount - advanceAmount);
+
   const gstAmount = Math.round((totalAmount * 18) / 118); // 18% GST component
   const basePrice = totalAmount - gstAmount;
   const wordsAmount = balanceAmount > 0 ? balanceAmount : totalAmount;
 
-  const orderDate = new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  // 7. Resolve Tracking & Dispatch
+  const shipmentStatus = order.orderStatus || order.status || 'Processing';
+  const courierPartner = order.courier || (shipmentStatus === 'Shipped' || shipmentStatus === 'Out for Delivery' || shipmentStatus === 'Delivered' ? 'Shadowfax' : 'Blue Dart Express');
+  const trackingCode = order.trackingId || 'Awaiting Dispatch';
 
-  const invoiceNumber = `INV-${(order.orderNumber || '0000').replace('DRWELL-ORD-', '')}`;
+  const rawDate = order.createdAt || order.date;
+  const orderDate = rawDate
+    ? new Date(rawDate).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+    : new Date().toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
 
   // Generate self-contained, standalone printable HTML
   const generatePrintableHtml = () => {
@@ -129,7 +191,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>Receipt_${order.orderNumber}</title>
+          <title>Receipt_${displayOrderNumber}</title>
           <style>
             @page {
               size: A4 portrait;
@@ -311,7 +373,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                   </tr>
                   <tr>
                     <td style="color: #64748b; padding-right: 8px;">Order ID:</td>
-                    <td style="font-weight: 800; font-family: monospace; color: #0682E4;">${order.orderNumber}</td>
+                    <td style="font-weight: 800; font-family: monospace; color: #0682E4;">${displayOrderNumber}</td>
                   </tr>
                   <tr>
                     <td style="color: #64748b; padding-right: 8px;">Date:</td>
@@ -322,7 +384,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                     <td style="font-weight: 800; text-transform: uppercase;">
                       ${order.paymentMethod || 'Razorpay'} 
                       <span style="font-size: 9px; padding: 1px 5px; border-radius: 4px; background: ${order.isPaid ? '#dcfce7; color: #166534;' : '#fef3c7; color: #92400e;'} font-weight: 800;">
-                        ${order.isPaid ? 'PAID' : 'PENDING'}
+                        ${order.isPaid ? 'PAID' : 'COD PENDING'}
                       </span>
                     </td>
                   </tr>
@@ -352,9 +414,9 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
           <div class="info-grid">
             <div class="info-cell" style="padding-right: 15px;">
               <div class="section-title">Customer & Delivery Address</div>
-              <div class="customer-name">${order.customerName}</div>
-              <div style="font-size: 11px; color: #475569; margin-bottom: 2px;">Phone: <strong>${order.customerPhone}</strong></div>
-              ${order.customerEmail && order.customerEmail !== 'N/A' ? `<div style="font-size: 11px; color: #475569; margin-bottom: 6px;">Email: <strong>${order.customerEmail}</strong></div>` : ''}
+              <div class="customer-name">${customerName}</div>
+              <div style="font-size: 11px; color: #475569; margin-bottom: 2px;">Phone: <strong>${customerPhone}</strong></div>
+              ${customerEmail && customerEmail !== 'N/A' ? `<div style="font-size: 11px; color: #475569; margin-bottom: 6px;">Email: <strong>${customerEmail}</strong></div>` : ''}
               <div style="font-size: 11px; color: #475569; line-height: 1.4; margin-top: 4px;">
                 ${formattedAddress || 'No address provided'}
               </div>
@@ -366,15 +428,15 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                 <table style="width: 100%; font-size: 11px; color: #334155;">
                   <tr>
                     <td style="color: #64748b; padding: 2px 0;">Status:</td>
-                    <td style="font-weight: 800; color: #0682E4; text-align: right;">${order.orderStatus || 'Processing'}</td>
+                    <td style="font-weight: 800; color: #0682E4; text-align: right;">${shipmentStatus}</td>
                   </tr>
                   <tr>
                     <td style="color: #64748b; padding: 2px 0;">Courier Partner:</td>
-                    <td style="font-weight: 700; text-align: right;">${order.courier || 'Blue Dart Express'}</td>
+                    <td style="font-weight: 700; text-align: right;">${courierPartner}</td>
                   </tr>
                   <tr>
                     <td style="color: #64748b; padding: 2px 0;">Tracking Code / AWB:</td>
-                    <td style="font-family: monospace; font-weight: 800; text-align: right;">${order.trackingId || 'Awaiting Dispatch'}</td>
+                    <td style="font-family: monospace; font-weight: 800; text-align: right;">${trackingCode}</td>
                   </tr>
                 </table>
               </div>
@@ -613,7 +675,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                   </div>
                   <div>
                     <span className="font-semibold text-slate-500">Order ID: </span>
-                    <span className="font-mono font-bold text-[#0682E4]">{order.orderNumber}</span>
+                    <span className="font-mono font-bold text-[#0682E4]">{displayOrderNumber}</span>
                   </div>
                   <div>
                     <span className="font-semibold text-slate-500">Order Date: </span>
@@ -667,15 +729,15 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                   <MapPin size={13} className="text-[#0682E4]" /> Customer & Delivery Address
                 </h3>
                 <div className="text-xs space-y-1 text-slate-700">
-                  <p className="font-bold text-sm text-slate-900">{order.customerName}</p>
+                  <p className="font-bold text-sm text-slate-900">{customerName}</p>
                   <p className="flex items-center gap-1.5">
                     <Phone size={11} className="text-slate-400" />
-                    <span>{order.customerPhone}</span>
+                    <span>{customerPhone || 'N/A'}</span>
                   </p>
-                  {order.customerEmail && order.customerEmail !== 'N/A' && (
+                  {customerEmail && customerEmail !== 'N/A' && (
                     <p className="flex items-center gap-1.5">
                       <Mail size={11} className="text-slate-400" />
-                      <span>{order.customerEmail}</span>
+                      <span>{customerEmail}</span>
                     </p>
                   )}
                   <p className="text-slate-600 mt-2 leading-relaxed whitespace-pre-line">
@@ -691,16 +753,16 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                 <div className="text-xs space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Shipment Status:</span>
-                    <span className="font-extrabold text-[#0682E4]">{order.orderStatus || 'Processing'}</span>
+                    <span className="font-extrabold text-[#0682E4]">{shipmentStatus}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Courier Partner:</span>
-                    <span className="font-bold text-slate-800">{order.courier || 'Blue Dart Express'}</span>
+                    <span className="font-bold text-slate-800">{courierPartner}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-500">Tracking Code / AWB:</span>
                     <span className="font-mono font-extrabold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
-                      {order.trackingId || 'Awaiting Dispatch'}
+                      {trackingCode}
                     </span>
                   </div>
                   {order.trackingUrl && (
