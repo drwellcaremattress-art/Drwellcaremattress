@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { 
-  Package, MapPin, Heart, User, LogOut, ChevronRight, ShieldCheck, 
-  Award, Sparkles, CheckCircle, Clock, Truck, FileText, Plus, 
+import {
+  Package, MapPin, Heart, User, LogOut, ChevronRight, ShieldCheck,
+  Award, Sparkles, CheckCircle, Clock, Truck, FileText, Plus,
   Edit3, Trash2, Phone, Mail, Calendar, Activity, Star, Moon, ArrowUpRight,
   ExternalLink, Copy, Store, Printer, IndianRupee, Search, RefreshCw,
   Building, BadgeCheck, CheckCircle2, Briefcase
@@ -63,7 +63,7 @@ export default function AccountPage() {
       router.replace('/login?callbackUrl=/account');
     }
   }, [status, router]);
-  
+
   // Profile State
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [profileSuccess, setProfileSuccess] = useState(false);
@@ -117,7 +117,7 @@ export default function AccountPage() {
         const localOrders = JSON.parse(savedOrdersStr);
         const filtered = localOrders.filter((o: any) => o.id !== order.id && o._id !== order._id);
         localStorage.setItem('drwell_user_orders', JSON.stringify(filtered));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const dbId = order._id;
@@ -150,7 +150,7 @@ export default function AccountPage() {
                 fullName: parsed.fullName || userName || '',
               });
             }
-          } catch (e) {}
+          } catch (e) { }
         } else {
           setProfile(prev => ({
             ...prev,
@@ -177,7 +177,7 @@ export default function AccountPage() {
             try {
               localStorage.setItem(userKey, JSON.stringify(updatedProfile));
               localStorage.setItem('drwell_user_profile', JSON.stringify(updatedProfile));
-            } catch (e) {}
+            } catch (e) { }
           }
         }).catch(err => console.error('Failed to sync DB profile', err));
       }
@@ -193,7 +193,7 @@ export default function AccountPage() {
         }));
         try {
           localStorage.setItem('drwell_user_addresses', JSON.stringify(currentAddresses));
-        } catch (e) {}
+        } catch (e) { }
       }
       setAddresses(currentAddresses);
 
@@ -204,10 +204,10 @@ export default function AccountPage() {
             setAddresses(res.data.addresses);
             try {
               localStorage.setItem('drwell_user_addresses', JSON.stringify(res.data.addresses));
-            } catch (e) {}
+            } catch (e) { }
           } else if (currentAddresses.length > 0) {
             // Push local addresses up to DB if DB is empty
-            axios.put('/api/users/profile', { addresses: currentAddresses }).catch(() => {});
+            axios.put('/api/users/profile', { addresses: currentAddresses }).catch(() => { });
           }
         }).catch(err => console.error('Failed to sync DB addresses', err));
       }
@@ -349,9 +349,9 @@ export default function AccountPage() {
             setOrders(mergedList);
             try {
               localStorage.setItem('drwell_user_orders', JSON.stringify(mergedList));
-            } catch (e) {}
+            } catch (e) { }
           }
-        }).catch(() => {});
+        }).catch(() => { });
       }
 
       // 4. Reviews Sync (100% Real User Contributed)
@@ -361,7 +361,7 @@ export default function AccountPage() {
         try {
           const parsedRevs = JSON.parse(savedUserRevs);
           if (Array.isArray(parsedRevs)) realReviews.push(...parsedRevs);
-        } catch (e) {}
+        } catch (e) { }
       }
 
       // Also scan for any real reviews stored in product-specific keys
@@ -381,7 +381,7 @@ export default function AccountPage() {
                 }
               });
             }
-          } catch (e) {}
+          } catch (e) { }
         }
       }
       setUserReviews(realReviews);
@@ -392,7 +392,7 @@ export default function AccountPage() {
         try {
           const parsedWishlist = JSON.parse(savedWishlistStr);
           if (Array.isArray(parsedWishlist)) setWishlist(parsedWishlist);
-        } catch (e) {}
+        } catch (e) { }
       }
 
       // 6. Check URL query parameters for tab (e.g. ?tab=dealer)
@@ -422,13 +422,13 @@ export default function AccountPage() {
             } else {
               axios.get('/api/products').then((r2) => {
                 if (r2.data && Array.isArray(r2.data)) setDealerProducts(r2.data);
-              }).catch(() => {});
+              }).catch(() => { });
             }
           })
           .catch(() => {
             axios.get('/api/products').then((r2) => {
               if (r2.data && Array.isArray(r2.data)) setDealerProducts(r2.data);
-            }).catch(() => {});
+            }).catch(() => { });
           });
       }
 
@@ -451,13 +451,13 @@ export default function AccountPage() {
             } else {
               axios.get('/api/products').then((r2) => {
                 if (r2.data && Array.isArray(r2.data)) setDealerProducts(r2.data);
-              }).catch(() => {});
+              }).catch(() => { });
             }
           })
           .catch(() => {
             axios.get('/api/products').then((r2) => {
               if (r2.data && Array.isArray(r2.data)) setDealerProducts(r2.data);
-            }).catch(() => {});
+            }).catch(() => { });
           });
       }
 
@@ -473,7 +473,7 @@ export default function AccountPage() {
           setEmployeeInvoices(res.data.invoices);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const refreshDealerInvoices = () => {
@@ -483,7 +483,7 @@ export default function AccountPage() {
           setDealerInvoices(res.data.orders);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const handleProfileSave = async (e: React.FormEvent) => {
@@ -528,17 +528,17 @@ export default function AccountPage() {
       phone: newAddr.phone || profile.phone,
     };
 
-    const updated = newAddr.isDefault 
+    const updated = newAddr.isDefault
       ? [created, ...addresses.map(a => ({ ...a, isDefault: false }))]
       : [...addresses, created];
 
     setAddresses(updated);
     try {
       localStorage.setItem('drwell_user_addresses', JSON.stringify(updated));
-    } catch (e) {}
+    } catch (e) { }
 
     if (session?.user?.email) {
-      axios.put('/api/users/profile', { addresses: updated }).catch(() => {});
+      axios.put('/api/users/profile', { addresses: updated }).catch(() => { });
     }
 
     setShowAddModal(false);
@@ -550,10 +550,10 @@ export default function AccountPage() {
     setAddresses(updated);
     try {
       localStorage.setItem('drwell_user_addresses', JSON.stringify(updated));
-    } catch (e) {}
+    } catch (e) { }
 
     if (session?.user?.email) {
-      axios.put('/api/users/profile', { addresses: updated }).catch(() => {});
+      axios.put('/api/users/profile', { addresses: updated }).catch(() => { });
     }
   };
 
@@ -562,10 +562,10 @@ export default function AccountPage() {
     setAddresses(updated);
     try {
       localStorage.setItem('drwell_user_addresses', JSON.stringify(updated));
-    } catch (e) {}
+    } catch (e) { }
 
     if (session?.user?.email) {
-      axios.put('/api/users/profile', { addresses: updated }).catch(() => {});
+      axios.put('/api/users/profile', { addresses: updated }).catch(() => { });
     }
   };
 
@@ -574,7 +574,7 @@ export default function AccountPage() {
     setWishlist(updated);
     try {
       localStorage.setItem('drwell_user_wishlist', JSON.stringify(updated));
-    } catch (e) {}
+    } catch (e) { }
   };
 
   // Computed Real Stats
@@ -693,13 +693,13 @@ export default function AccountPage() {
   return (
     <div className="bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-10 px-4 sm:px-6 font-body">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* ─── Hero Header Banner (Adaptive for Employee vs Dealer vs Customer) ───────────── */}
         {isEmployee ? (
           <div className="bg-gradient-to-r from-[#032b26] via-[#064e3b] to-[#022c22] rounded-[2.5rem] pt-10 pb-8 sm:pt-14 sm:pb-9 px-6 sm:px-10 text-white shadow-2xl relative overflow-hidden mb-10 border border-emerald-400/25">
             <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute left-1/4 bottom-0 w-80 h-80 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
-            
+
             <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
               <div className="flex items-center gap-5">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-black text-3xl sm:text-4xl shadow-[0_10px_25px_-5px_rgba(16,185,129,0.5)] border-2 border-white/30 shrink-0">
@@ -745,7 +745,7 @@ export default function AccountPage() {
           <div className="bg-gradient-to-r from-[#071728] via-[#0B2545] to-[#04325e] rounded-[2.5rem] pt-10 pb-8 sm:pt-14 sm:pb-9 px-6 sm:px-10 text-white shadow-2xl relative overflow-hidden mb-10 border border-blue-400/20">
             <div className="absolute right-0 top-0 w-96 h-96 bg-[#0682E4]/20 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute left-1/4 bottom-0 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-            
+
             <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
               <div className="flex items-center gap-5">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-[#0682E4] to-[#015bb0] flex items-center justify-center text-white font-black text-3xl sm:text-4xl shadow-[0_10px_25px_-5px_rgba(6,130,228,0.6)] border-2 border-white/30 shrink-0">
@@ -795,7 +795,7 @@ export default function AccountPage() {
           <div className="bg-gradient-to-r from-[#0B1A2A] via-[#122840] to-[#183656] rounded-[2.5rem] pt-12 pb-8 sm:pt-16 sm:pb-10 px-6 sm:px-10 text-white shadow-2xl relative overflow-hidden mb-10 border border-white/10">
             <div className="absolute right-0 top-0 w-96 h-96 bg-[#7cb93e]/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute left-1/3 bottom-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-            
+
             <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
               <div className="flex items-center gap-5">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-[#7cb93e] to-[#5a8b2a] flex items-center justify-center text-white font-black text-3xl sm:text-4xl shadow-[0_10px_25px_-5px_rgba(124,185,62,0.6)] border-2 border-white/30 shrink-0">
@@ -860,11 +860,10 @@ export default function AccountPage() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as any)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
-                    isSelected
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all shrink-0 ${isSelected
                       ? (isEmployee ? 'bg-emerald-600 text-white shadow-md' : 'bg-[#0B1A2A] text-white shadow-md')
                       : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-4 h-4 ${isSelected ? (isEmployee ? 'text-white' : item.id === 'dealer' ? 'text-[#0682E4]' : 'text-[#7cb93e]') : 'text-slate-400'}`} />
                   {item.label}
@@ -879,7 +878,7 @@ export default function AccountPage() {
                     localStorage.removeItem('drwell_user_profile');
                     localStorage.removeItem('drwell_user_addresses');
                     localStorage.removeItem('drwell_user_orders');
-                  } catch (e) {}
+                  } catch (e) { }
                   await signOut({ callbackUrl: '/login' });
                 }}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap bg-red-50 dark:bg-red-950/40 text-red-600 border border-red-200 dark:border-red-900 shrink-0"
@@ -898,7 +897,7 @@ export default function AccountPage() {
 
         {/* ─── Main Content Layout ───────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* Navigation Sidebar (hidden on mobile, shown on lg) */}
           <aside className="hidden lg:block lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 sticky top-28">
             <div className="text-xs font-black uppercase tracking-widest text-slate-400 px-3 mb-3">
@@ -921,24 +920,21 @@ export default function AccountPage() {
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id as any)}
-                    className={`w-full flex items-center justify-between p-4 rounded-2xl text-sm font-bold transition-all ${
-                      isSelected
+                    className={`w-full flex items-center justify-between p-4 rounded-2xl text-sm font-bold transition-all ${isSelected
                         ? (isEmployee ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20' : 'bg-[#0B1A2A] text-white shadow-md shadow-[#0B1A2A]/20')
                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-white/15 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                      }`}>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isSelected ? 'bg-white/15 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                        }`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       <span>{item.label}</span>
                     </div>
                     {item.badge && (
-                      <span className={`text-xs font-mono font-extrabold px-2.5 py-1 rounded-full ${
-                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                      }`}>
+                      <span className={`text-xs font-mono font-extrabold px-2.5 py-1 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                        }`}>
                         {item.badge}
                       </span>
                     )}
@@ -957,7 +953,7 @@ export default function AccountPage() {
                     </button>
                   </Link>
                 ) : (
-                  <button 
+                  <button
                     type="button"
                     onClick={async () => {
                       try {
@@ -966,7 +962,7 @@ export default function AccountPage() {
                         localStorage.removeItem('drwell_user_orders');
                         localStorage.removeItem('drwell_user_reviews');
                         localStorage.removeItem('drwell_user_wishlist');
-                      } catch (e) {}
+                      } catch (e) { }
                       await signOut({ callbackUrl: '/login' });
                     }}
                     className="w-full flex items-center gap-3.5 p-4 rounded-2xl text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
@@ -996,7 +992,7 @@ export default function AccountPage() {
           {/* Main Content Pane (full width on mobile, 8 cols on lg) */}
           <main className="col-span-1 lg:col-span-8 space-y-6 min-w-0">
             <AnimatePresence mode="wait">
-              
+
               {/* ─── TAB 1: MY PROFILE & ERGONOMICS (ADAPTIVE FOR DEALER VS USER) ── */}
               {activeTab === 'profile' && (
                 <motion.div
@@ -1521,7 +1517,7 @@ export default function AccountPage() {
                         You don't have any delivery addresses saved yet. Add your home or office location for faster checkout and express doorstep dispatch.
                       </p>
                       <div className="pt-4">
-                        <Button 
+                        <Button
                           onClick={() => setShowAddModal(true)}
                           className="bg-[#7cb93e] hover:bg-[#68a032] text-white rounded-2xl font-extrabold text-sm px-8 py-4 shadow-lg transition-transform hover:-translate-y-0.5"
                         >
@@ -1534,17 +1530,15 @@ export default function AccountPage() {
                       {addresses.map((addr) => (
                         <div
                           key={addr.id}
-                          className={`bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border relative flex flex-col justify-between transition-all ${
-                            addr.isDefault 
-                              ? 'border-2 border-[#0B1A2A] dark:border-[#7cb93e] shadow-md bg-gradient-to-br from-white to-blue-50/20 dark:from-slate-900 dark:to-slate-800/50' 
+                          className={`bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border relative flex flex-col justify-between transition-all ${addr.isDefault
+                              ? 'border-2 border-[#0B1A2A] dark:border-[#7cb93e] shadow-md bg-gradient-to-br from-white to-blue-50/20 dark:from-slate-900 dark:to-slate-800/50'
                               : 'border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md'
-                          }`}
+                            }`}
                         >
                           <div>
                             <div className="flex items-center justify-between mb-3">
-                              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                                addr.tag === 'Home' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' : 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300'
-                              }`}>
+                              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${addr.tag === 'Home' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' : 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300'
+                                }`}>
                                 {addr.tag}
                               </span>
                               {addr.isDefault ? (
@@ -1703,7 +1697,7 @@ export default function AccountPage() {
                                 <span className="px-3 py-1 bg-[#0B1A2A] text-white text-[10px] font-black rounded-full uppercase tracking-wider">
                                   {itemBadge}
                                 </span>
-                                <button 
+                                <button
                                   onClick={() => handleRemoveFromWishlist(itemSlug)}
                                   className="text-red-500 hover:scale-110 transition-transform p-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-950/40"
                                   title="Remove from Wishlist"
@@ -1881,16 +1875,14 @@ export default function AccountPage() {
                             <button
                               key={status}
                               onClick={() => setInvoiceStatusFilter(status)}
-                              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                                isSelected
+                              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${isSelected
                                   ? 'bg-[#0682E4] text-white shadow-sm'
                                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-                              }`}
+                                }`}
                             >
                               <span>{status}</span>
-                              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                                isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600'
-                              }`}>
+                              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600'
+                                }`}>
                                 {count}
                               </span>
                             </button>
@@ -1994,13 +1986,12 @@ export default function AccountPage() {
                                       </div>
                                     </td>
                                     <td className="py-4 px-4">
-                                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                                        orderStatus === 'Delivered'
+                                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${orderStatus === 'Delivered'
                                           ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                                           : orderStatus === 'Shipped' || orderStatus === 'Out for Delivery'
-                                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                                      }`}>
+                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                            : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                        }`}>
                                         {orderStatus}
                                       </span>
                                     </td>
@@ -2166,16 +2157,14 @@ export default function AccountPage() {
                             <button
                               key={status}
                               onClick={() => setEmployeeStatusFilter(status)}
-                              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                                isSelected
+                              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${isSelected
                                   ? 'bg-[#7cb93e] text-white shadow-sm'
                                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-                              }`}
+                                }`}
                             >
                               <span>{status}</span>
-                              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                                isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600'
-                              }`}>
+                              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600'
+                                }`}>
                                 {count}
                               </span>
                             </button>
@@ -2279,13 +2268,12 @@ export default function AccountPage() {
                                       </div>
                                     </td>
                                     <td className="py-4 px-4">
-                                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                                        orderStatus === 'Delivered'
+                                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${orderStatus === 'Delivered'
                                           ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                                           : orderStatus === 'Shipped' || orderStatus === 'Out for Delivery'
-                                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                                      }`}>
+                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                            : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                        }`}>
                                         {orderStatus}
                                       </span>
                                     </td>
@@ -2411,9 +2399,8 @@ export default function AccountPage() {
                       {idx < (trackingOrder.steps?.length || 0) - 1 && (
                         <div className={`absolute left-3.5 top-7 w-0.5 h-8 ${step.done ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
                       )}
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 relative z-10 ${
-                        step.done ? 'bg-emerald-500 text-white shadow-sm' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'
-                      }`}>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 relative z-10 ${step.done ? 'bg-emerald-500 text-white shadow-sm' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'
+                        }`}>
                         {step.done ? '✓' : idx + 1}
                       </div>
                       <div>
