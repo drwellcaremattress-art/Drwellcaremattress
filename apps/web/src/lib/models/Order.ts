@@ -39,6 +39,11 @@ export interface IOrder extends Document {
   dealerStoreName?: string;
   dealerPhone?: string;
   dealerEmail?: string;
+  employeeId?: mongoose.Types.ObjectId;
+  employeeName?: string;
+  employeeEmail?: string;
+  employeePhone?: string;
+  employeeCode?: string;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -53,6 +58,11 @@ const OrderSchema: Schema = new Schema(
     dealerStoreName: { type: String, required: false },
     dealerPhone: { type: String, required: false },
     dealerEmail: { type: String, required: false },
+    employeeId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    employeeName: { type: String, required: false },
+    employeeEmail: { type: String, required: false },
+    employeePhone: { type: String, required: false },
+    employeeCode: { type: String, required: false },
     items: [
       {
         productId: { type: String, required: false },

@@ -388,10 +388,34 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                       </span>
                     </td>
                   </tr>
+                  ${order.employeeName ? `
+                  <tr>
+                    <td style="color: #64748b; padding-right: 8px;">Created By:</td>
+                    <td style="font-weight: 800; color: #166534;">${order.employeeName}</td>
+                  </tr>
+                  ` : ''}
                 </table>
               </td>
             </tr>
           </table>
+
+          ${order.employeeName ? `
+            <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; color: #15803d;">Invoice Created & Issued By Official Staff</div>
+                <div style="font-size: 14px; font-weight: 800; color: #166534; margin-top: 2px;">
+                  ${order.employeeName}
+                </div>
+                ${order.employeeEmail ? `<div style="font-size: 11px; color: #15803d; margin-top: 2px;">Staff Email / ID: <strong>${order.employeeEmail}</strong></div>` : ''}
+              </div>
+              ${order.employeePhone ? `
+                <div style="text-align: right;">
+                  <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Staff Contact</div>
+                  <div style="font-family: monospace; font-weight: 800; color: #0f172a; font-size: 12px;">${order.employeePhone}</div>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
 
           ${(order.dealerStoreName || order.dealerName) ? `
             <div style="background: #f0f7ff; border: 1.5px solid #bae6fd; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
@@ -688,9 +712,45 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                       {order.isPaid ? 'PAID' : 'COD PENDING'}
                     </span>
                   </div>
+                  {order.employeeName && (
+                    <div>
+                      <span className="font-semibold text-slate-500">Billed By (Staff): </span>
+                      <span className="font-bold text-emerald-700">{order.employeeName}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Official Staff / Employee Badge (if order created by an employee) */}
+            {order.employeeName && (
+              <div className="bg-gradient-to-r from-emerald-50 via-teal-50/70 to-green-50/80 border border-emerald-300 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+                    <ShieldCheck size={18} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-wider text-emerald-800">
+                      Official Billing Desk • Invoice Issued By Employee
+                    </div>
+                    <div className="font-extrabold text-slate-900 text-sm">
+                      {order.employeeName}
+                    </div>
+                    {order.employeeEmail && (
+                      <div className="text-[11px] text-slate-600">
+                        Staff Email / ID: <span className="font-semibold text-slate-800">{order.employeeEmail}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {order.employeePhone && (
+                  <div className="sm:text-right text-xs">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">Staff Contact</span>
+                    <span className="font-mono font-bold text-slate-900">{order.employeePhone}</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Authorized Dealer Badge (if order placed by a dealer) */}
             {(order.dealerStoreName || order.dealerName) && (

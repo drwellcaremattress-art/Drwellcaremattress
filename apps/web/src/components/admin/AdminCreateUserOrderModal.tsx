@@ -21,6 +21,16 @@ export interface DealerInfo {
   address?: string;
 }
 
+export interface EmployeeInfo {
+  id?: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  department?: string;
+  designation?: string;
+  employeeCode?: string;
+}
+
 interface AdminCreateUserOrderModalProps {
   open: boolean;
   onClose: () => void;
@@ -29,6 +39,7 @@ interface AdminCreateUserOrderModalProps {
   onViewReceipt?: (order: any) => void;
   showToast: (type: 'success' | 'error', message: string) => void;
   dealerInfo?: DealerInfo;
+  employeeInfo?: EmployeeInfo;
 }
 
 interface OrderItemDraft {
@@ -59,6 +70,7 @@ export default function AdminCreateUserOrderModal({
   onViewReceipt,
   showToast,
   dealerInfo,
+  employeeInfo,
 }: AdminCreateUserOrderModalProps) {
   // Step: 'form' | 'success'
   const [step, setStep] = useState<'form' | 'success'>('form');
@@ -296,6 +308,11 @@ export default function AdminCreateUserOrderModal({
           dealerStoreName: dealerInfo?.storeName,
           dealerPhone: dealerInfo?.phone,
           dealerEmail: dealerInfo?.email,
+          employeeId: employeeInfo?.id,
+          employeeName: employeeInfo?.name,
+          employeeEmail: employeeInfo?.email,
+          employeePhone: employeeInfo?.phone,
+          employeeCode: employeeInfo?.employeeCode,
         }),
       });
 
@@ -391,6 +408,13 @@ export default function AdminCreateUserOrderModal({
                 <div className="mt-1">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/25 text-blue-300 border border-blue-400/30 text-[10.5px] font-bold">
                     Issuing Dealer: {dealerInfo.storeName || dealerInfo.name}
+                  </span>
+                </div>
+              )}
+              {employeeInfo && (
+                <div className="mt-1">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-400/30 text-[10.5px] font-bold">
+                    Billing Staff: {employeeInfo.name} ({employeeInfo.designation || 'Sales Executive'})
                   </span>
                 </div>
               )}

@@ -24,6 +24,12 @@ export interface IUser extends Document {
     address?: string;
     status?: string;
   };
+  employeeDetails?: {
+    department?: string;
+    designation?: string;
+    employeeCode?: string;
+    status?: string;
+  };
 }
 
 const UserSchema: Schema = new Schema(
@@ -46,7 +52,7 @@ const UserSchema: Schema = new Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'admin', 'dealer'],
+      enum: ['user', 'admin', 'dealer', 'employee'],
       default: 'user',
     },
     dealerDetails: {
@@ -55,6 +61,12 @@ const UserSchema: Schema = new Schema(
       state: { type: String },
       gstNumber: { type: String },
       address: { type: String },
+      status: { type: String, default: 'active' },
+    },
+    employeeDetails: {
+      department: { type: String },
+      designation: { type: String },
+      employeeCode: { type: String },
       status: { type: String, default: 'active' },
     },
   },

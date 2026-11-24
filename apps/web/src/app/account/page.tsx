@@ -6,7 +6,7 @@ import {
   Award, Sparkles, CheckCircle, Clock, Truck, FileText, Plus, 
   Edit3, Trash2, Phone, Mail, Calendar, Activity, Star, Moon, ArrowUpRight,
   ExternalLink, Copy, Store, Printer, IndianRupee, Search, RefreshCw,
-  Building, BadgeCheck, CheckCircle2
+  Building, BadgeCheck, CheckCircle2, Briefcase
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import axios from 'axios';
 import OrderReceiptModal from '@/components/orders/OrderReceiptModal';
-import AdminCreateUserOrderModal, { DealerInfo } from '@/components/admin/AdminCreateUserOrderModal';
+import AdminCreateUserOrderModal, { DealerInfo, EmployeeInfo } from '@/components/admin/AdminCreateUserOrderModal';
 import { ProductType } from '@/components/admin/AdminProductTable';
 
 interface UserProfile {
@@ -55,7 +55,7 @@ const DEFAULT_PROFILE: UserProfile = {
 export default function AccountPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'addresses' | 'reviews' | 'wishlist' | 'dealer'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'addresses' | 'reviews' | 'wishlist' | 'dealer' | 'employee_invoices'>('profile');
 
   // Immediately redirect guests to login
   useEffect(() => {
@@ -76,6 +76,14 @@ export default function AccountPage() {
   const [isCreateDealerOrderOpen, setIsCreateDealerOrderOpen] = useState(false);
   const [dealerSearchQuery, setDealerSearchQuery] = useState('');
   const [invoiceStatusFilter, setInvoiceStatusFilter] = useState<'All' | 'Confirmed' | 'Processing' | 'Shipped' | 'Delivered'>('All');
+
+  // Employee State & Integration (Staff Billing Desk)
+  const isEmployee = (session?.user as any)?.role === 'employee';
+  const [employeeInvoices, setEmployeeInvoices] = useState<any[]>([]);
+  const [employeeInfo, setEmployeeInfo] = useState<EmployeeInfo | null>(null);
+  const [isCreateEmployeeOrderOpen, setIsCreateEmployeeOrderOpen] = useState(false);
+  const [employeeSearchQuery, setEmployeeSearchQuery] = useState('');
+  const [employeeStatusFilter, setEmployeeStatusFilter] = useState<'All' | 'Confirmed' | 'Processing' | 'Shipped' | 'Delivered'>('All');
 
   // Dynamic Real Data States (100% Mockup Removed)
   const [orders, setOrders] = useState<any[]>([]);
@@ -391,7 +399,7 @@ export default function AccountPage() {
       if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
         const tabParam = urlParams.get('tab');
-        if (tabParam && ['profile', 'orders', 'addresses', 'reviews', 'wishlist', 'dealer'].includes(tabParam)) {
+        if (tabParam && ['profile', 'orders', 'addresses', 'reviews', 'wishlist', 'dealer', 'employee_invoices'].includes(tabParam)) {
           setActiveTab(tabParam as any);
         }
       }
@@ -416,10 +424,41 @@ export default function AccountPage() {
           .catch(() => {});
       }
 
+      // 8. Employee Staff Billing Data Sync
+      if ((session?.user as any)?.role === 'employee') {
+        setActiveTab('employee_invoices');
+        axios.get('/api/employee/invoices')
+          .then((res) => {
+            if (res.data) {
+              if (Array.isArray(res.data.invoices)) setEmployeeInvoices(res.data.invoices);
+              if (res.data.employee) setEmployeeInfo(res.data.employee);
+            }
+          })
+          .catch((err) => console.error('Failed to sync employee invoices:', err));
+
+        axios.get('/api/admin/products')
+          .then((res) => {
+            if (res.data && Array.isArray(res.data)) {
+              setDealerProducts(res.data);
+            }
+          })
+          .catch(() => {});
+      }
+
     } catch (e) {
       console.error('Failed to sync real account data:', e);
     }
   }, [session]);
+
+  const refreshEmployeeInvoices = () => {
+    axios.get('/api/employee/invoices')
+      .then((res) => {
+        if (res.data && Array.isArray(res.data.invoices)) {
+          setEmployeeInvoices(res.data.invoices);
+        }
+      })
+      .catch(() => {});
+  };
 
   const refreshDealerInvoices = () => {
     axios.get('/api/dealer/invoices')
@@ -639,8 +678,54 @@ export default function AccountPage() {
     <div className="bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-10 px-4 sm:px-6 font-body">
       <div className="max-w-7xl mx-auto">
         
-        {/* ─── Hero Header Banner (Adaptive for Dealer vs Customer) ───────────── */}
-        {isDealer ? (
+        {/* ─── Hero Header Banner (Adaptive for Employee vs Dealer vs Customer) ───────────── */}
+        {isEmployee ? (
+          <div className="bg-gradient-to-r from-[#032b26] via-[#064e3b] to-[#022c22] rounded-[2.5rem] pt-10 pb-8 sm:pt-14 sm:pb-9 px-6 sm:px-10 text-white shadow-2xl relative overflow-hidden mb-10 border border-emerald-400/25">
+            <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute left-1/4 bottom-0 w-80 h-80 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <div className="flex items-center gap-5">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-black text-3xl sm:text-4xl shadow-[0_10px_25px_-5px_rgba(16,185,129,0.5)] border-2 border-white/30 shrink-0">
+                  <BadgeCheck className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-200 bg-white/10 backdrop-blur-md px-3.5 py-1 rounded-full mb-2 border border-emerald-400/30">
+                    <ShieldCheck className="w-4 h-4 text-emerald-300" />
+                    Authorized Staff Billing Desk • Direct Invoice Desk
+                  </div>
+                  <h1 className="font-heading text-3xl sm:text-4xl font-black text-white tracking-tight">
+                    {profile.fullName || employeeInfo?.name || session?.user?.name || 'Staff Billing Desk'}
+                  </h1>
+                  <p className="text-sm text-slate-200 font-medium mt-1 flex items-center gap-4 flex-wrap">
+                    <span className="flex items-center gap-1.5 font-bold text-white"><Briefcase className="w-4 h-4 text-emerald-400" /> {employeeInfo?.designation || 'Sales Executive'} ({employeeInfo?.department || 'Sales & Billing'})</span>
+                    <span className="flex items-center gap-1.5"><Mail className="w-4 h-4 text-emerald-400" /> {employeeInfo?.email || profile.email}</span>
+                    {employeeInfo?.phone && <span className="flex items-center gap-1.5"><Phone className="w-4 h-4 text-emerald-400" /> {employeeInfo.phone}</span>}
+                    <span className="font-mono text-xs font-bold text-emerald-300 bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                      ID: {employeeInfo?.employeeCode || `EMP-${(session?.user as any)?.id?.slice(-4) || 'STAFF'}`}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Computed Summary Badges for Employee */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 w-full md:w-auto shrink-0 mt-6 md:mt-10 self-end">
+                <div className="bg-white/10 backdrop-blur-xl py-5 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[120px]">
+                  <span className="text-[11px] font-black text-emerald-200 uppercase tracking-widest block mb-1.5 leading-relaxed">Staff Invoices</span>
+                  <span className="text-2xl sm:text-3xl font-black text-white font-heading leading-none">
+                    {employeeInvoices.length}
+                  </span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-xl py-5 px-4 sm:px-6 rounded-2xl border border-white/20 text-center flex flex-col justify-center items-center shadow-lg transition-transform hover:scale-105 min-w-[130px]">
+                  <span className="text-[11px] font-black text-emerald-200 uppercase tracking-widest block mb-1.5 leading-relaxed">Turnover Billed</span>
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-300 font-heading leading-none">
+                    ₹{employeeInvoices.reduce((sum, inv) => sum + (Number(inv.total) || Number(inv.totalPrice) || 0), 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : isDealer ? (
           <div className="bg-gradient-to-r from-[#071728] via-[#0B2545] to-[#04325e] rounded-[2.5rem] pt-10 pb-8 sm:pt-14 sm:pb-9 px-6 sm:px-10 text-white shadow-2xl relative overflow-hidden mb-10 border border-blue-400/20">
             <div className="absolute right-0 top-0 w-96 h-96 bg-[#0682E4]/20 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute left-1/4 bottom-0 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -743,14 +828,16 @@ export default function AccountPage() {
         {/* ─── Mobile Tab Bar (hidden on lg) ─────────────────────────────── */}
         <div className="lg:hidden mb-6 overflow-x-auto scrollbar-hide -mx-4 px-4">
           <div className="flex gap-2 w-max pb-1">
-            {[
+            {(isEmployee ? [
+              { id: 'employee_invoices', label: `Staff Invoices (${employeeInvoices.length})`, icon: FileText },
+            ] : [
               { id: 'profile', label: 'Profile', icon: User },
               ...(isDealer ? [{ id: 'dealer', label: `Dealer Portal (${dealerInvoices.length})`, icon: Store }] : []),
               { id: 'orders', label: `Orders (${orders.length})`, icon: Package },
               { id: 'addresses', label: `Addresses (${addresses.length})`, icon: MapPin },
               { id: 'reviews', label: `Reviews (${userReviews.length})`, icon: Star },
               { id: 'wishlist', label: `Wishlist (${wishlist.length})`, icon: Heart },
-            ].map((item) => {
+            ]).map((item) => {
               const Icon = item.icon;
               const isSelected = activeTab === item.id;
               return (
@@ -759,11 +846,11 @@ export default function AccountPage() {
                   onClick={() => setActiveTab(item.id as any)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all shrink-0 ${
                     isSelected
-                      ? 'bg-[#0B1A2A] text-white shadow-md'
+                      ? (isEmployee ? 'bg-emerald-600 text-white shadow-md' : 'bg-[#0B1A2A] text-white shadow-md')
                       : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isSelected ? (item.id === 'dealer' ? 'text-[#0682E4]' : 'text-[#7cb93e]') : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 ${isSelected ? (isEmployee ? 'text-white' : item.id === 'dealer' ? 'text-[#0682E4]' : 'text-[#7cb93e]') : 'text-slate-400'}`} />
                   {item.label}
                 </button>
               );
@@ -799,17 +886,19 @@ export default function AccountPage() {
           {/* Navigation Sidebar (hidden on mobile, shown on lg) */}
           <aside className="hidden lg:block lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800 sticky top-28">
             <div className="text-xs font-black uppercase tracking-widest text-slate-400 px-3 mb-3">
-              Account Menu
+              {isEmployee ? 'Staff Portal' : 'Account Menu'}
             </div>
             <nav className="space-y-1.5">
-              {[
+              {(isEmployee ? [
+                { id: 'employee_invoices', label: 'Staff Invoices & Billing Desk', icon: FileText, badge: `${employeeInvoices.length}` },
+              ] : [
                 { id: 'profile', label: 'My Profile & Ergonomics', icon: User, badge: isDealer ? 'Dealer' : 'VIP' },
                 ...(isDealer ? [{ id: 'dealer', label: 'Dealer Portal & Invoices', icon: Store, badge: `${dealerInvoices.length}` }] : []),
                 { id: 'orders', label: 'Order History & Tracking', icon: Package, badge: `${orders.length}` },
                 { id: 'addresses', label: 'Saved Shipping Addresses', icon: MapPin, badge: `${addresses.length}` },
                 { id: 'reviews', label: 'My Verified Reviews', icon: Star, badge: `${userReviews.length > 0 ? userReviews.length : '0'}` },
                 { id: 'wishlist', label: 'Saved Wishlist Beds', icon: Heart, badge: `${wishlist.length}` },
-              ].map((item) => {
+              ]).map((item) => {
                 const Icon = item.icon;
                 const isSelected = activeTab === item.id;
                 return (
@@ -818,13 +907,13 @@ export default function AccountPage() {
                     onClick={() => setActiveTab(item.id as any)}
                     className={`w-full flex items-center justify-between p-4 rounded-2xl text-sm font-bold transition-all ${
                       isSelected
-                        ? 'bg-[#0B1A2A] text-white shadow-md shadow-[#0B1A2A]/20'
+                        ? (isEmployee ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20' : 'bg-[#0B1A2A] text-white shadow-md shadow-[#0B1A2A]/20')
                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                     }`}
                   >
                     <div className="flex items-center gap-3.5">
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-white/15 text-[#7cb93e]' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                        isSelected ? 'bg-white/15 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
                       }`}>
                         <Icon className="w-5 h-5" />
                       </div>
@@ -832,7 +921,7 @@ export default function AccountPage() {
                     </div>
                     {item.badge && (
                       <span className={`text-xs font-mono font-extrabold px-2.5 py-1 rounded-full ${
-                        isSelected ? 'bg-[#7cb93e] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                       }`}>
                         {item.badge}
                       </span>
@@ -1919,6 +2008,291 @@ export default function AccountPage() {
                 </motion.div>
               )}
 
+              {/* ─── TAB 7: EMPLOYEE BILLING DESK & INVOICES ─── */}
+              {activeTab === 'employee_invoices' && isEmployee && (
+                <motion.div
+                  key="employee_invoices"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  className="space-y-6"
+                >
+                  {/* Employee Staff Banner */}
+                  <div className="bg-gradient-to-br from-[#06241b] via-[#0b3d2e] to-[#04261d] rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-emerald-500/30 relative overflow-hidden">
+                    <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl bg-[#7cb93e] flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 shrink-0">
+                          <Briefcase className="w-8 h-8" />
+                        </div>
+                        <div>
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-black uppercase tracking-wider mb-1.5">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Official Staff Billing &amp; Invoice Desk
+                          </div>
+                          <h2 className="font-heading font-black text-2xl sm:text-3xl text-white">
+                            {employeeInfo?.name || profile.fullName || session?.user?.name || 'Staff Member'}
+                          </h2>
+                          <div className="text-xs text-slate-300 font-medium flex items-center gap-3 flex-wrap mt-1">
+                            <span>Designation: <b>{employeeInfo?.designation || 'Sales Executive'}</b></span>
+                            <span>• Dept: <b>{employeeInfo?.department || 'Sales &amp; Billing'}</b></span>
+                            <span>• Code: <b className="font-mono text-emerald-300">{employeeInfo?.employeeCode || `EMP-${(session?.user as any)?.id?.slice(-4) || 'STAFF'}`}</b></span>
+                            {employeeInfo?.phone && <span>• 📞 {employeeInfo.phone}</span>}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <Button
+                          onClick={() => setIsCreateEmployeeOrderOpen(true)}
+                          className="bg-[#7cb93e] hover:bg-[#68a032] text-white font-black px-6 py-5 rounded-2xl shadow-xl transition-all hover:scale-105 flex items-center gap-2"
+                        >
+                          <Plus className="w-5 h-5" /> + Create Customer Invoice
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4 Metric Cards */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Staff Invoices</span>
+                        <span className="text-2xl sm:text-3xl font-black text-[#0B1A2A] dark:text-white font-heading mt-1 block">
+                          {employeeInvoices.length}
+                        </span>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-[#7cb93e] flex items-center justify-center font-bold">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Billed</span>
+                        <span className="text-2xl sm:text-3xl font-black text-[#7cb93e] font-heading mt-1 block">
+                          ₹{employeeInvoices.reduce((sum, inv) => sum + (Number(inv.total) || Number(inv.totalPrice) || 0), 0).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-[#7cb93e] flex items-center justify-center font-bold">
+                        <IndianRupee className="w-6 h-6" />
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">In Transit</span>
+                        <span className="text-2xl sm:text-3xl font-black text-amber-500 font-heading mt-1 block">
+                          {employeeInvoices.filter(i => (i.orderStatus || i.status) !== 'Delivered' && (i.orderStatus || i.status) !== 'Cancelled').length}
+                        </span>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center font-bold">
+                        <Truck className="w-6 h-6" />
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Delivered</span>
+                        <span className="text-2xl sm:text-3xl font-black text-emerald-600 font-heading mt-1 block">
+                          {employeeInvoices.filter(i => (i.orderStatus || i.status) === 'Delivered').length}
+                        </span>
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 flex items-center justify-center font-bold">
+                        <CheckCircle2 className="w-6 h-6" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Employee Invoices Table Header & Filter Toolbar */}
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
+                    <div className="flex flex-col gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className="font-heading text-xl font-black text-[#0B1A2A] dark:text-white">
+                            Customer Invoices Issued by You
+                          </h3>
+                          <p className="text-xs text-slate-500 font-medium mt-0.5">
+                            Official company tax invoices issued under your staff identity ({employeeInfo?.name || profile.fullName || 'Staff'}). Your name will appear on top of every invoice.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="relative flex-grow sm:w-72">
+                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                              type="text"
+                              placeholder="Search customer, phone, order #..."
+                              value={employeeSearchQuery}
+                              onChange={(e) => setEmployeeSearchQuery(e.target.value)}
+                              className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#7cb93e]"
+                            />
+                          </div>
+                          <Button
+                            onClick={refreshEmployeeInvoices}
+                            variant="outline"
+                            size="icon"
+                            className="rounded-xl h-10 w-10 text-slate-600 shrink-0"
+                            title="Refresh Invoices"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Status Filter Chips */}
+                      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pt-1">
+                        {(['All', 'Confirmed', 'Processing', 'Shipped', 'Delivered'] as const).map((status) => {
+                          const count = status === 'All'
+                            ? employeeInvoices.length
+                            : employeeInvoices.filter(i => (i.orderStatus || i.status) === status).length;
+                          const isSelected = employeeStatusFilter === status;
+                          return (
+                            <button
+                              key={status}
+                              onClick={() => setEmployeeStatusFilter(status)}
+                              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                                isSelected
+                                  ? 'bg-[#7cb93e] text-white shadow-sm'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                              }`}
+                            >
+                              <span>{status}</span>
+                              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                                isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600'
+                              }`}>
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Table or Empty State */}
+                    {employeeInvoices.length === 0 ? (
+                      <div className="py-14 text-center space-y-4">
+                        <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-[#7cb93e] flex items-center justify-center mx-auto text-2xl shadow-inner">
+                          <FileText className="w-8 h-8" />
+                        </div>
+                        <h4 className="font-heading font-black text-lg text-[#0B1A2A] dark:text-white">No Customer Invoices Yet</h4>
+                        <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                          You haven't generated any customer invoices yet. Click below to create an official tax invoice with your name stamped on top.
+                        </p>
+                        <Button
+                          onClick={() => setIsCreateEmployeeOrderOpen(true)}
+                          className="bg-[#7cb93e] hover:bg-[#68a032] text-white font-extrabold text-xs px-6 py-3 rounded-xl shadow-md"
+                        >
+                          + Create Your First Customer Invoice
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto -mx-6 sm:mx-0">
+                        <table className="w-full text-left text-xs">
+                          <thead>
+                            <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                              <th className="pb-3 px-4">Invoice / Order #</th>
+                              <th className="pb-3 px-4">Customer Details</th>
+                              <th className="pb-3 px-4">Products &amp; Size</th>
+                              <th className="pb-3 px-4">Amount</th>
+                              <th className="pb-3 px-4">Status</th>
+                              <th className="pb-3 px-4 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                            {employeeInvoices
+                              .filter((inv) => {
+                                const currentStatus = inv.orderStatus || inv.status || 'Confirmed';
+                                if (employeeStatusFilter !== 'All' && currentStatus !== employeeStatusFilter) {
+                                  return false;
+                                }
+                                const q = employeeSearchQuery.toLowerCase().trim();
+                                if (!q) return true;
+                                return (
+                                  (inv.orderNumber || inv.id || '').toLowerCase().includes(q) ||
+                                  (inv.customerName || inv.shippingAddress?.firstName || '').toLowerCase().includes(q) ||
+                                  (inv.customerPhone || inv.shippingAddress?.phone || '').includes(q) ||
+                                  (inv.items || []).some((it: any) => (it.name || '').toLowerCase().includes(q))
+                                );
+                              })
+                              .map((invoice, idx) => {
+                                const orderId = invoice.orderNumber || invoice.id || `DW-${invoice._id?.toString().slice(-6)}`;
+                                const custName = invoice.customerName || (invoice.shippingAddress?.firstName ? `${invoice.shippingAddress.firstName} ${invoice.shippingAddress.lastName || ''}`.trim() : 'Walk-in Customer');
+                                const custPhone = invoice.customerPhone || invoice.shippingAddress?.phone || '—';
+                                const custCity = invoice.shippingAddress?.city || invoice.shippingAddress?.state || '';
+                                const orderTotal = Number(invoice.total || invoice.totalPrice || 0);
+                                const orderStatus = invoice.orderStatus || invoice.status || 'Confirmed';
+                                const orderDate = new Date(invoice.createdAt || Date.now()).toLocaleDateString('en-IN', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                });
+
+                                return (
+                                  <tr key={idx} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                                    <td className="py-4 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">
+                                      <div className="font-extrabold text-[#0682E4]">{orderId}</div>
+                                      <div className="text-[10px] text-slate-400 font-sans font-normal">{orderDate}</div>
+                                    </td>
+                                    <td className="py-4 px-4">
+                                      <div className="flex items-center gap-2.5">
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-[11px] text-[#7cb93e] shrink-0">
+                                          {custName.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                          <div className="font-bold text-slate-800 dark:text-slate-200">{custName}</div>
+                                          <div className="text-[11px] text-slate-500 font-normal">{custPhone}</div>
+                                          {custCity && <div className="text-[10px] text-slate-400">{custCity}</div>}
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="py-4 px-4 max-w-[220px]">
+                                      {(invoice.items || []).map((it: any, iIdx: number) => (
+                                        <div key={iIdx} className="text-slate-700 dark:text-slate-300 font-semibold truncate flex items-center gap-1.5 mb-0.5">
+                                          <span className="font-mono text-[#0682E4] font-black">{it.qty || 1}x</span>
+                                          <span className="truncate">{it.name}</span>
+                                          <span className="text-[10px] text-slate-400 font-mono">({it.variantSku || it.dimensions || 'Std'})</span>
+                                        </div>
+                                      ))}
+                                    </td>
+                                    <td className="py-4 px-4">
+                                      <div className="font-black text-[#7cb93e] font-heading text-sm">
+                                        ₹{orderTotal.toLocaleString('en-IN')}
+                                      </div>
+                                      <div className="text-[10px] text-slate-400 capitalize">
+                                        {invoice.paymentMethod || 'COD'}
+                                      </div>
+                                    </td>
+                                    <td className="py-4 px-4">
+                                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                                        orderStatus === 'Delivered'
+                                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                          : orderStatus === 'Shipped' || orderStatus === 'Out for Delivery'
+                                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                      }`}>
+                                        {orderStatus}
+                                      </span>
+                                    </td>
+                                    <td className="py-4 px-4 text-right">
+                                      <button
+                                        type="button"
+                                        onClick={() => setSelectedReceiptOrder(invoice)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#7cb93e] text-slate-700 hover:text-white dark:bg-slate-800 dark:text-slate-300 font-bold text-xs transition-colors shadow-sm"
+                                      >
+                                        <Printer className="w-3.5 h-3.5" /> View / Print
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
             </AnimatePresence>
           </main>
         </div>
@@ -2201,6 +2575,33 @@ export default function AccountPage() {
               setDealerInvoices((prev) => [newOrder, ...prev]);
               setIsCreateDealerOrderOpen(false);
               refreshDealerInvoices();
+            }}
+            onViewReceipt={(order) => setSelectedReceiptOrder(order)}
+            showToast={(type, message) => {
+              if (type === 'error') alert(message);
+            }}
+          />
+        )}
+
+        {/* ─── Modal: Employee Create Customer Order & Invoice ────────────────── */}
+        {isEmployee && (
+          <AdminCreateUserOrderModal
+            open={isCreateEmployeeOrderOpen}
+            onClose={() => setIsCreateEmployeeOrderOpen(false)}
+            products={dealerProducts}
+            employeeInfo={{
+              id: (session?.user as any)?.id || employeeInfo?.id,
+              name: employeeInfo?.name || profile.fullName || session?.user?.name || '',
+              email: employeeInfo?.email || profile.email || session?.user?.email || '',
+              phone: employeeInfo?.phone || profile.phone || '',
+              department: employeeInfo?.department || 'Sales & Billing',
+              designation: employeeInfo?.designation || 'Sales Executive',
+              employeeCode: employeeInfo?.employeeCode || `EMP-${(session?.user as any)?.id?.slice(-4) || 'STAFF'}`,
+            }}
+            onOrderCreated={(newOrder) => {
+              setEmployeeInvoices((prev) => [newOrder, ...prev]);
+              setIsCreateEmployeeOrderOpen(false);
+              refreshEmployeeInvoices();
             }}
             onViewReceipt={(order) => setSelectedReceiptOrder(order)}
             showToast={(type, message) => {

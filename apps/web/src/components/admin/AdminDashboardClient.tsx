@@ -6,6 +6,7 @@ import AdminProductFormDrawer from './AdminProductFormDrawer';
 import AdminDeleteConfirmModal from './AdminDeleteConfirmModal';
 import AdminOffersManager from './AdminOffersManager';
 import AdminDealersManager from './AdminDealersManager';
+import AdminEmployeesManager from './AdminEmployeesManager';
 import { OfferData } from '../home/HeroOfferDisplay3D';
 import OrderReceiptModal from '../orders/OrderReceiptModal';
 import AdminCreateUserOrderModal from './AdminCreateUserOrderModal';
@@ -54,7 +55,7 @@ export default function AdminDashboardClient({
   initialOrders: OrderType[];
   initialOffer?: Partial<OfferData> | null;
 }) {
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'offers' | 'dealers'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'offers' | 'dealers' | 'employees'>('products');
   const [products, setProducts] = useState<ProductType[]>(initialProducts);
   const [orders, setOrders] = useState<OrderType[]>(initialOrders);
 
@@ -512,6 +513,19 @@ export default function AdminDashboardClient({
             <Store size={16} className={activeTab === 'dealers' ? 'text-[#0682E4]' : 'text-slate-400'} /> Authorized Dealers
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ml-1 ${activeTab === 'dealers' ? 'bg-blue-100 text-[#0682E4]' : 'bg-slate-100 text-slate-500'}`}>
               Partner Network
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('employees')}
+            className={`pb-4 px-4 font-extrabold text-sm flex items-center gap-2 border-b-2 transition-all ${
+              activeTab === 'employees'
+                ? 'border-emerald-600 text-emerald-600'
+                : 'border-transparent text-slate-400 hover:text-slate-700'
+            }`}
+          >
+            <Users size={16} className={activeTab === 'employees' ? 'text-emerald-600' : 'text-slate-400'} /> Staff & Employees
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ml-1 ${activeTab === 'employees' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}`}>
+              Billing Desk
             </span>
           </button>
         </div>
@@ -1120,6 +1134,13 @@ export default function AdminDashboardClient({
         {/* ── TAB: AUTHORIZED DEALERS ── */}
         {activeTab === 'dealers' && (
           <AdminDealersManager
+            showToast={showToast}
+          />
+        )}
+
+        {/* ── TAB: STAFF & EMPLOYEES ── */}
+        {activeTab === 'employees' && (
+          <AdminEmployeesManager
             showToast={showToast}
           />
         )}
