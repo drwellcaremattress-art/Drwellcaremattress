@@ -30,6 +30,17 @@ export interface ProductListingProps {
   headingSubtitle?: string;
 }
 
+const formatThicknessDisplay = (raw?: string) => {
+  if (!raw) return '5" – 8"';
+  const nums = (raw.match(/\d+/g) || []).map(Number).sort((a, b) => a - b);
+  if (nums.length === 0) return raw;
+  if (nums.length === 1) return `${nums[0]}"`;
+  const min = nums[0];
+  const max = nums[nums.length - 1];
+  if (min === max) return `${min}"`;
+  return `${min}" – ${max}"`;
+};
+
 function ProductListingContent({
   showFilters = true,
   gridCols = 3,
@@ -507,34 +518,39 @@ function ProductListingContent({
                         <div className="w-full h-px bg-slate-100 my-2 sm:my-3" />
 
                         {/* 3-Column Features / Specs Bar */}
-                        <div className="grid grid-cols-3 items-center text-center py-0.5 mb-3 sm:mb-4">
+                        <div className="grid grid-cols-3 items-center text-center py-1.5 mb-3 sm:mb-4 bg-slate-50/80 rounded-xl px-1 border border-slate-100">
                           {/* 1. Rating */}
-                          <div className="flex items-center justify-center gap-1 sm:gap-1.5 border-r border-slate-200 pr-1">
+                          <div className="flex items-center justify-center gap-1 sm:gap-1.5 border-r border-slate-200/80 pr-1 min-w-0">
                             <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-400 shrink-0" />
-                            <div className="text-left leading-none">
-                              <span className="text-[11px] sm:text-sm font-extrabold text-[#0B1A2A] block">
+                            <div className="text-left leading-none min-w-0">
+                              <span className="text-[11px] sm:text-xs font-black text-[#0B1A2A] block">
                                 {product.rating || 4.8}
                               </span>
-                              <span className="text-[9px] sm:text-[11px] text-[#64748b] block mt-0.5">
+                              <span className="text-[8px] sm:text-[10px] font-semibold text-[#64748b] block mt-0.5 truncate">
                                 ({(product.reviews || 1240).toLocaleString('en-IN')})
                               </span>
                             </div>
                           </div>
 
                           {/* 2. Thickness */}
-                          <div className="flex items-center justify-center gap-1 sm:gap-1.5 px-1">
+                          <div className="flex items-center justify-center gap-1 sm:gap-1.5 px-1 min-w-0" title={`Available thickness: ${product.thickness || 'Standard'}`}>
                             <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0682E4] shrink-0" />
-                            <span className="text-[10px] sm:text-xs font-black text-[#0B1A2A] whitespace-nowrap">
-                              {product.thickness || '5" / 6"'}
-                            </span>
+                            <div className="text-left leading-none min-w-0">
+                              <span className="text-[11px] sm:text-xs font-black text-[#0B1A2A] block whitespace-nowrap">
+                                {formatThicknessDisplay(product.thickness)}
+                              </span>
+                              <span className="text-[8px] sm:text-[10px] font-bold text-slate-500 block mt-0.5">
+                                Thickness
+                              </span>
+                            </div>
                           </div>
 
                           {/* 3. Warranty */}
-                          <div className="flex items-center justify-center gap-1 sm:gap-1.5 border-l border-slate-200 pl-1">
+                          <div className="flex items-center justify-center gap-1 sm:gap-1.5 border-l border-slate-200/80 pl-1 min-w-0">
                             <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
-                            <div className="text-left leading-none">
-                              <span className="text-[10px] sm:text-xs font-black text-emerald-700 block">
-                                {product.warranty ? `${product.warranty}-Year` : '5-Year'}
+                            <div className="text-left leading-none min-w-0">
+                              <span className="text-[10px] sm:text-xs font-black text-emerald-700 block whitespace-nowrap">
+                                {product.warranty ? `${product.warranty}-Yr` : '5-Yr'}
                               </span>
                               <span className="text-[8px] sm:text-[10px] font-bold text-emerald-700 block mt-0.5">
                                 Warranty
