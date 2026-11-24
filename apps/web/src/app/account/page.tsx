@@ -91,11 +91,10 @@ export default function AccountPage() {
   const [copiedTrackingId, setCopiedTrackingId] = useState<string | null>(null);
 
   const formatDisplayName = (email?: string | null, name?: string | null) => {
-    if (!email) return name || 'VIP Customer';
-    const lowerEmail = email.toLowerCase().trim();
-    if (lowerEmail.includes('dineshmurugan')) return 'Dinesh Murugan';
+    if (!email) return name || '';
     if (name && name.trim() && !name.includes('@')) return name;
-    const prefix = lowerEmail.split('@')[0].replace(/[0-9]/g, '').replace(/[._-]/g, ' ').trim() || 'VIP Customer';
+    const lowerEmail = email.toLowerCase().trim();
+    const prefix = lowerEmail.split('@')[0].replace(/[0-9]/g, '').replace(/[._-]/g, ' ').trim() || '';
     return prefix.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
 

@@ -14,14 +14,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 const checkoutSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().optional(),
-  email: z.string().email("Invalid email").or(z.literal('')),
-  phone: z.string().min(10, "Phone number is required"),
-  address: z.string().min(5, "Address is required"),
+  firstName: z.string().min(2, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Valid email address is required"),
+  phone: z.string().min(10, "10-digit mobile number is required"),
+  address: z.string().min(5, "Door number and street address is required"),
   city: z.string().min(2, "City is required"),
   state: z.string().min(2, "State is required"),
-  pinCode: z.string().min(6, "PIN code is required"),
+  pinCode: z.string().min(6, "Valid 6-digit PIN code is required"),
   payment: z.enum(["razorpay", "cod"]),
 });
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -61,15 +61,6 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
 
   useEffect(() => {
-    const formatDisplayName = (email?: string | null, name?: string | null) => {
-      if (!email) return name || '';
-      const lowerEmail = email.toLowerCase().trim();
-      if (lowerEmail.includes('dineshmurugan')) return 'Dinesh Murugan';
-      if (name && name.trim() && !name.includes('@')) return name;
-      const prefix = lowerEmail.split('@')[0].replace(/[0-9]/g, '').replace(/[._-]/g, ' ').trim() || '';
-      return prefix.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    };
-
     let fName = '';
     let lName = '';
     let emailStr = session?.user?.email || '';
@@ -79,29 +70,33 @@ export default function CheckoutPage() {
     let stateStr = 'Tamil Nadu';
     let pinStr = '';
 
+    // Check user-specific saved profile in localStorage
     try {
-      const savedProfileStr = localStorage.getItem('drwell_user_profile');
+      const userEmail = session?.user?.email;
+      const userKey = userEmail ? `drwell_user_profile_${userEmail}` : null;
+      const savedProfileStr = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('drwell_user_profile');
       if (savedProfileStr) {
         const prof = JSON.parse(savedProfileStr);
-        if (prof.fullName && prof.fullName !== 'VIP Customer' && prof.fullName !== 'Rajesh Sharma') {
+        if (prof.fullName && !['VIP Customer', 'Rajesh Sharma', 'Dinesh Murugan', 'Dinesh', 'testing Murugan'].includes(prof.fullName.trim())) {
           const parts = prof.fullName.trim().split(' ');
           fName = parts[0] || '';
           lName = parts.slice(1).join(' ') || '';
         }
         if (prof.email) emailStr = prof.email;
-        if (prof.phone && prof.phone !== '+91 93429 22044') phoneStr = prof.phone;
+        if (prof.phone && !['+91 93429 22044', '+91 9843240703', '9843240703', '9342922044'].includes(prof.phone.trim())) {
+          phoneStr = prof.phone;
+        }
       }
     } catch (e) {}
 
-    if (!fName && emailStr) {
-      const derived = formatDisplayName(emailStr, session?.user?.name);
-      if (derived) {
-        const parts = derived.trim().split(' ');
-        fName = parts[0] || '';
-        lName = parts.slice(1).join(' ') || '';
-      }
+    // Check user session name
+    if (!fName && session?.user?.name && !['VIP Customer', 'Rajesh Sharma', 'Dinesh Murugan', 'Dinesh'].includes(session.user.name.trim())) {
+      const parts = session.user.name.trim().split(' ');
+      fName = parts[0] || '';
+      lName = parts.slice(1).join(' ') || '';
     }
 
+    // Check saved addresses
     try {
       const savedAddrsStr = localStorage.getItem('drwell_user_addresses');
       if (savedAddrsStr) {
@@ -115,42 +110,74 @@ export default function CheckoutPage() {
               if (defAddr.city) cityStr = defAddr.city;
               if (defAddr.state) stateStr = defAddr.state;
               if (defAddr.pincode) pinStr = defAddr.pincode;
-              if (!phoneStr && defAddr.phone && defAddr.phone !== '+91 93429 22044') phoneStr = defAddr.phone;
+              if (!phoneStr && defAddr.phone && !['+91 93429 22044', '+91 9843240703', '9843240703'].includes(defAddr.phone.trim())) {
+                phoneStr = defAddr.phone;
+              }
             }
           }
         }
       }
     } catch (e) {}
 
-    if (!fName) fName = 'Dinesh';
-    if (!lName) lName = 'Murugan';
-    if (!phoneStr) phoneStr = '+91 9843240703';
+    // Attempt to read real profile and addresses from API
+    if (session?.user?.email) {
+      fetch('/api/users/profile')
+        .then(res => res.json())
+        .then(dbData => {
+          if (dbData) {
+            if (dbData.name && !['VIP Customer', 'Rajesh Sharma', 'Dinesh Murugan', 'Dinesh'].includes(dbData.name.trim())) {
+              const parts = dbData.name.trim().split(' ');
+              if (parts[0] && !formData.firstName) setValue('firstName', parts[0]);
+              if (parts.slice(1).join(' ') && !formData.lastName) setValue('lastName', parts.slice(1).join(' '));
+            }
+            if (dbData.phone && !['+91 93429 22044', '+91 9843240703', '9843240703', '9342922044'].includes(dbData.phone.trim())) {
+              if (!formData.phone) setValue('phone', dbData.phone);
+            }
+            if (dbData.addresses && Array.isArray(dbData.addresses) && dbData.addresses.length > 0) {
+              setSavedAddresses(dbData.addresses);
+              const defAddr = dbData.addresses.find((a: any) => a.isDefault) || dbData.addresses[0];
+              if (defAddr) {
+                if (defAddr.street && !formData.address) setValue('address', defAddr.street);
+                if (defAddr.city && !formData.city) setValue('city', defAddr.city);
+                if (defAddr.state && !formData.state) setValue('state', defAddr.state);
+                if (defAddr.pincode && !formData.pinCode) setValue('pinCode', defAddr.pincode);
+                if (defAddr.phone && !['+91 93429 22044', '+91 9843240703', '9843240703'].includes(defAddr.phone.trim())) {
+                  if (!formData.phone) setValue('phone', defAddr.phone);
+                }
+              }
+            }
+          }
+        })
+        .catch(() => {});
+    }
 
-    setValue('firstName', formData.firstName || fName);
-    setValue('lastName', formData.lastName || lName);
-    setValue('email', formData.email || emailStr);
-    setValue('phone', formData.phone || phoneStr);
-    setValue('address', formData.address || addrStr);
-    setValue('city', formData.city || cityStr);
-    setValue('state', formData.state || stateStr);
-    setValue('pinCode', formData.pinCode || pinStr);
+    if (fName && !formData.firstName) setValue('firstName', fName);
+    if (lName && !formData.lastName) setValue('lastName', lName);
+    if (emailStr && !formData.email) setValue('email', emailStr);
+    if (phoneStr && !formData.phone) setValue('phone', phoneStr);
+    if (addrStr && !formData.address) setValue('address', addrStr);
+    if (cityStr && !formData.city) setValue('city', cityStr);
+    if (stateStr && !formData.state) setValue('state', stateStr);
+    if (pinStr && !formData.pinCode) setValue('pinCode', pinStr);
   }, [session, setValue]);
 
   const handleSelectSavedAddress = (addr: any) => {
     let fName = formData.firstName;
     let lName = formData.lastName;
-    if (addr.name) {
+    if (addr.name && !['VIP Customer', 'Rajesh Sharma', 'Dinesh Murugan', 'Dinesh'].includes(addr.name.trim())) {
       const parts = addr.name.trim().split(' ');
       fName = parts[0] || fName;
       lName = parts.slice(1).join(' ') || lName;
     }
-    setValue('firstName', formData.firstName || fName || 'Dinesh');
-    setValue('lastName', formData.lastName || lName || 'Murugan');
+    if (fName) setValue('firstName', fName);
+    if (lName) setValue('lastName', lName);
     setValue('address', addr.street || addr.address || '');
     setValue('city', addr.city || '');
     setValue('state', addr.state || 'Tamil Nadu');
     setValue('pinCode', addr.pincode || addr.postalCode || '');
-    setValue('phone', addr.phone || formData.phone || '+91 9843240703');
+    if (addr.phone && !['+91 9843240703', '+91 93429 22044', '9843240703', '9342922044'].includes(addr.phone.trim())) {
+      setValue('phone', addr.phone);
+    }
   };
 
   const saveOrderToAccountHistory = (ordNum: string, orderItems: any[], orderTotal: number, form: any) => {
@@ -181,7 +208,7 @@ export default function CheckoutPage() {
       const newAddrObj = {
         id: `addr-${Date.now()}`,
         tag: 'Home',
-        name: `${form.firstName} ${form.lastName}`.trim(),
+        name: `${form.firstName} ${form.lastName || ''}`.trim(),
         street: form.address,
         city: form.city,
         state: form.state,
@@ -195,23 +222,28 @@ export default function CheckoutPage() {
         localStorage.setItem('drwell_user_addresses', JSON.stringify(updatedAddrs));
       }
 
-      const existingProfStr = localStorage.getItem('drwell_user_profile');
+      const userEmail = session?.user?.email;
+      const userKey = userEmail ? `drwell_user_profile_${userEmail}` : null;
+      const existingProfStr = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('drwell_user_profile');
       if (existingProfStr) {
         const prof = JSON.parse(existingProfStr);
-        prof.fullName = `${form.firstName} ${form.lastName}`.trim() || prof.fullName;
-        prof.phone = form.phone || prof.phone;
+        prof.fullName = `${form.firstName} ${form.lastName || ''}`.trim() || prof.fullName;
+        if (form.phone) prof.phone = form.phone;
+        if (userKey) localStorage.setItem(userKey, JSON.stringify(prof));
         localStorage.setItem('drwell_user_profile', JSON.stringify(prof));
       } else if (session?.user?.email) {
-        localStorage.setItem('drwell_user_profile', JSON.stringify({
-          fullName: `${form.firstName} ${form.lastName}`.trim() || 'Dinesh Murugan',
+        const newProf = {
+          fullName: `${form.firstName} ${form.lastName || ''}`.trim(),
           email: session.user.email,
-          phone: form.phone || '+91 9843240703',
-          dob: '2002-06-07',
-          gender: 'Male',
+          phone: form.phone || '',
+          dob: '',
+          gender: 'Not Specified',
           firmnessPref: 'Medium Firm (7/10) — Recommended',
           sleepPosition: 'Side & Back Sleeper',
           backPainRelief: 'Lumbar Spine Orthopaedic Support',
-        }));
+        };
+        if (userKey) localStorage.setItem(userKey, JSON.stringify(newProf));
+        localStorage.setItem('drwell_user_profile', JSON.stringify(newProf));
       }
     } catch (e) {
       console.error('Failed to save order to localStorage:', e);
@@ -279,6 +311,19 @@ export default function CheckoutPage() {
         };
         setConfirmedOrder(safeOrder);
         saveOrderToAccountHistory(orderNumber, items, total, data);
+        if (session?.user?.email) {
+          fetch('/api/users/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              name: `${data.firstName} ${data.lastName || ''}`.trim(),
+              phone: data.phone,
+            })
+          }).catch(() => {});
+        }
         clearCart();
       } catch (err) {
         console.error('Finalize order error:', err);
@@ -569,7 +614,7 @@ export default function CheckoutPage() {
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                   </span>
                   <p className="text-xs sm:text-sm font-medium">
-                    <span className="font-extrabold">Logged in as {formData.firstName || session.user?.name || 'VIP Member'}</span> — Your saved profile and contact details have been automatically prefilled.
+                    <span className="font-extrabold">Logged in as {formData.firstName ? `${formData.firstName} ${formData.lastName || ''}`.trim() : (session.user?.name || session.user?.email || 'VIP Member')}</span> — Please enter your delivery details below.
                   </p>
                 </div>
               </div>
@@ -581,11 +626,12 @@ export default function CheckoutPage() {
                 {formErrors.firstName && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.firstName.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Last Name</label>
-                <input {...register("lastName")} type="text" placeholder="Enter your last name" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none" />
+                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Last Name *</label>
+                <input {...register("lastName")} type="text" placeholder="Enter your last name" className={`w-full border ${formErrors.lastName ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
+                {formErrors.lastName && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.lastName.message}</span>}
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address</label>
+                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Email Address *</label>
                 <input {...register("email")} type="email" placeholder="Enter your email address" className={`w-full border ${formErrors.email ? 'border-red-500 ring-2 ring-red-500/20' : 'border-slate-200'} rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none`} />
                 {formErrors.email && <span className="text-red-500 text-xs font-semibold mt-1 block">{formErrors.email.message}</span>}
               </div>
