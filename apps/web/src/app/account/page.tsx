@@ -160,7 +160,7 @@ export default function AccountPage() {
         }
 
         // Live Database Sync: fetch saved MongoDB profile and populate permanently
-        axios.get('/api/users/profile').then((res) => {
+        axios.get('/api/users/profile', { params: { email: userEmail } }).then((res) => {
           if (res.data) {
             const dbData = res.data;
             const updatedProfile: UserProfile = {
@@ -199,7 +199,7 @@ export default function AccountPage() {
 
       // Attempt API sync for addresses if logged in
       if (userEmail) {
-        axios.get('/api/users/profile').then((res) => {
+        axios.get('/api/users/profile', { params: { email: userEmail } }).then((res) => {
           if (res.data && res.data.addresses && res.data.addresses.length > 0) {
             setAddresses(res.data.addresses);
             try {
@@ -207,7 +207,7 @@ export default function AccountPage() {
             } catch (e) { }
           } else if (currentAddresses.length > 0) {
             // Push local addresses up to DB if DB is empty
-            axios.put('/api/users/profile', { addresses: currentAddresses }).catch(() => { });
+            axios.put('/api/users/profile', { addresses: currentAddresses }, { params: { email: userEmail } }).catch(() => { });
           }
         }).catch(err => console.error('Failed to sync DB addresses', err));
       }
@@ -406,7 +406,7 @@ export default function AccountPage() {
 
       // 7. Dealer Data Sync
       if ((session?.user as any)?.role === 'dealer') {
-        axios.get('/api/dealer/invoices')
+        axios.get('/api/dealer/invoices', { params: { email: session?.user?.email } })
           .then((res) => {
             if (res.data) {
               if (Array.isArray(res.data.orders)) setDealerInvoices(res.data.orders);
@@ -435,7 +435,7 @@ export default function AccountPage() {
       // 8. Employee Staff Billing Data Sync
       if ((session?.user as any)?.role === 'employee') {
         setActiveTab('employee_invoices');
-        axios.get('/api/employee/invoices')
+        axios.get('/api/employee/invoices', { params: { email: session?.user?.email } })
           .then((res) => {
             if (res.data) {
               if (Array.isArray(res.data.invoices)) setEmployeeInvoices(res.data.invoices);
@@ -467,7 +467,7 @@ export default function AccountPage() {
   }, [session]);
 
   const refreshEmployeeInvoices = () => {
-    axios.get('/api/employee/invoices')
+    axios.get('/api/employee/invoices', { params: { email: session?.user?.email } })
       .then((res) => {
         if (res.data && Array.isArray(res.data.invoices)) {
           setEmployeeInvoices(res.data.invoices);
@@ -477,7 +477,7 @@ export default function AccountPage() {
   };
 
   const refreshDealerInvoices = () => {
-    axios.get('/api/dealer/invoices')
+    axios.get('/api/dealer/invoices', { params: { email: session?.user?.email } })
       .then((res) => {
         if (res.data && Array.isArray(res.data.orders)) {
           setDealerInvoices(res.data.orders);

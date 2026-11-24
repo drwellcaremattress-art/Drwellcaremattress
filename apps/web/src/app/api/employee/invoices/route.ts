@@ -4,33 +4,59 @@ import { authOptions } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import { User } from '@/lib/models/User';
 import { Order } from '@/lib/models/Order';
+import { protect } from '@/lib/authMiddleware';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) {
-      return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 });
-    }
-
     await connectDB();
-    const email = session.user.email.toLowerCase().trim();
-    const user = await User.findOne({ email }).lean();
+    let user: any = await protect(req);
 
     if (!user) {
-      return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+      const session = await getServerSession(authOptions);
+      const url = new URL(req.url);
+      const emailQuery = url.searchParams.get('email');
+      const emailOrIdent = session?.user?.email || emailQuery;
+
+      if (emailOrIdent) {
+        const clean = emailOrIdent.toLowerCase().trim();
+        user = await User.findOne({
+          $or: [
+            { email: clean },
+            { email: new RegExp(`^${clean}$`, 'i') },
+            { phone: clean },
+            ...((session?.user as any)?.id ? [{ _id: (session?.user as any).id }] : [])
+          ]
+        }).lean();
+      }
+    }
+
+    if (!user) {
+      return NextResponse.json({
+        success: false,
+        message: 'Employee session not found',
+        employee: null,
+        invoices: [],
+      }, { status: 200 });
     }
 
     const isEmployee = user.role === 'employee' || user.role === 'admin';
     if (!isEmployee) {
-      return NextResponse.json({ success: false, message: 'Access denied: not an employee' }, { status: 403 });
+      return NextResponse.json({
+        success: false,
+        message: 'Access denied: not an employee',
+        employee: null,
+        invoices: [],
+      }, { status: 200 });
     }
 
+    const userEmail = (user.email || '').toLowerCase().trim();
     const orders = await Order.find({
       $or: [
         { employeeId: user._id },
-        { employeeEmail: email }
+        { employeeEmail: userEmail },
+        { employeeName: user.name }
       ]
     }).sort({ createdAt: -1 }).lean();
 
@@ -51,6 +77,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error in /api/employee/invoices:', error);
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: error.message, invoices: [], employee: null }, { status: 200 });
   }
 }
