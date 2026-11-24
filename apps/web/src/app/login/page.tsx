@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,25 @@ export default function LoginPage() {
   const [resetError, setResetError] = useState('');
   const [isResetting, setIsResetting] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'register') {
+        setIsLogin(false);
+      }
+    }
+  }, []);
+
+  const getRedirectUrl = (role?: string) => {
+    if (role === 'admin') return '/admin';
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const callback = params.get('callbackUrl');
+      if (callback && callback.startsWith('/')) return callback;
+    }
+    return '/account';
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -50,11 +69,7 @@ export default function LoginPage() {
           // Check role and redirect accordingly
           const session = await getSession();
           const role = (session?.user as any)?.role;
-          if (role === 'admin') {
-            window.location.href = '/admin';
-          } else {
-            window.location.href = '/account';
-          }
+          window.location.href = getRedirectUrl(role);
         }
       } else {
         // Register
@@ -75,7 +90,7 @@ export default function LoginPage() {
             email,
             password
           });
-          window.location.href = '/account';
+          window.location.href = getRedirectUrl();
         }
       }
     } catch (err) {

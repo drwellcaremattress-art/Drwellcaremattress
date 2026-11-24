@@ -105,8 +105,8 @@ export function Navbar() {
             <Button variant="ghost" size="icon" className="hover:text-[#0682E4] hover:bg-[#0682E4]/10 rounded-full transition-colors" onClick={() => setIsSearchOpen(!isSearchOpen)}>
               <Search className="w-[18px] h-[18px]" strokeWidth={2} />
             </Button>
-            <Link href="/account">
-              <Button variant="ghost" size="icon" className="hover:text-[#6CB50E] hover:bg-[#6CB50E]/10 rounded-full transition-colors">
+            <Link href={session ? "/account" : "/login?callbackUrl=/account"}>
+              <Button variant="ghost" size="icon" className="hover:text-[#6CB50E] hover:bg-[#6CB50E]/10 rounded-full transition-colors" title={session ? "My Account" : "Sign In"}>
                 <User className="w-[18px] h-[18px]" strokeWidth={2} />
               </Button>
             </Link>
@@ -261,6 +261,19 @@ export function Navbar() {
                 </Link>
                 <Link href="/faq" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>FAQ</Link>
                 <Link href="/contact" className="px-6 py-4 hover:bg-gray-50 hover:text-[#6CB50E] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link>
+                <Link 
+                  href={session ? "/account" : "/login?callbackUrl=/account"} 
+                  className="px-6 py-4 hover:bg-gray-50 hover:text-[#0682E4] transition-colors flex items-center justify-between border-t border-gray-100" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-[#0682E4]" />
+                    {session ? "My VIP Account" : "Sign In / Register"}
+                  </span>
+                  {session && (
+                    <span className="text-[10px] bg-[#6CB50E] text-white font-bold px-2 py-0.5 rounded">Active</span>
+                  )}
+                </Link>
                 {isDealer && (
                   <Link
                     href="/account?tab=dealer"

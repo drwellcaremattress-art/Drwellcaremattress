@@ -4,6 +4,11 @@ export interface IUser extends Document {
   name: string;
   email: string;
   phone?: string;
+  dob?: string;
+  gender?: string;
+  firmnessPref?: string;
+  sleepPosition?: string;
+  backPainRelief?: string;
   passwordHash?: string;
   addresses: any[];
   wishlist: mongoose.Types.ObjectId[];
@@ -26,6 +31,11 @@ const UserSchema: Schema = new Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     phone: { type: String },
+    dob: { type: String },
+    gender: { type: String },
+    firmnessPref: { type: String },
+    sleepPosition: { type: String },
+    backPainRelief: { type: String },
     passwordHash: { type: String },
     addresses: [{ type: Schema.Types.Mixed }],
     wishlist: [{ type: Schema.Types.ObjectId, ref: 'Product' }],

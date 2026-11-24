@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import axios from 'axios';
 import OrderReceiptModal from '@/components/orders/OrderReceiptModal';
@@ -41,10 +42,10 @@ interface Address {
 }
 
 const DEFAULT_PROFILE: UserProfile = {
-  fullName: 'VIP Customer',
-  email: 'customer@drwellcare.com',
-  phone: '+91 93429 22044',
-  dob: '1990-01-01',
+  fullName: '',
+  email: '',
+  phone: '',
+  dob: '',
   gender: 'Not Specified',
   firmnessPref: 'Medium Firm (7/10) — Recommended',
   sleepPosition: 'Side & Back Sleeper',
@@ -52,8 +53,16 @@ const DEFAULT_PROFILE: UserProfile = {
 };
 
 export default function AccountPage() {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'addresses' | 'reviews' | 'wishlist' | 'dealer'>('profile');
+
+  // Immediately redirect guests to login
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/login?callbackUrl=/account');
+    }
+  }, [status, router]);
   
   // Profile State
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
@@ -120,23 +129,51 @@ export default function AccountPage() {
       const userEmail = session?.user?.email;
       const userName = userEmail ? formatDisplayName(userEmail, session.user?.name) : null;
 
-      // 1. Profile Sync
-      const savedProfileStr = localStorage.getItem('drwell_user_profile');
-      let currentProfile = savedProfileStr ? JSON.parse(savedProfileStr) : DEFAULT_PROFILE;
+      // 1. Profile Sync - Check user-specific storage first, then live MongoDB sync
+      if (userEmail) {
+        const userKey = `drwell_user_profile_${userEmail}`;
+        const savedUserStr = localStorage.getItem(userKey) || localStorage.getItem('drwell_user_profile');
+        if (savedUserStr) {
+          try {
+            const parsed = JSON.parse(savedUserStr);
+            if (parsed && (parsed.email === userEmail || !parsed.email)) {
+              setProfile({
+                ...parsed,
+                email: userEmail,
+                fullName: parsed.fullName || userName || '',
+              });
+            }
+          } catch (e) {}
+        } else {
+          setProfile(prev => ({
+            ...prev,
+            email: userEmail,
+            fullName: userName || '',
+          }));
+        }
 
-      if (userEmail && (currentProfile.email !== userEmail || currentProfile.fullName === 'Rajesh Sharma' || currentProfile.fullName === 'VIP Customer')) {
-        currentProfile = {
-          ...currentProfile,
-          fullName: userName || 'VIP Customer',
-          email: userEmail,
-        };
-        try {
-          localStorage.setItem('drwell_user_profile', JSON.stringify(currentProfile));
-        } catch (e) {}
-      } else if (!savedProfileStr && !userEmail) {
-        currentProfile = DEFAULT_PROFILE;
+        // Live Database Sync: fetch saved MongoDB profile and populate permanently
+        axios.get('/api/users/profile').then((res) => {
+          if (res.data) {
+            const dbData = res.data;
+            const updatedProfile: UserProfile = {
+              fullName: dbData.name || userName || '',
+              email: dbData.email || userEmail,
+              phone: dbData.phone || '',
+              dob: dbData.dob || '',
+              gender: dbData.gender || 'Not Specified',
+              firmnessPref: dbData.firmnessPref || 'Medium Firm (7/10) — Recommended',
+              sleepPosition: dbData.sleepPosition || 'Side & Back Sleeper',
+              backPainRelief: dbData.backPainRelief || 'Lumbar Spine Orthopaedic Support',
+            };
+            setProfile(updatedProfile);
+            try {
+              localStorage.setItem(userKey, JSON.stringify(updatedProfile));
+              localStorage.setItem('drwell_user_profile', JSON.stringify(updatedProfile));
+            } catch (e) {}
+          }
+        }).catch(err => console.error('Failed to sync DB profile', err));
       }
-      setProfile(currentProfile);
 
       // 2. Addresses Sync (100% Real)
       const savedAddressesStr = localStorage.getItem('drwell_user_addresses');
@@ -340,13 +377,35 @@ export default function AccountPage() {
       .catch(() => {});
   };
 
-  const handleProfileSave = (e: React.FormEvent) => {
+  const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const userEmail = session?.user?.email;
+      if (userEmail) {
+        localStorage.setItem(`drwell_user_profile_${userEmail}`, JSON.stringify(profile));
+      }
       localStorage.setItem('drwell_user_profile', JSON.stringify(profile));
-    } catch (e) {}
-    setProfileSuccess(true);
-    setTimeout(() => setProfileSuccess(false), 3000);
+
+      // Persist permanently to MongoDB database
+      await axios.put('/api/users/profile', {
+        name: profile.fullName,
+        fullName: profile.fullName,
+        phone: profile.phone,
+        dob: profile.dob,
+        gender: profile.gender,
+        firmnessPref: profile.firmnessPref,
+        sleepPosition: profile.sleepPosition,
+        backPainRelief: profile.backPainRelief,
+      });
+
+      setProfileSuccess(true);
+      setTimeout(() => setProfileSuccess(false), 3500);
+    } catch (err) {
+      console.error('Failed to save profile to database:', err);
+      // Still show success if local storage updated
+      setProfileSuccess(true);
+      setTimeout(() => setProfileSuccess(false), 3500);
+    }
   };
 
   const handleAddAddress = (e: React.FormEvent) => {
@@ -413,6 +472,115 @@ export default function AccountPage() {
   const loyaltyPoints = orders.length * 500 + userReviews.length * 200;
   const activeWarranties = orders.length;
 
+  if (status === 'loading') {
+    return (
+      <div className="bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-24 px-4 flex items-center justify-center font-body">
+        <div className="text-center space-y-4">
+          <div className="w-14 h-14 border-4 border-[#7cb93e] border-t-transparent rounded-full animate-spin mx-auto" />
+          <h2 className="text-xl font-heading font-black text-slate-800 dark:text-white">Connecting to VIP Member Portal...</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Verifying encrypted orthopaedic sleep profile session</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-12 px-4 sm:px-6 font-body">
+        <div className="max-w-4xl mx-auto">
+          {/* VIP Access Required Card */}
+          <div className="bg-gradient-to-br from-[#0B1A2A] via-[#122840] to-[#183656] rounded-[2.5rem] p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden border border-white/10 text-center mb-10">
+            <div className="absolute right-0 top-0 w-96 h-96 bg-[#7cb93e]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute left-1/4 bottom-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-[#7cb93e] to-[#5a8b2a] flex items-center justify-center text-white text-4xl sm:text-5xl shadow-[0_10px_25px_-5px_rgba(124,185,62,0.6)] border-2 border-white/30 mx-auto mb-6">
+                <ShieldCheck className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+              </div>
+
+              <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#7cb93e] bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full mb-4 border border-white/10">
+                <Award className="w-4 h-4 text-amber-400 fill-amber-400" />
+                Dr.Well Care VIP Member Portal
+              </div>
+
+              <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
+                Sign In to View Your VIP Profile & Orders
+              </h1>
+
+              <p className="text-base sm:text-lg text-slate-300 font-medium leading-relaxed mb-8">
+                Your personal details, live order dispatch tracking, 10-year warranty certificates, and saved sleep ergonomics are strictly secured. Please sign in or create an account to access your profile.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link href="/login?callbackUrl=/account" className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto bg-[#7cb93e] hover:bg-[#6ba334] text-slate-950 font-black px-8 py-6 rounded-2xl text-base shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2">
+                    <User className="w-5 h-5 text-slate-950" /> Sign In to VIP Account
+                  </Button>
+                </Link>
+                <Link href="/login?tab=register&callbackUrl=/account" className="w-full sm:w-auto">
+                  <Button variant="outline" className="w-full sm:w-auto border-2 border-white/30 text-white bg-white/5 hover:bg-white/10 font-bold px-8 py-6 rounded-2xl text-base transition-all hover:scale-105">
+                    Create New Account
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Benefits Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center text-[#0682E4] shrink-0 font-bold">
+                <Truck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-heading font-black text-slate-900 dark:text-white text-base">Real-Time Dispatch Tracking</h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                  Monitor manufacturing progress and live Blue Dart express courier status directly from your dashboard.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 shrink-0 font-bold">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-heading font-black text-slate-900 dark:text-white text-base">10-Year Digital Warranty Vault</h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                  All your purchased mattresses come with authentic digital warranty certificates, ready to download anytime.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 shrink-0 font-bold">
+                <Activity className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-heading font-black text-slate-900 dark:text-white text-base">Personal Sleep Ergonomics</h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                  Save your body firmness preferences and spine support requirements for personalized recommendations.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-amber-600 shrink-0 font-bold">
+                <FileText className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-heading font-black text-slate-900 dark:text-white text-base">One-Click Tax Invoices</h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                  View and print official GST-compliant tax invoices and receipts with exact product dimensions and specs.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-10 px-4 sm:px-6 font-body">
       <div className="max-w-7xl mx-auto">
@@ -476,19 +644,19 @@ export default function AccountPage() {
             <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
               <div className="flex items-center gap-5">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-[#7cb93e] to-[#5a8b2a] flex items-center justify-center text-white font-black text-3xl sm:text-4xl shadow-[0_10px_25px_-5px_rgba(124,185,62,0.6)] border-2 border-white/30 shrink-0">
-                  {profile.fullName.charAt(0).toUpperCase()}
+                  {((profile.fullName || session?.user?.name || 'V').trim().charAt(0) || 'V').toUpperCase()}
                 </div>
                 <div>
                   <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-[#7cb93e] bg-white/10 backdrop-blur-md px-3.5 py-1 rounded-full mb-2 border border-white/10">
                     <Award className="w-4 h-4 text-amber-400 fill-amber-400" />
-                    Dr.Well Care VIP Gold Member
+                    Dr.Well Care VIP Member
                   </div>
                   <h1 className="font-heading text-3xl sm:text-4xl font-black text-white tracking-tight">
-                    {profile.fullName}
+                    {profile.fullName || session?.user?.name || 'Valued VIP Member'}
                   </h1>
                   <p className="text-sm text-white/80 font-medium mt-1 flex items-center gap-4 flex-wrap">
-                    <span className="flex items-center gap-1.5"><Mail className="w-4 h-4 text-[#7cb93e]" /> {profile.email}</span>
-                    <span className="flex items-center gap-1.5"><Phone className="w-4 h-4 text-[#7cb93e]" /> {profile.phone}</span>
+                    <span className="flex items-center gap-1.5"><Mail className="w-4 h-4 text-[#7cb93e]" /> {profile.email || session?.user?.email}</span>
+                    {profile.phone && <span className="flex items-center gap-1.5"><Phone className="w-4 h-4 text-[#7cb93e]" /> {profile.phone}</span>}
                   </p>
                 </div>
               </div>
@@ -516,28 +684,6 @@ export default function AccountPage() {
               </div>
             </div>
           </div>
-        )}
-
-        {!session && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white rounded-3xl p-6 sm:p-8 mb-8 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 border-2 border-amber-300/40">
-            <div className="flex items-center gap-5 text-center sm:text-left">
-              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl shrink-0 shadow-inner">
-                🔒
-              </div>
-              <div>
-                <div className="inline-block px-3 py-1 rounded-full bg-black/20 text-white font-extrabold text-xs uppercase tracking-wider mb-1">Guest Mode Active</div>
-                <h3 className="font-heading font-black text-xl sm:text-2xl text-white">Log In or Create an Account</h3>
-                <p className="text-xs sm:text-sm text-white/90 font-medium max-w-xl mt-1 leading-relaxed">
-                  Sign in to sync your VIP loyalty points across devices, track live dispatch updates, manage saved addresses, and register 10-year warranty codes.
-                </p>
-              </div>
-            </div>
-            <Link href="/login" className="w-full sm:w-auto shrink-0">
-              <Button className="w-full sm:w-auto bg-[#0B1A2A] hover:bg-[#162a42] text-white font-black px-8 py-5 rounded-2xl text-base shadow-2xl transition-all hover:scale-105 flex items-center justify-center gap-2">
-                <User className="w-5 h-5 text-[#7cb93e]" /> Sign In / Create Account
-              </Button>
-            </Link>
-          </motion.div>
         )}
 
         {/* ─── Mobile Tab Bar (hidden on lg) ─────────────────────────────── */}
