@@ -417,11 +417,19 @@ export default function AccountPage() {
 
         axios.get('/api/admin/products')
           .then((res) => {
-            if (res.data && Array.isArray(res.data)) {
+            if (res.data && Array.isArray(res.data) && res.data.length > 0) {
               setDealerProducts(res.data);
+            } else {
+              axios.get('/api/products').then((r2) => {
+                if (r2.data && Array.isArray(r2.data)) setDealerProducts(r2.data);
+              }).catch(() => {});
             }
           })
-          .catch(() => {});
+          .catch(() => {
+            axios.get('/api/products').then((r2) => {
+              if (r2.data && Array.isArray(r2.data)) setDealerProducts(r2.data);
+            }).catch(() => {});
+          });
       }
 
       // 8. Employee Staff Billing Data Sync
@@ -438,11 +446,19 @@ export default function AccountPage() {
 
         axios.get('/api/admin/products')
           .then((res) => {
-            if (res.data && Array.isArray(res.data)) {
+            if (res.data && Array.isArray(res.data) && res.data.length > 0) {
               setDealerProducts(res.data);
+            } else {
+              axios.get('/api/products').then((r2) => {
+                if (r2.data && Array.isArray(r2.data)) setDealerProducts(r2.data);
+              }).catch(() => {});
             }
           })
-          .catch(() => {});
+          .catch(() => {
+            axios.get('/api/products').then((r2) => {
+              if (r2.data && Array.isArray(r2.data)) setDealerProducts(r2.data);
+            }).catch(() => {});
+          });
       }
 
     } catch (e) {

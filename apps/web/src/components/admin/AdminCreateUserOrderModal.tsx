@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, User, Mail, Lock, Phone, MapPin, ShoppingBag, Plus, Trash2,
@@ -98,17 +99,141 @@ export default function AdminCreateUserOrderModal({
   // Items in Order
   const [items, setItems] = useState<OrderItemDraft[]>([]);
 
+  // Internal catalog products state with self-healing fallback
+  const [catalogProducts, setCatalogProducts] = useState<ProductType[]>(products || []);
+
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setCatalogProducts(products);
+    } else {
+      axios.get('/api/admin/products')
+        .then((res) => {
+          if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+            setCatalogProducts(res.data);
+          } else {
+            axios.get('/api/products').then((r2) => {
+              if (r2.data && Array.isArray(r2.data)) setCatalogProducts(r2.data);
+            }).catch(() => {});
+          }
+        })
+        .catch(() => {
+          axios.get('/api/products').then((r2) => {
+            if (r2.data && Array.isArray(r2.data)) setCatalogProducts(r2.data);
+          }).catch(() => {});
+        });
+    }
+  }, [products]);
+
+  // Clean and parse product attributes
+  const cleanProductName = (name: string) => {
+    return (name || '').replace(/\s*-\s*\d+(\.\d+)?\s*(inch|in)?$/i, '').trim();
+  };
+
+  const parseThickness = (p: any): string => {
+    if (p.thickness) {
+      const m = p.thickness.match(/(\d+)\s*(inch|in)?/i);
+      if (m) return `${m[1]} Inch`;
+    }
+    if (p.variants?.[0]?.thickness_cm) {
+      const inVal = Math.round(p.variants[0].thickness_cm / 2.54);
+      if (inVal > 0) return `${inVal} Inch`;
+    }
+    if (p.slug) {
+      const slugMatch = p.slug.match(/-(\d+)$/);
+      if (slugMatch) return `${slugMatch[1]} Inch`;
+    }
+    return '6 Inch';
+  };
+
+  interface ProductGroup {
+    name: string;
+    defaultProduct: ProductType;
+    thicknessDocs: Record<string, ProductType>;
+    availableThicknesses: string[];
+  }
+
+  // Deduplicate products by unique base model name (NO REPEATED NAMES!)
+  const productGroups = useMemo<ProductGroup[]>(() => {
+    const map = new Map<string, ProductGroup>();
+
+    (catalogProducts || []).forEach((p: any) => {
+      if (!p || !p.name) return;
+      const modelName = cleanProductName(p.name);
+      const th = parseThickness(p);
+
+      if (!map.has(modelName)) {
+        map.set(modelName, {
+          name: modelName,
+          defaultProduct: p,
+          thicknessDocs: { [th]: p },
+          availableThicknesses: [th],
+        });
+      } else {
+        const group = map.get(modelName)!;
+        group.thicknessDocs[th] = p;
+        if (!group.availableThicknesses.includes(th)) {
+          group.availableThicknesses.push(th);
+        }
+        if ((p.variants?.length || 0) > (group.defaultProduct.variants?.length || 0)) {
+          group.defaultProduct = p;
+        }
+      }
+    });
+
+    // Sort thicknesses ascending: e.g. 4 Inch, 5 Inch, 6 Inch, 8 Inch, 10 Inch
+    map.forEach((grp) => {
+      grp.availableThicknesses.sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+      if (grp.availableThicknesses.length === 0) {
+        grp.availableThicknesses = ['6 Inch', '8 Inch'];
+      }
+    });
+
+    return Array.from(map.values());
+  }, [catalogProducts]);
+
   // Item Picker State
-  const [selectedProductSlug, setSelectedProductSlug] = useState<string>(
-    products[0]?.slug || ''
-  );
+  const [selectedProductName, setSelectedProductName] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('Single');
+  const [selectedThickness, setSelectedThickness] = useState<string>('6 Inch');
+
+  // Keep selectedProductName synchronized with available product groups
+  useEffect(() => {
+    if (productGroups.length > 0) {
+      if (!selectedProductName || !productGroups.some((g) => g.name === selectedProductName)) {
+        setSelectedProductName(productGroups[0].name);
+      }
+    }
+  }, [productGroups, selectedProductName]);
+
+  // Active product group for current model name
+  const activeGroup = useMemo(() => {
+    return productGroups.find((g) => g.name === selectedProductName) || productGroups[0] || null;
+  }, [productGroups, selectedProductName]);
+
+  // Ensure selectedThickness aligns with active group's available thicknesses
+  useEffect(() => {
+    if (activeGroup?.availableThicknesses && activeGroup.availableThicknesses.length > 0) {
+      if (!activeGroup.availableThicknesses.includes(selectedThickness)) {
+        if (activeGroup.availableThicknesses.includes('6 Inch')) {
+          setSelectedThickness('6 Inch');
+        } else {
+          setSelectedThickness(activeGroup.availableThicknesses[0]);
+        }
+      }
+    }
+  }, [activeGroup, selectedThickness]);
+
+  // Find currently active product document in picker (based on product name + thickness)
+  const activeProduct = useMemo(() => {
+    if (!activeGroup) return catalogProducts[0] || null;
+    return activeGroup.thicknessDocs[selectedThickness] || activeGroup.defaultProduct || catalogProducts[0];
+  }, [activeGroup, selectedThickness, catalogProducts]);
+
   // Sub-dimension selection (like product page popup)
   const [selectedSubDim, setSelectedSubDim] = useState<{ dim: string; sqft: number } | null>(null);
   const [isCustomSize, setIsCustomSize] = useState<boolean>(false);
   const [customL, setCustomL] = useState<string>('');
   const [customW, setCustomW] = useState<string>('');
-  const [selectedThickness, setSelectedThickness] = useState<string>('6 Inch');
   const [selectedColor, setSelectedColor] = useState<string>('Pure White');
   const [itemQty, setItemQty] = useState<number>(1);
   const [customPrice, setCustomPrice] = useState<string>('');
@@ -137,11 +262,8 @@ export default function AdminCreateUserOrderModal({
     showToast('success', 'Generated secure customer password!');
   };
 
-  // Find currently active product in picker
-  const activeProduct = products.find((p) => p.slug === selectedProductSlug) || products[0];
-
   // Colors available for this product
-  const availableColors = React.useMemo(() => {
+  const availableColors = useMemo(() => {
     if (activeProduct?.colors && activeProduct.colors.length > 0) {
       const list = activeProduct.colors
         .map((c: any) => (typeof c === 'string' ? c : c?.name))
@@ -152,14 +274,14 @@ export default function AdminCreateUserOrderModal({
   }, [activeProduct]);
 
   // Keep selectedColor aligned when activeProduct changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (availableColors.length > 0 && !availableColors.includes(selectedColor)) {
       setSelectedColor(availableColors[0]);
     }
   }, [availableColors, selectedColor]);
 
   // Active variant for current size category
-  const activeVariant = React.useMemo(() =>
+  const activeVariant = useMemo(() =>
     activeProduct?.variants?.find((v) => v.size.toLowerCase() === selectedSize.toLowerCase()),
     [activeProduct, selectedSize]
   );
@@ -237,9 +359,10 @@ export default function AdminCreateUserOrderModal({
     const colorSpecificImage = typeof matchedColorObj === 'object' && matchedColorObj?.image ? matchedColorObj.image : '';
     const image = colorSpecificImage || activeProduct.images?.[0]?.url || '/images/products/ecolatex-6.jpeg';
 
+    const productName = activeGroup?.name || activeProduct.name;
     const newItem: OrderItemDraft = {
       productId: activeProduct.slug,
-      name: activeProduct.name,
+      name: productName,
       variantSku: `${activeProduct.slug.toUpperCase()}-${dimLabel.replace(/[^A-Z0-9]/gi, '')}-${selectedThickness.replace(/\s+/g, '')}-${selectedColor.replace(/\s+/g, '').toUpperCase()}`,
       size: dimLabel,
       thickness: selectedThickness,
@@ -252,7 +375,7 @@ export default function AdminCreateUserOrderModal({
     setItems((prev) => [...prev, newItem]);
     setCustomPrice('');
     setItemQty(1);
-    showToast('success', `Added "${activeProduct.name} (${dimLabel}, ${selectedColor})" to order.`);
+    showToast('success', `Added "${productName} (${dimLabel}, ${selectedThickness}, ${selectedColor})" to order.`);
   };
 
   const handleRemoveItem = (idx: number) => {
@@ -617,13 +740,13 @@ export default function AdminCreateUserOrderModal({
                       Choose Product
                     </label>
                     <select
-                      value={selectedProductSlug}
-                      onChange={(e) => setSelectedProductSlug(e.target.value)}
-                      className="w-full px-2.5 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white"
+                      value={selectedProductName}
+                      onChange={(e) => setSelectedProductName(e.target.value)}
+                      className="w-full px-2.5 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
                     >
-                      {products.map((p) => (
-                        <option key={p.slug} value={p.slug}>
-                          {p.name}
+                      {productGroups.map((group) => (
+                        <option key={group.name} value={group.name} className="font-bold text-slate-900 py-1">
+                          {group.name}
                         </option>
                       ))}
                     </select>
@@ -637,7 +760,7 @@ export default function AdminCreateUserOrderModal({
                     <select
                       value={selectedSize}
                       onChange={(e) => setSelectedSize(e.target.value)}
-                      className="w-full px-2.5 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white"
+                      className="w-full px-2.5 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
                     >
                       <option value="Single">Single</option>
                       <option value="Double">Double</option>
@@ -654,12 +777,13 @@ export default function AdminCreateUserOrderModal({
                     <select
                       value={selectedThickness}
                       onChange={(e) => setSelectedThickness(e.target.value)}
-                      className="w-full px-2.5 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-800 bg-white"
+                      className="w-full px-2.5 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0682E4]"
                     >
-                      <option value="5 Inch">5 Inch</option>
-                      <option value="6 Inch">6 Inch</option>
-                      <option value="8 Inch">8 Inch</option>
-                      <option value="10 Inch">10 Inch</option>
+                      {(activeGroup?.availableThicknesses || ['4 Inch', '5 Inch', '6 Inch', '8 Inch', '10 Inch']).map((th) => (
+                        <option key={th} value={th} className="font-bold text-slate-900 py-1">
+                          {th}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
