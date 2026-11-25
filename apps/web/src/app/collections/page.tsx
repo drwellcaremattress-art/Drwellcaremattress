@@ -87,8 +87,8 @@ export default function CollectionsPage() {
         </motion.div>
       </div>
 
-      {/* 2. Reusable Product Listing Component */}
-      <ProductListing />
+      {/* 2. Reusable Product Listing Component (Full-Width 3-Column Grid without Filter Sidebar) */}
+      <ProductListing showFilters={false} gridCols={3} />
 
       {/* 3. The Dr Well Care Advantage - Premium Glass Grid */}
       <section className="container mx-auto px-4 mb-28 relative z-10 mt-16">
