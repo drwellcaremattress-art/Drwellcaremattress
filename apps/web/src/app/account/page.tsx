@@ -280,7 +280,7 @@ export default function AccountPage() {
                 { label: 'Order Cancelled', time: 'Cancelled', done: true },
               ] : [
                 { label: 'Order Confirmed', time: 'Completed', done: isConfirmed },
-                { label: 'Manufactured & QC Passed (Pune Plant)', time: isConfirmed ? 'Completed' : 'Pending', done: isConfirmed },
+                { label: 'Manufactured & QC Passed', time: isConfirmed ? 'Completed' : 'Pending', done: isConfirmed },
                 { label: dispatchLabel, time: isShipped ? (trackingCode ? `AWB: ${trackingCode}` : 'In Transit') : 'Pending', done: isShipped },
                 { label: 'Out for Delivery (Local Hub)', time: isDelivered ? 'Delivered' : isOutForDelivery ? 'Out for Delivery' : 'Expected Soon', done: isOutForDelivery },
               ];

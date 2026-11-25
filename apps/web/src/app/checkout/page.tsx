@@ -232,7 +232,7 @@ export default function CheckoutPage() {
         warrantyId: `WAR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
         steps: [
           { label: 'Order Confirmed', time: 'Just now', done: true },
-          { label: 'Manufactured & QC Passed (Pune Plant)', time: 'Pending QC', done: false },
+          { label: 'Manufactured & QC Passed', time: 'Pending QC', done: false },
           { label: 'Dispatched via BlueDart Express', time: 'Pending Dispatch', done: false },
           { label: 'Out for Delivery (Local Hub)', time: 'Expected Soon', done: false },
         ]
