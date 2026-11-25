@@ -81,6 +81,7 @@ export default function AdminDashboardClient({
   const [selectedReceiptOrder, setSelectedReceiptOrder] = useState<OrderType | null>(null);
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+  const [orderCreatorFilter, setOrderCreatorFilter] = useState<'all' | 'employee' | 'dealer' | 'customer'>('all');
   const [trackingInputs, setTrackingInputs] = useState<Record<string, { courier: string; trackingId: string; trackingUrl: string }>>({});
   const [savingTrackingId, setSavingTrackingId] = useState<string | null>(null);
   const [advanceInputs, setAdvanceInputs] = useState<Record<string, string>>({});
@@ -631,6 +632,37 @@ export default function AdminDashboardClient({
               ))}
             </div>
 
+            {/* Creator Source Filter Pills */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
+              {[
+                { id: 'all' as const, label: 'All Creators', count: orders.length },
+                { id: 'employee' as const, label: 'By Employee', count: orders.filter(o => Boolean(o.employeeName)).length },
+                { id: 'dealer' as const, label: 'By Dealer', count: orders.filter(o => Boolean(o.dealerName || o.dealerStoreName)).length },
+                { id: 'customer' as const, label: 'Direct Customer', count: orders.filter(o => !o.employeeName && !o.dealerName && !o.dealerStoreName).length },
+              ].map((pill) => (
+                <button
+                  key={pill.id}
+                  onClick={() => setOrderCreatorFilter(pill.id)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 ${
+                    orderCreatorFilter === pill.id
+                      ? pill.id === 'employee'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : pill.id === 'dealer'
+                        ? 'bg-[#0682E4] text-white shadow-md'
+                        : 'bg-[#0B1A2A] text-white shadow-md'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>{pill.label}</span>
+                  <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+                    orderCreatorFilter === pill.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {pill.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
             {/* Filtered Orders List */}
             {(() => {
               const filteredOrders = orders.filter((o) => {
@@ -638,6 +670,11 @@ export default function AdminDashboardClient({
                 if (orderStatusFilter !== 'all' && o.orderStatus !== orderStatusFilter) {
                   return false;
                 }
+                // Creator filter
+                if (orderCreatorFilter === 'employee' && !o.employeeName) return false;
+                if (orderCreatorFilter === 'dealer' && !o.dealerName && !o.dealerStoreName) return false;
+                if (orderCreatorFilter === 'customer' && (o.employeeName || o.dealerName || o.dealerStoreName)) return false;
+
                 // Search filter
                 if (!orderSearch.trim()) return true;
                 const q = orderSearch.toLowerCase().trim();
@@ -646,7 +683,11 @@ export default function AdminDashboardClient({
                 const phone = (o.customerPhone || '').toLowerCase();
                 const awb = (o.trackingId || '').toLowerCase();
                 const courier = (o.courier || '').toLowerCase();
-                return num.includes(q) || name.includes(q) || phone.includes(q) || awb.includes(q) || courier.includes(q);
+                const emp = (o.employeeName || '').toLowerCase();
+                const empCode = (o.employeeCode || '').toLowerCase();
+                const dlr = (o.dealerName || '').toLowerCase();
+                const dlrStore = (o.dealerStoreName || '').toLowerCase();
+                return num.includes(q) || name.includes(q) || phone.includes(q) || awb.includes(q) || courier.includes(q) || emp.includes(q) || empCode.includes(q) || dlr.includes(q) || dlrStore.includes(q);
               });
 
               if (filteredOrders.length === 0) {
