@@ -43,6 +43,16 @@ interface OrderType {
   courier?: string;
   trackingUrl?: string;
   estimatedDelivery?: string;
+  dealerId?: string;
+  dealerName?: string;
+  dealerStoreName?: string;
+  dealerPhone?: string;
+  dealerEmail?: string;
+  employeeId?: string;
+  employeeName?: string;
+  employeeEmail?: string;
+  employeePhone?: string;
+  employeeCode?: string;
   createdAt: string;
 }
 
@@ -829,6 +839,43 @@ export default function AdminDashboardClient({
 
                         {/* ── CARD BODY ── */}
                         <div className="p-5 space-y-4 flex-grow text-xs">
+                          {/* Creator Attribution Banner (Employee / Dealer / Admin / Direct) */}
+                          {(ord.employeeName || ord.dealerName || ord.dealerStoreName || ord.paymentMethod === 'assisted_admin') && (
+                            <div
+                              className={`px-3 py-2 rounded-xl border flex items-center justify-between gap-2 ${
+                                ord.employeeName
+                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                                  : ord.dealerName || ord.dealerStoreName
+                                  ? 'bg-blue-50 border-blue-200 text-blue-900'
+                                  : 'bg-slate-100 border-slate-200 text-slate-800'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                {ord.employeeName ? (
+                                  <ShieldCheck size={14} className="text-emerald-600 shrink-0" />
+                                ) : (
+                                  <Store size={14} className="text-[#0682E4] shrink-0" />
+                                )}
+                                <div className="min-w-0 truncate">
+                                  <span className="text-[10px] font-black uppercase tracking-wider opacity-75 block leading-none">
+                                    {ord.employeeName
+                                      ? 'Created by Employee'
+                                      : ord.dealerName || ord.dealerStoreName
+                                      ? 'Created by Dealer'
+                                      : 'Created by Admin'}
+                                  </span>
+                                  <span className="font-extrabold text-xs truncate block mt-0.5">
+                                    {ord.employeeName
+                                      ? `${ord.employeeName}${ord.employeeCode ? ` (${ord.employeeCode})` : ''}`
+                                      : ord.dealerStoreName
+                                      ? `${ord.dealerStoreName}${ord.dealerName ? ` — ${ord.dealerName}` : ''}`
+                                      : ord.dealerName || 'Admin Billing Desk'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Customer Details */}
                           <div className="bg-slate-50/70 p-3.5 rounded-2xl border border-slate-100 space-y-1.5">
                             <div className="flex items-center gap-2">

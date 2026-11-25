@@ -89,7 +89,11 @@ export default async function AdminDashboardPage() {
         totalPrice: o.total || o.totalPrice || 0,
         subtotal: o.subtotal || o.total || o.totalPrice || 0,
         advanceAmount: Number(o.advanceAmount) || 0,
-        balanceAmount: o.balanceAmount !== undefined ? Number(o.balanceAmount) : Math.max(0, (Number(o.total || o.totalPrice || 0)) - (Number(o.advanceAmount) || 0)),
+        balanceAmount: (o.isPaid || o.paymentStatus === 'paid')
+          ? 0
+          : (Number(o.advanceAmount) > 0
+              ? Math.max(0, (Number(o.total || o.totalPrice || 0)) - Number(o.advanceAmount))
+              : (o.balanceAmount && Number(o.balanceAmount) > 0 ? Number(o.balanceAmount) : Number(o.total || o.totalPrice || 0))),
         discount: o.discount || 0,
         shipping: o.shipping || 0,
         tax: o.tax || 0,
@@ -100,6 +104,16 @@ export default async function AdminDashboardPage() {
         courier: o.courier || '',
         trackingUrl: o.trackingUrl || '',
         estimatedDelivery: o.estimatedDelivery || '',
+        dealerId: o.dealerId ? String(o.dealerId) : '',
+        dealerName: o.dealerName || '',
+        dealerStoreName: o.dealerStoreName || '',
+        dealerPhone: o.dealerPhone || '',
+        dealerEmail: o.dealerEmail || '',
+        employeeId: o.employeeId ? String(o.employeeId) : '',
+        employeeName: o.employeeName || '',
+        employeeEmail: o.employeeEmail || '',
+        employeePhone: o.employeePhone || '',
+        employeeCode: o.employeeCode || '',
         createdAt: o.createdAt || new Date().toISOString(),
       };
     });

@@ -121,11 +121,19 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
   // 6. Resolve Items and Financials
   const items = (order.items && order.items.length > 0) ? order.items : (order.orderItems || []);
   const totalAmount = Number(order.totalPrice || order.total || 0);
+  const isOrderPaid = Boolean(order.isPaid || order.paymentStatus === 'paid');
 
   const advanceAmount = Math.max(0, Number(order.advanceAmount || 0));
-  const balanceAmount = order.balanceAmount !== undefined
-    ? Math.max(0, Number(order.balanceAmount))
-    : Math.max(0, totalAmount - advanceAmount);
+  let balanceAmount = totalAmount;
+  if (isOrderPaid || (advanceAmount > 0 && advanceAmount >= totalAmount)) {
+    balanceAmount = 0;
+  } else if (advanceAmount > 0) {
+    balanceAmount = Math.max(0, totalAmount - advanceAmount);
+  } else if (order.balanceAmount !== undefined && Number(order.balanceAmount) > 0) {
+    balanceAmount = Math.max(0, Number(order.balanceAmount));
+  } else {
+    balanceAmount = totalAmount;
+  }
 
   const gstAmount = Math.round((totalAmount * 18) / 118); // 18% GST component
   const basePrice = totalAmount - gstAmount;

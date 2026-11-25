@@ -246,8 +246,13 @@ export default function AccountPage() {
       localOrders = localOrders.map((o: any) => {
         const orderNumber = o.orderNumber || o.rawNumber || (o.id && o.id.startsWith('DW-') ? o.id.replace('DW-', 'DRWELL-ORD-') : o.id) || (o._id ? `DRWELL-ORD-${o._id.toString().slice(-6)}` : 'DRWELL-ORD-045386');
         const total = Number(o.total || o.totalPrice || 0);
+        const isOrdPaid = Boolean(o.isPaid || o.paymentStatus === 'paid');
         const advanceAmount = o.advanceAmount !== undefined ? Number(o.advanceAmount) : (o.paymentMethod?.toLowerCase().includes('cod') || o.payment?.toLowerCase().includes('cod') ? 2000 : 0);
-        const balanceAmount = o.balanceAmount !== undefined ? Number(o.balanceAmount) : Math.max(0, total - advanceAmount);
+        const balanceAmount = isOrdPaid
+          ? 0
+          : (advanceAmount > 0
+              ? Math.max(0, total - advanceAmount)
+              : (o.balanceAmount && Number(o.balanceAmount) > 0 ? Number(o.balanceAmount) : total));
         const custName = o.customerName || (o.shippingAddress?.firstName ? `${o.shippingAddress.firstName} ${o.shippingAddress.lastName || ''}`.trim() : '') || userName || '';
         const custPhone = o.customerPhone || o.shippingAddress?.phone || profile.phone || '';
         const custEmail = o.customerEmail || o.userEmail || o.shippingAddress?.email || userEmail || '';
@@ -315,8 +320,13 @@ export default function AccountPage() {
 
               const rawOrderNum = o.orderNumber || (o.id && o.id.startsWith('DW-') ? o.id.replace('DW-', 'DRWELL-ORD-') : `DRWELL-ORD-${o._id?.toString().slice(-6)}`);
               const ordTotal = Number(o.total || o.totalPrice || 0);
+              const isOrdPaid = Boolean(o.isPaid || o.paymentStatus === 'paid');
               const advAmt = o.advanceAmount !== undefined ? Number(o.advanceAmount) : (o.paymentMethod === 'cod' || o.paymentStatus === 'advance_paid' ? 2000 : 0);
-              const balAmt = o.balanceAmount !== undefined ? Number(o.balanceAmount) : Math.max(0, ordTotal - advAmt);
+              const balAmt = isOrdPaid
+                ? 0
+                : (advAmt > 0
+                    ? Math.max(0, ordTotal - advAmt)
+                    : (o.balanceAmount && Number(o.balanceAmount) > 0 ? Number(o.balanceAmount) : ordTotal));
 
               return {
                 _id: o._id,
