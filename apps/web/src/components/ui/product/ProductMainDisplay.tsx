@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { ImageGallery } from '@/components/ui/product/ImageGallery';
 import { ProductInfo } from '@/components/ui/product/ProductInfo';
 
@@ -12,10 +11,17 @@ interface ProductMainDisplayProps {
 }
 
 export function ProductMainDisplay({ product }: ProductMainDisplayProps) {
-  const router = useRouter();
-  const initialVariantIndex = 0; // Always default to the least thick variant (variants are sorted ascending by thickness)
-  
+  const matchedVariantIdx = product.thicknessVariants?.findIndex((v: any) => v.slug === product.slug);
+  const initialVariantIndex = matchedVariantIdx !== undefined && matchedVariantIdx >= 0 ? matchedVariantIdx : 0;
+
   const [activeVariantIndex, setActiveVariantIndex] = useState<number>(initialVariantIndex);
+
+  useEffect(() => {
+    if (product.thicknessVariants && product.thicknessVariants.length > 0) {
+      const idx = product.thicknessVariants.findIndex((v: any) => v.slug === product.slug);
+      setActiveVariantIndex(idx >= 0 ? idx : 0);
+    }
+  }, [product.slug]);
 
   const defaultColorName = product.colors && product.colors.length > 0 ? product.colors[0].name : 'White';
   const [selectedColor, setSelectedColor] = useState<string>(defaultColorName);
@@ -56,13 +62,7 @@ export function ProductMainDisplay({ product }: ProductMainDisplayProps) {
   const handleVariantChange = (idx: number, variantSlug?: string) => {
     setActiveVariantIndex(idx);
     if (variantSlug && typeof window !== 'undefined') {
-      if (variantSlug !== product.slug) {
-        // If it's a completely separate product in the database, navigate to it!
-        router.push(`/product/${variantSlug}`);
-      } else {
-        // If it's just a variant on the same product, just update the URL cosmetically
-        window.history.replaceState(null, '', `/product/${variantSlug}`);
-      }
+      window.history.replaceState(null, '', `/product/${variantSlug}`);
     }
   };
 
