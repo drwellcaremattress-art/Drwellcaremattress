@@ -251,8 +251,8 @@ export default function AccountPage() {
         const balanceAmount = isOrdPaid
           ? 0
           : (advanceAmount > 0
-              ? Math.max(0, total - advanceAmount)
-              : (o.balanceAmount && Number(o.balanceAmount) > 0 ? Number(o.balanceAmount) : total));
+            ? Math.max(0, total - advanceAmount)
+            : (o.balanceAmount && Number(o.balanceAmount) > 0 ? Number(o.balanceAmount) : total));
         const custName = o.customerName || (o.shippingAddress?.firstName ? `${o.shippingAddress.firstName} ${o.shippingAddress.lastName || ''}`.trim() : '') || userName || '';
         const custPhone = o.customerPhone || o.shippingAddress?.phone || profile.phone || '';
         const custEmail = o.customerEmail || o.userEmail || o.shippingAddress?.email || userEmail || '';
@@ -325,8 +325,8 @@ export default function AccountPage() {
               const balAmt = isOrdPaid
                 ? 0
                 : (advAmt > 0
-                    ? Math.max(0, ordTotal - advAmt)
-                    : (o.balanceAmount && Number(o.balanceAmount) > 0 ? Number(o.balanceAmount) : ordTotal));
+                  ? Math.max(0, ordTotal - advAmt)
+                  : (o.balanceAmount && Number(o.balanceAmount) > 0 ? Number(o.balanceAmount) : ordTotal));
 
               return {
                 _id: o._id,
@@ -899,8 +899,8 @@ export default function AccountPage() {
                   key={item.id}
                   onClick={() => setActiveTab(item.id as any)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all shrink-0 ${isSelected
-                      ? (isEmployee ? 'bg-emerald-600 text-white shadow-md' : 'bg-[#0B1A2A] text-white shadow-md')
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                    ? (isEmployee ? 'bg-emerald-600 text-white shadow-md' : 'bg-[#0B1A2A] text-white shadow-md')
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
                     }`}
                 >
                   <Icon className={`w-4 h-4 ${isSelected ? (isEmployee ? 'text-white' : item.id === 'dealer' ? 'text-[#0682E4]' : 'text-[#7cb93e]') : 'text-slate-400'}`} />
@@ -959,8 +959,8 @@ export default function AccountPage() {
                     key={item.id}
                     onClick={() => setActiveTab(item.id as any)}
                     className={`w-full flex items-center justify-between p-4 rounded-2xl text-sm font-bold transition-all ${isSelected
-                        ? (isEmployee ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20' : 'bg-[#0B1A2A] text-white shadow-md shadow-[#0B1A2A]/20')
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      ? (isEmployee ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20' : 'bg-[#0B1A2A] text-white shadow-md shadow-[#0B1A2A]/20')
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                       }`}
                   >
                     <div className="flex items-center gap-3.5">
@@ -1571,8 +1571,8 @@ export default function AccountPage() {
                         <div
                           key={addr.id}
                           className={`bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border relative flex flex-col justify-between transition-all ${addr.isDefault
-                              ? 'border-2 border-[#0B1A2A] dark:border-[#7cb93e] shadow-md bg-gradient-to-br from-white to-blue-50/20 dark:from-slate-900 dark:to-slate-800/50'
-                              : 'border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md'
+                            ? 'border-2 border-[#0B1A2A] dark:border-[#7cb93e] shadow-md bg-gradient-to-br from-white to-blue-50/20 dark:from-slate-900 dark:to-slate-800/50'
+                            : 'border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md'
                             }`}
                         >
                           <div>
@@ -1916,8 +1916,8 @@ export default function AccountPage() {
                               key={status}
                               onClick={() => setInvoiceStatusFilter(status)}
                               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${isSelected
-                                  ? 'bg-[#0682E4] text-white shadow-sm'
-                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                                ? 'bg-[#0682E4] text-white shadow-sm'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
                                 }`}
                             >
                               <span>{status}</span>
@@ -2027,10 +2027,10 @@ export default function AccountPage() {
                                     </td>
                                     <td className="py-4 px-4">
                                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${orderStatus === 'Delivered'
-                                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                          : orderStatus === 'Shipped' || orderStatus === 'Out for Delivery'
-                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                                            : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                        : orderStatus === 'Shipped' || orderStatus === 'Out for Delivery'
+                                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                                         }`}>
                                         {orderStatus}
                                       </span>
@@ -2198,8 +2198,8 @@ export default function AccountPage() {
                               key={status}
                               onClick={() => setEmployeeStatusFilter(status)}
                               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${isSelected
-                                  ? 'bg-[#7cb93e] text-white shadow-sm'
-                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                                ? 'bg-[#7cb93e] text-white shadow-sm'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
                                 }`}
                             >
                               <span>{status}</span>
@@ -2309,10 +2309,10 @@ export default function AccountPage() {
                                     </td>
                                     <td className="py-4 px-4">
                                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${orderStatus === 'Delivered'
-                                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                          : orderStatus === 'Shipped' || orderStatus === 'Out for Delivery'
-                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                                            : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                        : orderStatus === 'Shipped' || orderStatus === 'Out for Delivery'
+                                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                                         }`}>
                                         {orderStatus}
                                       </span>
