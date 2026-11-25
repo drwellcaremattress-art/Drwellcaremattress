@@ -6,7 +6,7 @@ import {
   Award, Sparkles, CheckCircle, Clock, Truck, FileText, Plus,
   Edit3, Trash2, Phone, Mail, Calendar, Activity, Star, Moon, ArrowUpRight,
   ExternalLink, Copy, Store, Printer, IndianRupee, Search, RefreshCw,
-  Building, BadgeCheck, CheckCircle2, Briefcase
+  Building, BadgeCheck, CheckCircle2, Briefcase, XCircle, AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -97,6 +97,11 @@ export default function AccountPage() {
   const [trackingOrder, setTrackingOrder] = useState<any | null>(null);
   const [selectedReceiptOrder, setSelectedReceiptOrder] = useState<any | null>(null);
   const [copiedTrackingId, setCopiedTrackingId] = useState<string | null>(null);
+  const [cancelConfirmOrder, setCancelConfirmOrder] = useState<any | null>(null);
+  const [isCancellingOrder, setIsCancellingOrder] = useState(false);
+  const [orderCancelToast, setOrderCancelToast] = useState<string | null>(null);
+
+  const isCustomer = !isDealer && !isEmployee && (session?.user as any)?.role !== 'admin';
 
   const formatDisplayName = (email?: string | null, name?: string | null) => {
     if (!email) return name || '';
@@ -106,28 +111,51 @@ export default function AccountPage() {
     return prefix.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
 
-  const handleDeleteUserOrder = async (order: any) => {
-    if (!confirm(`Are you sure you want to delete order #${order.id}?`)) return;
+  const handleConfirmCancelOrder = async () => {
+    if (!cancelConfirmOrder || !isCustomer) return;
+    const order = cancelConfirmOrder;
+    setIsCancellingOrder(true);
 
-    setOrders((prev) => prev.filter((o) => o.id !== order.id && o._id !== order._id));
+    const dbId = order._id;
+    if (dbId) {
+      try {
+        await axios.put(`/api/orders/${dbId}`, { orderStatus: 'Cancelled' });
+      } catch (e) {
+        console.error('Failed to cancel order on server:', e);
+      }
+    }
+
+    const cancelledSteps = [
+      { label: 'Order Placed', time: 'Completed', done: true },
+      { label: 'Order Cancelled', time: 'Cancelled', done: true },
+    ];
+    const cancelledColor = 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-300';
+
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === order.id && o._id === order._id
+          ? { ...o, status: 'Cancelled', orderStatus: 'Cancelled', statusColor: cancelledColor, steps: cancelledSteps }
+          : o
+      )
+    );
 
     const savedOrdersStr = localStorage.getItem('drwell_user_orders');
     if (savedOrdersStr) {
       try {
         const localOrders = JSON.parse(savedOrdersStr);
-        const filtered = localOrders.filter((o: any) => o.id !== order.id && o._id !== order._id);
-        localStorage.setItem('drwell_user_orders', JSON.stringify(filtered));
+        const updated = localOrders.map((o: any) =>
+          o.id === order.id && o._id === order._id
+            ? { ...o, status: 'Cancelled', orderStatus: 'Cancelled', statusColor: cancelledColor, steps: cancelledSteps }
+            : o
+        );
+        localStorage.setItem('drwell_user_orders', JSON.stringify(updated));
       } catch (e) { }
     }
 
-    const dbId = order._id;
-    if (dbId) {
-      try {
-        await axios.delete(`/api/orders/${dbId}`);
-      } catch (e) {
-        console.error('Failed to delete order from server:', e);
-      }
-    }
+    setIsCancellingOrder(false);
+    setCancelConfirmOrder(null);
+    setOrderCancelToast(`Order #${order.rawNumber || order.id} has been cancelled.`);
+    setTimeout(() => setOrderCancelToast(null), 5000);
   };
 
   // Synchronize profile & dynamic data with active session and storage
@@ -1469,14 +1497,16 @@ export default function AccountPage() {
                             >
                               <Truck className="w-4 h-4 text-[#7cb93e]" /> Track Live
                             </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => handleDeleteUserOrder(order)}
-                              className="rounded-xl text-xs font-bold border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900/50 dark:hover:bg-rose-950/50 flex items-center gap-1.5"
-                              title="Delete Order"
-                            >
-                              <Trash2 className="w-4 h-4 text-rose-500" /> Delete
-                            </Button>
+                            {isCustomer && order.status !== 'Cancelled' && order.status !== 'Delivered' && (
+                              <Button
+                                variant="outline"
+                                onClick={() => setCancelConfirmOrder(order)}
+                                className="rounded-xl text-xs font-bold border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900/50 dark:hover:bg-rose-950/50 flex items-center gap-1.5 cursor-pointer"
+                                title="Cancel Order"
+                              >
+                                <XCircle className="w-4 h-4 text-rose-500" /> Cancel Order
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -2559,6 +2589,77 @@ export default function AccountPage() {
           open={Boolean(selectedReceiptOrder)}
           onClose={() => setSelectedReceiptOrder(null)}
         />
+
+        {/* ─── Modal: Customer Cancel Order Confirmation ─────────────────── */}
+        <AnimatePresence>
+          {cancelConfirmOrder && isCustomer && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+              onClick={() => !isCancellingOrder && setCancelConfirmOrder(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-black text-lg text-[#0B1A2A] dark:text-white">
+                      Cancel Order #{cancelConfirmOrder.rawNumber || cancelConfirmOrder.id}?
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                      Are you sure you want to cancel your order for <b>{cancelConfirmOrder.itemTitle}</b>? This action will notify our dispatch team and mark your order as Cancelled.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isCancellingOrder}
+                    onClick={() => setCancelConfirmOrder(null)}
+                    className="rounded-xl text-xs font-bold px-5"
+                  >
+                    Keep Order
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={isCancellingOrder}
+                    onClick={handleConfirmCancelOrder}
+                    className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-extrabold px-5 flex items-center gap-1.5"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    {isCancellingOrder ? 'Cancelling...' : 'Yes, Cancel Order'}
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ─── Toast Notification: Order Cancelled ─────────────────────────── */}
+        <AnimatePresence>
+          {orderCancelToast && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-6 right-6 z-50 bg-[#0B1A2A] text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 text-xs sm:text-sm font-bold"
+            >
+              <CheckCircle2 className="w-5 h-5 text-rose-400 shrink-0" />
+              <span>{orderCancelToast}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ─── Modal: Dealer Create Customer Order & Invoice ────────────────── */}
         {isDealer && (
