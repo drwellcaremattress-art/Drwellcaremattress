@@ -80,7 +80,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
       : '') ||
     order.shippingAddress?.name ||
     order.customer ||
-    'Valued Customer';
+    '';
 
   // 3. Resolve Customer Phone
   const customerPhone =
@@ -361,7 +361,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                 <div class="brand-address">
                   <strong style="color: #0f172a; font-size: 13px; font-weight: 900; letter-spacing: 0.3px;">VKS ENTERPRISES</strong><br />
                   No: 551, Sivapragasam Nagar, Surapet, Chennai - 600066, Tamil Nadu<br />
-                  <strong style="color: #0f172a;">GSTIN: 33MNVPK5897H1ZV</strong> • Support: +91 93429 22044 / +91 9843240703
+                  <strong style="color: #0f172a;">GSTIN: 33MNVPK5897H1ZV</strong> • Support: +91 93429 22044
                 </div>
               </td>
               <td style="vertical-align: top; text-align: right;">
@@ -683,7 +683,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                     <span className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 font-mono font-bold text-[11px]">
                       GSTIN: 33MNVPK5897H1ZV
                     </span>
-                    <span className="text-slate-500 font-medium">Support: +91 93429 22044 / +91 9843240703</span>
+                    <span className="text-slate-500 font-medium">Support: +91 93429 22044</span>
                   </div>
                 </div>
               </div>

@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       city: shippingAddress.city.trim(),
       state: (shippingAddress.state || 'Karnataka').trim(),
       pincode: shippingAddress.pincode.trim(),
-      phone: cleanPhone || '+91 93429 22044',
+      phone: cleanPhone,
       isDefault: true,
     };
 

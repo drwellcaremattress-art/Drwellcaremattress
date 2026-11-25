@@ -297,7 +297,7 @@ export default function WarrantyPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Phone Number *</label>
-                      <input type="tel" name="phone" value={regForm.phone} onChange={handleRegChange} placeholder="+91 93429 22044" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
+                      <input type="tel" name="phone" value={regForm.phone} onChange={handleRegChange} placeholder="Enter your phone number" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
                     </div>
                   </div>
 
@@ -389,7 +389,7 @@ export default function WarrantyPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Phone Number for Inspection *</label>
-                      <input type="tel" name="phone" value={claimForm.phone} onChange={handleClaimChange} placeholder="+91 93429 22044" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
+                      <input type="tel" name="phone" value={claimForm.phone} onChange={handleClaimChange} placeholder="Enter your phone number" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#0682E4] outline-none bg-slate-50/50 focus:bg-white font-medium" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Issue Classification *</label>

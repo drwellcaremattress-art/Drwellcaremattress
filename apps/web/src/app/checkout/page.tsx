@@ -186,7 +186,7 @@ export default function CheckoutPage() {
       const isCod = form.payment === 'cod';
       const advance = isCod ? (form.advanceAmount || 0) : orderTotal;
       const balance = isCod ? Math.max(0, orderTotal - advance) : 0;
-      const custFullName = `${form.firstName || ''} ${form.lastName || ''}`.trim() || 'Valued Customer';
+      const custFullName = `${form.firstName || ''} ${form.lastName || ''}`.trim();
 
       const newOrderObj = {
         id: ordNum.replace('DRWELL-ORD-', 'DW-'),
