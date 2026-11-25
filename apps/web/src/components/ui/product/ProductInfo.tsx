@@ -465,16 +465,6 @@ export function ProductInfo({
                       style={{ backgroundColor: col.hex || '#FFFFFF' }}
                     />
                     <span>{col.name}</span>
-                    {col.image && (
-                      <span
-                        className={`text-[9px] px-1.5 py-0.2 rounded font-mono uppercase tracking-wider ${
-                          isSelected ? 'bg-white/20 text-white' : 'bg-blue-50 text-[#0682E4]'
-                        }`}
-                        title="Specific image available"
-                      >
-                        Photo
-                      </span>
-                    )}
                   </button>
                 );
               })}
