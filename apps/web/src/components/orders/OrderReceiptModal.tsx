@@ -30,6 +30,9 @@ function numberToWords(num: number): string {
 }
 
 function getValidColor(color?: string, sku?: string) {
+  if (sku && /^CUSTOM-/i.test(sku) && !color) {
+    return '—';
+  }
   if (!color || /thickness|inch/i.test(color)) {
     if (sku) {
       if (/ROYALBLUE/i.test(sku)) return 'Royal Blue';
@@ -42,6 +45,9 @@ function getValidColor(color?: string, sku?: string) {
 }
 
 function getValidDimension(it: any) {
+  if (it.size === 'Custom Item' || (it.variantSku && /^CUSTOM-/i.test(it.variantSku))) {
+    return it.size || 'Custom Item';
+  }
   if (it.dimensions && it.dimensions !== it.variantSku) return it.dimensions;
   if (it.size) {
     return `${it.size}${it.thickness ? ` (${it.thickness})` : ''}`;

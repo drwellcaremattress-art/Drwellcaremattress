@@ -114,17 +114,25 @@ export async function POST(req: NextRequest) {
     const orderNumber = `DRW-ORD-${randomSuffix}`;
 
     // 4. Create Order
-    const sanitizedItems = items.map((it: any) => ({
-      productId: it.productId || it.slug || '',
-      name: it.name || 'Mattress',
-      variantSku: it.variantSku || `${(it.name || 'PROD').toUpperCase()}-${it.size || 'SINGLE'}`,
-      color: (it.color && !/thickness|inch/i.test(it.color)) ? it.color : 'Pure White',
-      thickness: it.thickness || '',
-      size: it.size || '',
-      qty: Number(it.qty) || 1,
-      price: Number(it.price) || 0,
-      image: it.image || '/images/products/ecolatex-6.jpeg',
-    }));
+    const sanitizedItems = items.map((it: any) => {
+      const isCustom =
+        String(it.productId || '').startsWith('custom-') ||
+        String(it.variantSku || '').startsWith('CUSTOM-') ||
+        it.size === 'Custom Item';
+      return {
+        productId: it.productId || it.slug || '',
+        name: it.name || (isCustom ? 'Custom Item' : 'Mattress'),
+        variantSku: it.variantSku || `${(it.name || 'PROD').toUpperCase()}-${it.size || 'SINGLE'}`,
+        color: isCustom
+          ? (it.color || '')
+          : (it.color && !/thickness|inch/i.test(it.color)) ? it.color : 'Pure White',
+        thickness: it.thickness || '',
+        size: it.size || '',
+        qty: Number(it.qty) || 1,
+        price: Number(it.price) || 0,
+        image: it.image || '/images/products/ecolatex-6.jpeg',
+      };
+    });
 
     const fullShippingAddress = {
       ...shippingAddress,

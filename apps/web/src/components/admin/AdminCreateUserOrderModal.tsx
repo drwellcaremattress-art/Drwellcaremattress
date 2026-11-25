@@ -238,6 +238,11 @@ export default function AdminCreateUserOrderModal({
   const [itemQty, setItemQty] = useState<number>(1);
   const [customPrice, setCustomPrice] = useState<string>('');
 
+  // Custom / Accessory Item State (fully empty by default for pillows, bed covers, etc.)
+  const [customItemName, setCustomItemName] = useState<string>('');
+  const [customItemPrice, setCustomItemPrice] = useState<string>('');
+  const [customItemQty, setCustomItemQty] = useState<string>('');
+
   // Order Details State
   const [orderStatus, setOrderStatus] = useState<string>('Confirmed');
   const [paymentStatus, setPaymentStatus] = useState<string>('cod');
@@ -378,12 +383,54 @@ export default function AdminCreateUserOrderModal({
     showToast('success', `Added "${productName} (${dimLabel}, ${selectedThickness}, ${selectedColor})" to order.`);
   };
 
+  const handleAddCustomItem = () => {
+    const cleanName = customItemName.trim();
+    const priceVal = Number(customItemPrice);
+    const qtyVal = parseInt(customItemQty, 10);
+
+    if (!cleanName) {
+      showToast('error', 'Please enter a product name (e.g. Pillow, Bed Cover).');
+      return;
+    }
+    if (!customItemPrice || isNaN(priceVal) || priceVal <= 0) {
+      showToast('error', 'Please enter a valid price for the custom item.');
+      return;
+    }
+    if (!customItemQty || isNaN(qtyVal) || qtyVal < 1) {
+      showToast('error', 'Please enter a valid quantity (minimum 1).');
+      return;
+    }
+
+    const slugPart = cleanName.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '') || 'CUSTOM';
+    const newItem: OrderItemDraft = {
+      productId: `custom-${Date.now()}`,
+      name: cleanName,
+      variantSku: `CUSTOM-${slugPart}`,
+      size: 'Custom Item',
+      thickness: '',
+      color: '',
+      qty: qtyVal,
+      price: Math.round(priceVal),
+      image: '/images/products/ecolatex-6.jpeg',
+    };
+
+    setItems((prev) => [...prev, newItem]);
+    setCustomItemName('');
+    setCustomItemPrice('');
+    setCustomItemQty('');
+    showToast('success', `Added "${cleanName} × ${qtyVal}" (₹${(Math.round(priceVal) * qtyVal).toLocaleString('en-IN')}) to order.`);
+  };
+
   const handleRemoveItem = (idx: number) => {
     setItems((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // Financial calculations
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+  // Financial calculations (includes live pending custom item if typed, or added items)
+  const pendingCustomTotal =
+    customItemName.trim() && Number(customItemPrice) > 0
+      ? Math.round(Number(customItemPrice)) * Math.max(1, parseInt(customItemQty, 10) || 1)
+      : 0;
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0) + pendingCustomTotal;
   const totalPayable = Math.max(0, subtotal - discountAmount);
   const balanceDue = Math.max(0, totalPayable - advanceAmount);
 
@@ -405,8 +452,28 @@ export default function AdminCreateUserOrderModal({
       return;
     }
 
-    if (items.length === 0) {
-      showToast('error', 'Please add at least one mattress/product to this order.');
+    // Auto-include custom item if user typed name + price without clicking Add Custom Item first
+    let submitItems = [...items];
+    if (customItemName.trim() && Number(customItemPrice) > 0) {
+      const cleanName = customItemName.trim();
+      const priceVal = Math.round(Number(customItemPrice));
+      const qtyVal = Math.max(1, parseInt(customItemQty, 10) || 1);
+      const slugPart = cleanName.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '') || 'CUSTOM';
+      submitItems.push({
+        productId: `custom-${Date.now()}`,
+        name: cleanName,
+        variantSku: `CUSTOM-${slugPart}`,
+        size: 'Custom Item',
+        thickness: '',
+        color: '',
+        qty: qtyVal,
+        price: priceVal,
+        image: '/images/products/ecolatex-6.jpeg',
+      });
+    }
+
+    if (submitItems.length === 0) {
+      showToast('error', 'Please add at least one mattress/product or custom item to this order.');
       return;
     }
 
@@ -418,7 +485,7 @@ export default function AdminCreateUserOrderModal({
         body: JSON.stringify({
           customer,
           shippingAddress,
-          items,
+          items: submitItems,
           orderStatus,
           paymentStatus,
           paymentMethod,
@@ -496,6 +563,9 @@ export default function AdminCreateUserOrderModal({
     setCustomer({ name: '', email: '', password: '', phone: '' });
     setShippingAddress({ street: '', city: 'Bangalore', state: 'Karnataka', pincode: '', country: 'India' });
     setItems([]);
+    setCustomItemName('');
+    setCustomItemPrice('');
+    setCustomItemQty('');
     setAdvanceAmount(0);
     setDiscountAmount(0);
     setHandoverData(null);
@@ -938,6 +1008,73 @@ export default function AdminCreateUserOrderModal({
                   </div>
                 </div>
 
+                {/* ── Custom / Accessory Item Entry (Pillows, Bed Covers, etc.) ── */}
+                <div className="bg-white p-4 rounded-xl border border-dashed border-emerald-300 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-black text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <Plus size={14} className="text-emerald-600" /> Add Custom Product / Accessory (Pillow, Bed Cover, Protector, etc.)
+                    </span>
+                    {customItemName.trim() && Number(customItemPrice) > 0 && (
+                      <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                        Line Total: ₹{(Math.round(Number(customItemPrice)) * Math.max(1, parseInt(customItemQty, 10) || 1)).toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+                    <div className="sm:col-span-5">
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                        Custom Product Name
+                      </label>
+                      <input
+                        type="text"
+                        value={customItemName}
+                        onChange={(e) => setCustomItemName(e.target.value)}
+                        placeholder="Type item name (e.g. Memory Pillow, Bed Cover)"
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 placeholder:text-slate-400 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-3">
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                        Price (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={customItemPrice}
+                        onChange={(e) => setCustomItemPrice(e.target.value)}
+                        placeholder="Enter price"
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 placeholder:text-slate-400 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                        Qty
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={customItemQty}
+                        onChange={(e) => setCustomItemQty(e.target.value)}
+                        placeholder="Qty"
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 placeholder:text-slate-400 text-center bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <button
+                        type="button"
+                        onClick={handleAddCustomItem}
+                        className="w-full py-2 px-3 rounded-lg bg-[#7cb93e] hover:bg-[#68a032] text-white text-xs font-extrabold flex items-center justify-center gap-1 shadow transition-all active:scale-95 cursor-pointer"
+                      >
+                        <Plus size={14} /> Add Custom
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Selected Items List */}
                 {items.length > 0 ? (
                   <div className="space-y-2 mt-3">
@@ -947,16 +1084,22 @@ export default function AdminCreateUserOrderModal({
                         className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200 text-xs"
                       >
                         <div className="flex items-center gap-3">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-10 h-10 object-cover rounded-lg bg-slate-100 border border-slate-200"
-                          />
+                          {item.productId?.startsWith('custom-') ? (
+                            <div className="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
+                              <Package size={18} />
+                            </div>
+                          ) : (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-10 h-10 object-cover rounded-lg bg-slate-100 border border-slate-200"
+                            />
+                          )}
                           <div>
                             <span className="font-black text-slate-900 block">{item.name}</span>
                             <span className="text-slate-500 text-[11px] flex items-center gap-1.5 flex-wrap mt-0.5">
-                              <span>Size: <b>{item.size}</b></span>
-                              <span>&bull; Thickness: <b>{item.thickness}</b></span>
+                              <span>{item.productId?.startsWith('custom-') ? 'Type:' : 'Size:'} <b>{item.size}</b></span>
+                              {item.thickness && <span>&bull; Thickness: <b>{item.thickness}</b></span>}
                               {item.color && (
                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 text-[#0682E4] rounded-md font-bold text-[10.5px]">
                                   <span className={`w-1.5 h-1.5 rounded-full ${item.color.toLowerCase().includes('blue') ? 'bg-[#0682E4]' :
