@@ -270,8 +270,8 @@ export default function AccountPage() {
           customerName: custName,
           customerPhone: custPhone,
           customerEmail: custEmail,
-          courier: o.courier || (o.status === 'Shipped' ? 'Shadowfax' : 'Blue Dart Express'),
-          trackingId: o.trackingId || (o.status === 'Shipped' ? '123456' : ''),
+          courier: o.courier || '',
+          trackingId: o.trackingId || '',
           orderStatus: o.orderStatus || o.status || 'Processing',
         };
       });
@@ -302,11 +302,11 @@ export default function AccountPage() {
               const isShipped = isOutForDelivery || currentStatus === 'Shipped';
               const isConfirmed = isShipped || currentStatus === 'Confirmed' || currentStatus === 'Processing';
 
-              const courierName = o.courier || (isShipped ? 'Shadowfax' : 'Blue Dart Express');
-              const trackingCode = o.trackingId || (isShipped ? '123456' : '');
+              const courierName = o.courier || '';
+              const trackingCode = o.trackingId || '';
               const dispatchLabel = trackingCode
-                ? `Dispatched via ${courierName} (AWB: ${trackingCode})`
-                : `Dispatched via ${courierName}`;
+                ? `Dispatched via ${courierName || 'Courier'} (AWB: ${trackingCode})`
+                : (courierName ? `Dispatched via ${courierName}` : 'Dispatched');
 
               const steps = currentStatus === 'Cancelled' ? [
                 { label: 'Order Placed', time: 'Completed', done: true },

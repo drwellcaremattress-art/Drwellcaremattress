@@ -145,10 +145,16 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
   const basePrice = totalAmount - gstAmount;
   const wordsAmount = balanceAmount > 0 ? balanceAmount : totalAmount;
 
-  // 7. Resolve Tracking & Dispatch
+  // 7. Resolve Tracking & Dispatch (Only show on receipt once trackingId is updated)
+  const rawTrackingId = (order.trackingId || '').trim();
+  const hasTrackingUpdate = Boolean(
+    rawTrackingId &&
+    rawTrackingId.toLowerCase() !== 'awaiting dispatch' &&
+    rawTrackingId !== '—'
+  );
   const shipmentStatus = order.orderStatus || order.status || 'Processing';
-  const courierPartner = order.courier || (shipmentStatus === 'Shipped' || shipmentStatus === 'Out for Delivery' || shipmentStatus === 'Delivered' ? 'Shadowfax' : 'Blue Dart Express');
-  const trackingCode = order.trackingId || 'Awaiting Dispatch';
+  const courierPartner = (order.courier || '').trim() || 'Courier';
+  const trackingCode = rawTrackingId;
 
   const rawDate = order.createdAt || order.date;
   const orderDate = rawDate
@@ -460,6 +466,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
               </div>
             </div>
 
+            ${hasTrackingUpdate ? `
             <div class="info-cell" style="padding-left: 15px;">
               <div class="info-box">
                 <div class="section-title" style="color: #0682E4; margin-bottom: 6px;">Dispatch & Live Tracking</div>
@@ -479,6 +486,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                 </table>
               </div>
             </div>
+            ` : ''}
           </div>
 
           <table class="items-table">
@@ -513,7 +521,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                   <strong>Amount in Words:</strong><br />
                   <span style="font-style: italic; color: #334155;">${numberToWords(wordsAmount)}</span>
                   ${advanceAmount > 0 && balanceAmount > 0 ? `<div style="font-size: 10px; color: #0682E4; font-weight: 700; margin-top: 2px;">(Balance Payable on Delivery)</div>` : ''}
-                  ${advanceAmount >= totalAmount && totalAmount > 0 ? `<div style="font-size: 10px; color: #166534; font-weight: 700; margin-top: 2px;">(Paid in Full)</div>` : ''}
+                  ${(isOrderPaid || advanceAmount >= totalAmount) && totalAmount > 0 ? `<div style="font-size: 10px; color: #166534; font-weight: 700; margin-top: 2px;">(Paid in Full)</div>` : ''}
                 </div>
               </td>
 
@@ -540,22 +548,22 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                     <td style="padding: 4px 0; border-top: 1px dashed #cbd5e1; font-weight: 700; color: #1e293b;">Total Order Value:</td>
                     <td style="text-align: right; font-family: monospace; font-weight: 800; border-top: 1px dashed #cbd5e1; color: #1e293b;">₹${totalAmount.toLocaleString('en-IN')}</td>
                   </tr>
-                  ${advanceAmount > 0 ? `
+                  ${(advanceAmount > 0 || isOrderPaid) && totalAmount > 0 ? `
                   <tr>
-                    <td style="padding: 4px 0; color: #166534; font-weight: 700;">Less: Advance Paid:</td>
-                    <td style="text-align: right; font-family: monospace; font-weight: 800; color: #166534;">-₹${advanceAmount.toLocaleString('en-IN')}</td>
+                    <td style="padding: 4px 0; color: #166534; font-weight: 700;">${isOrderPaid && advanceAmount === 0 ? 'Less: Amount Paid:' : 'Less: Advance Paid:'}</td>
+                    <td style="text-align: right; font-family: monospace; font-weight: 800; color: #166534;">-₹${(isOrderPaid && advanceAmount === 0 ? totalAmount : advanceAmount).toLocaleString('en-IN')}</td>
                   </tr>` : ''}
                   <tr>
                     <td colspan="2" style="border-top: 2px solid #0f172a; padding-top: 6px; margin-top: 4px;">
                       <div style="display: flex; justify-content: space-between; align-items: baseline;">
                         <span style="font-size: 13px; font-weight: 900; text-transform: uppercase; color: #0f172a;">
-                          ${advanceAmount > 0 ? 'Balance Due on Delivery:' : 'Grand Total Due:'}
+                          ${(isOrderPaid || advanceAmount > 0) ? 'Balance Due:' : 'Grand Total Due:'}
                         </span>
                         <span class="grand-total" style="color: ${balanceAmount > 0 ? '#0B1A2A' : '#166534'};">
                           ₹${balanceAmount.toLocaleString('en-IN')}
                         </span>
                       </div>
-                      ${advanceAmount >= totalAmount && totalAmount > 0 ? `
+                      ${(isOrderPaid || advanceAmount >= totalAmount) && totalAmount > 0 ? `
                         <div style="text-align: right; font-size: 10px; font-weight: 800; color: #166534; margin-top: 2px;">
                           ✓ PAID IN FULL (Zero Balance)
                         </div>
@@ -797,7 +805,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
             )}
 
             {/* Billed To / Shipped To & Tracking info */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-b border-slate-200">
+            <div className={`grid grid-cols-1 ${hasTrackingUpdate ? 'sm:grid-cols-2' : ''} gap-6 py-6 border-b border-slate-200`}>
               <div>
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
                   <MapPin size={13} className="text-[#0682E4]" /> Customer & Delivery Address
@@ -820,35 +828,37 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                 </div>
               </div>
 
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
-                  <Truck size={14} className="text-[#7cb93e]" /> Dispatch & Live Tracking
-                </h3>
-                <div className="text-xs space-y-1.5">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Shipment Status:</span>
-                    <span className="font-extrabold text-[#0682E4]">{shipmentStatus}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Courier Partner:</span>
-                    <span className="font-bold text-slate-800">{courierPartner}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500">Tracking Code / AWB:</span>
-                    <span className="font-mono font-extrabold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
-                      {trackingCode}
-                    </span>
-                  </div>
-                  {order.trackingUrl && (
-                    <div className="pt-1 text-[11px] text-[#0682E4] truncate">
-                      <span>Live URL: </span>
-                      <a href={order.trackingUrl} target="_blank" rel="noreferrer" className="underline font-mono">
-                        {order.trackingUrl}
-                      </a>
+              {hasTrackingUpdate && (
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
+                    <Truck size={14} className="text-[#7cb93e]" /> Dispatch & Live Tracking
+                  </h3>
+                  <div className="text-xs space-y-1.5">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Shipment Status:</span>
+                      <span className="font-extrabold text-[#0682E4]">{shipmentStatus}</span>
                     </div>
-                  )}
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Courier Partner:</span>
+                      <span className="font-bold text-slate-800">{courierPartner}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Tracking Code / AWB:</span>
+                      <span className="font-mono font-extrabold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                        {trackingCode}
+                      </span>
+                    </div>
+                    {order.trackingUrl && (
+                      <div className="pt-1 text-[11px] text-[#0682E4] truncate">
+                        <span>Live URL: </span>
+                        <a href={order.trackingUrl} target="_blank" rel="noreferrer" className="underline font-mono">
+                          {order.trackingUrl}
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Itemized Order Table */}
@@ -930,7 +940,7 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                       (Balance Payable on Delivery / COD)
                     </span>
                   )}
-                  {advanceAmount >= totalAmount && totalAmount > 0 && (
+                  {(isOrderPaid || advanceAmount >= totalAmount) && totalAmount > 0 && (
                     <span className="text-[10px] text-emerald-700 font-extrabold block mt-0.5">
                       (Paid in Full)
                     </span>
@@ -961,26 +971,26 @@ export default function OrderReceiptModal({ order, open, onClose }: Props) {
                   <span>Total Order Value:</span>
                   <span className="font-mono font-extrabold">₹{totalAmount.toLocaleString('en-IN')}</span>
                 </div>
-                {advanceAmount > 0 && (
+                {(advanceAmount > 0 || isOrderPaid) && totalAmount > 0 && (
                   <div className="flex justify-between text-emerald-700 font-bold">
-                    <span>Less: Advance Paid:</span>
-                    <span className="font-mono font-extrabold">-₹{advanceAmount.toLocaleString('en-IN')}</span>
+                    <span>{isOrderPaid && advanceAmount === 0 ? 'Less: Amount Paid:' : 'Less: Advance Paid:'}</span>
+                    <span className="font-mono font-extrabold">-₹{(isOrderPaid && advanceAmount === 0 ? totalAmount : advanceAmount).toLocaleString('en-IN')}</span>
                   </div>
                 )}
                 <div className="pt-2 border-t-2 border-slate-900 flex justify-between items-baseline">
                   <div>
                     <span className="text-sm font-black text-slate-900 uppercase block">
-                      {advanceAmount > 0 ? 'Balance Due on Delivery:' : 'Grand Total Due:'}
+                      {isOrderPaid || advanceAmount > 0 ? 'Balance Due:' : 'Grand Total Due:'}
                     </span>
                     {advanceAmount > 0 && balanceAmount > 0 && (
                       <span className="text-[10px] font-bold text-[#0682E4]">Cash / UPI on Doorstep</span>
                     )}
                   </div>
-                  <span className="text-2xl font-black font-mono text-[#0B1A2A]">
+                  <span className={`text-2xl font-black font-mono ${balanceAmount > 0 ? 'text-[#0B1A2A]' : 'text-emerald-700'}`}>
                     ₹{balanceAmount.toLocaleString('en-IN')}
                   </span>
                 </div>
-                {advanceAmount >= totalAmount && totalAmount > 0 && (
+                {(isOrderPaid || advanceAmount >= totalAmount) && totalAmount > 0 && (
                   <div className="text-right text-[11px] font-extrabold text-emerald-700">
                     ✓ PAID IN FULL (Zero Balance)
                   </div>

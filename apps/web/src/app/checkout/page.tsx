@@ -220,7 +220,7 @@ export default function CheckoutPage() {
           country: 'India'
         },
         courier: 'Blue Dart Express',
-        trackingId: 'Awaiting Dispatch',
+        trackingId: '',
         itemTitle: orderItems[0]?.name || 'Dr.Well Care Orthopaedic Series',
         size: orderItems[0]?.size || orderItems[0]?.dimensions || orderItems[0]?.variantSku || 'Standard Size',
         qty: orderItems.reduce((sum: number, i: any) => sum + (i.qty || 1), 0),
