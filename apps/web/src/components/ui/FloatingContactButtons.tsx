@@ -11,7 +11,7 @@ export function FloatingContactButtons() {
 
       {/* 1. WhatsApp Button (Stacked Top) - Green Speech Bubble Icon */}
       <a
-        href="https://wa.me/919342922044?text=Hi%20Dr%20Well%20Care%2C%20I%20have%20an%20inquiry%20about%20your%20mattresses."
+        href="https://wa.me/919962705879?text=Hi%20Dr%20Well%20Care%2C%20I%20have%20an%20inquiry%20about%20your%20mattresses."
         target="_blank"
         rel="noreferrer"
         className="pointer-events-auto group relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white flex items-center justify-center shadow-[0_8px_25px_rgba(37,211,102,0.5)] hover:shadow-[0_12px_35px_rgba(37,211,102,0.8)] transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-[#25D366]"
